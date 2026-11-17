@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@/styles/global.css";
-import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
-
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
-
 
 // Self-hosted variable font: one file covers every weight from 200 to 1000. No italic on purpose.
 const nunito = localFont({
@@ -33,7 +29,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", nunito.variable, pacifico.variable, "font-sans", inter.variable)}
+      className={cn(
+        "h-full antialiased font-sans",
+        nunito.variable,
+        pacifico.variable,
+      )}
     >
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
