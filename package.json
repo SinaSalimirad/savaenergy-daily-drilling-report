@@ -1,0 +1,24 @@
+{
+  "name": "savaenergy-daily-drilling-report",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun --parallel --filter '*' dev",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "typecheck": "bun run --filter '*' typecheck",
+    "build": "bun run --filter '*' build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.7",
+    "typescript": "^7.0.2"
+  },
+  "packageManager": "bun@1.4.4",
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver"
+  ]
+}
