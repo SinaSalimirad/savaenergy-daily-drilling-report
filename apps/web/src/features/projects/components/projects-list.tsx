@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useProjects } from "../api";
+import { ProjectsPagination } from "./projects-pagination";
 import { ProjectsTable } from "./projects-table";
 
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
 
 // Shared by the active and archived pages: loading, error, table and pagination.
 export function ProjectsList({
@@ -16,10 +17,11 @@ export function ProjectsList({
   emptyMessage: string;
 }) {
   const [page, setPage] = useState(1);
-  const projects = useProjects({ page, pageSize: PAGE_SIZE, archived });
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const projects = useProjects({ page, pageSize, archived });
 
   const total = projects.data?.meta.total ?? 0;
-  const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const lastPage = Math.max(1, Math.ceil(total / pageSize));
 
   // Archiving/restoring the last row of the last page leaves that page empty: step back one page.
   useEffect(() => {
@@ -50,27 +52,17 @@ export function ProjectsList({
             data={projects.data.data}
             emptyMessage={emptyMessage}
           />
-          {lastPage > 1 && (
-            <div className="mt-4 flex items-center justify-end gap-3">
-              <span className="text-muted-foreground tabular-nums">
-                Page {page} of {lastPage}
-              </span>
-              <Button
-                variant="outline"
-                disabled={page <= 1}
-                onClick={() => setPage(page - 1)}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                disabled={page >= lastPage}
-                onClick={() => setPage(page + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+          <ProjectsPagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              // The old page number may not exist with the new size: start from the top.
+              setPage(1);
+            }}
+          />
         </>
       )}
     </div>

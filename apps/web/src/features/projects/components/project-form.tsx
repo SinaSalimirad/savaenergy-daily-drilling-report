@@ -2,29 +2,27 @@
 
 import { useForm } from "@tanstack/react-form";
 import { type ReactNode, useId } from "react";
+import type { ProjectCurrency, ProjectWritableStatus } from "schema";
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { SimpleSelect } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api-error";
-import {
-  type CreateProjectBody,
-  type Project,
-  useCreateProject,
-  useUpdateProject,
-} from "../api";
+import { type Project, useCreateProject, useUpdateProject } from "../api";
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from "../currencies";
 import { normalizeNames } from "../names";
 
-type Status = CreateProjectBody["status"];
-type Currency = CreateProjectBody["currency"];
+type Status = ProjectWritableStatus;
+type Currency = ProjectCurrency;
 
 const emptyValues = {
   name: "",
   field: "",
   operator: "",
   contractor: "",
+  // Kept as text while typing; converted to a number on submit.
+  wells: "",
   status: "planned" as Status,
   currency: DEFAULT_CURRENCY as Currency,
 };
@@ -35,6 +33,7 @@ function valuesFrom(project: Project): typeof emptyValues {
     field: project.field ?? "",
     operator: project.operator,
     contractor: project.contractor,
+    wells: String(project.wells),
     // Archived projects cannot be edited (see the actions menu), so this is never "archived".
     status: project.status as Status,
     currency: project.currency as Currency,
@@ -130,6 +129,8 @@ export function ProjectForm({
           ...value,
           operator: normalizeNames(value.operator),
           contractor: normalizeNames(value.contractor),
+          // An empty box becomes NaN-free 0 here, and the API rejects it as "not positive".
+          wells: Number(value.wells),
         };
         try {
           if (project) {
@@ -237,6 +238,31 @@ export function ProjectForm({
                   id={id}
                   name={field.name}
                   placeholder="e.g. Halliburton, Schlumberger"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  aria-invalid={invalid}
+                />
+              )}
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field name="wells">
+          {(field) => (
+            <Field
+              label="Number of wells"
+              error={firstError(field.state.meta.errors)}
+            >
+              {({ id, invalid }) => (
+                <Input
+                  id={id}
+                  name={field.name}
+                  type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
+                  placeholder="e.g. 12"
                   value={field.state.value}
                   onChange={(event) => field.handleChange(event.target.value)}
                   onBlur={field.handleBlur}

@@ -29,7 +29,7 @@ const EMPTY_VALUE = "—";
 // Numeric/date columns read better centered than left-aligned.
 const CENTERED_COLUMN_IDS = new Set([
   "field",
-  "well",
+  "wells",
   "active_well",
   "last_report",
   "status",
@@ -47,11 +47,8 @@ const columns = columnHelper.columns([
     header: "Field",
     cell: (info) => info.getValue() ?? EMPTY_VALUE,
   }),
+  columnHelper.accessor("wells", { header: "Wells" }),
   // TODO: WE WILL HAVE THESE PART BUT in Future and when Implementing `WELL SCHEMA`, Skip for now
-  // columnHelper.accessor("well", {
-  //   header: "Wells",
-  //   cell: (info) => info.getValue() ?? EMPTY_VALUE,
-  // }),
   // columnHelper.accessor("active_well", {
   //   header: "Active wells",
   //   cell: (info) => info.getValue() ?? EMPTY_VALUE,
@@ -78,6 +75,10 @@ const columns = columnHelper.columns([
   }),
 ]);
 
+// Spacing of the shadcn data-table block: roomy rows, 16px of padding on the sides.
+const HEAD_CELL = "px-4";
+const BODY_CELL = "h-[53px] px-4";
+
 const SKELETON_ROWS = 10;
 
 /**
@@ -101,16 +102,16 @@ export function ProjectsTable({
   });
 
   return (
-    <div className="bg-card p-4 rounded-lg">
+    <div className="overflow-hidden rounded-lg border">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
                   scope="col"
-                  className={alignClass(header.column.id)}
+                  className={cn(HEAD_CELL, alignClass(header.column.id))}
                 >
                   {header.isPlaceholder ? null : (
                     <table.FlexRender header={header} />
@@ -126,7 +127,10 @@ export function ProjectsTable({
               // biome-ignore lint/suspicious/noArrayIndexKey: placeholder rows have no identity
               <TableRow key={index}>
                 {table.getAllLeafColumns().map((column) => (
-                  <TableCell key={column.id} className={alignClass(column.id)}>
+                  <TableCell
+                    key={column.id}
+                    className={cn(BODY_CELL, alignClass(column.id))}
+                  >
                     <Skeleton
                       className={
                         column.id === "actions"
@@ -145,7 +149,7 @@ export function ProjectsTable({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-24 text-center text-muted-foreground"
+                className="h-24 px-4 text-center text-muted-foreground"
               >
                 {emptyMessage}
               </TableCell>
@@ -156,7 +160,7 @@ export function ProjectsTable({
                 {row.getAllCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className={alignClass(cell.column.id)}
+                    className={cn(BODY_CELL, alignClass(cell.column.id))}
                   >
                     <table.FlexRender cell={cell} />
                   </TableCell>

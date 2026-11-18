@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { env } from "../config/env";
+import { logger } from "../lib/logger";
 
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
@@ -14,7 +15,7 @@ const pool = new Pool({
 // An idle client can emit "error" (database restart, network drop). Without a listener
 // Node treats it as an uncaught exception and kills the whole API process.
 pool.on("error", (error) => {
-  console.error("Unexpected error on an idle database connection", error);
+  logger.error("Unexpected error on an idle database connection", { error });
 });
 
 // Must match `casing` in drizzle.config.ts, otherwise drizzle-kit generates snake_case
