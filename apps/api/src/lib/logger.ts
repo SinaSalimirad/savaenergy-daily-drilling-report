@@ -5,9 +5,29 @@ import {
   getConsoleSink,
   getLogger,
   jsonLinesFormatter,
+  type Sink,
 } from "@logtape/logtape";
 import { DEFAULT_REDACT_FIELDS, redactByField } from "@logtape/redaction";
 import { env } from "../config/env";
+
+/**
+ * Rounds `responseTime` (milliseconds) to 2 decimals, so a line says 40.54 and not
+ * 40.53936000000067. The request plugin logs the raw number, in the properties and
+ * again inside the message, so both are rewritten here, just before the line is written.
+ */
+function roundResponseTime(sink: Sink): Sink {
+  return (record) => {
+    const raw = record.properties.responseTime;
+    if (typeof raw !== "number") return sink(record);
+
+    const rounded = Math.round(raw * 100) / 100;
+    return sink({
+      ...record,
+      properties: { ...record.properties, responseTime: rounded },
+      message: record.message.map((part) => (part === raw ? rounded : part)),
+    });
+  };
+}
 
 // Configured once, when this file is first imported. Every other file imports `logger`
 // from here, so import order does not matter. The console sink is synchronous, so there
@@ -17,25 +37,27 @@ configureSync({
     // Secrets must never reach the logs. Any property whose name looks sensitive (password,
     // token, authorization, ...) is replaced before the line is written. The defaults cover
     // the common names; the extra ones are specific to this API.
-    console: redactByField(
-      getConsoleSink({
-        // Colored lines are easy to read locally. One JSON object per line is what log
-        // collectors (Docker, Loki, ...) expect in production.
-        formatter:
-          env.NODE_ENV === "production"
-            ? jsonLinesFormatter
-            : ansiColorFormatter,
-      }),
-      {
-        fieldPatterns: [
-          ...DEFAULT_REDACT_FIELDS,
-          /^cookie$/i,
-          /^set-cookie$/i,
-          /^database_?url$/i,
-          /^connection_?string$/i,
-        ],
-        action: () => "[REDACTED]",
-      },
+    console: roundResponseTime(
+      redactByField(
+        getConsoleSink({
+          // Colored lines are easy to read locally. One JSON object per line is what log
+          // collectors (Docker, Loki, ...) expect in production.
+          formatter:
+            env.NODE_ENV === "production"
+              ? jsonLinesFormatter
+              : ansiColorFormatter,
+        }),
+        {
+          fieldPatterns: [
+            ...DEFAULT_REDACT_FIELDS,
+            /^cookie$/i,
+            /^set-cookie$/i,
+            /^database_?url$/i,
+            /^connection_?string$/i,
+          ],
+          action: () => "[REDACTED]",
+        },
+      ),
     ),
   },
   loggers: [
