@@ -9,7 +9,8 @@ try {
   await migrate(db, { migrationsFolder: join(import.meta.dir, "migrations") });
   logger.info("Migrations applied");
 } catch (error) {
-  logger.error("Migration failed", { error });
+  // Fatal: the whole program cannot do its job, not just one operation.
+  logger.fatal("Migration failed", { error });
   process.exitCode = 1;
 } finally {
   // Without this the open pool keeps the process alive after the work is done.

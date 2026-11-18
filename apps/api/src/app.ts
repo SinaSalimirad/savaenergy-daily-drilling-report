@@ -13,6 +13,9 @@ export const app = new Elysia()
     elysiaLogger({
       category: ["api", "http"],
       skip: (ctx) => ctx.path === "/health",
+      // Adds `requestId` to the request line and to every log written while handling it.
+      // A caller can send its own `x-request-id` header; the same id comes back in the response.
+      context: true,
       // A 404 or 422 is the client's mistake, not a server problem, so it is not an error.
       completionLevel: (_ctx, { status }) =>
         status >= 500 ? "error" : status >= 400 ? "warning" : "info",
