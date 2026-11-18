@@ -1,6 +1,7 @@
 "use client";
 
-import { type FormEvent, type ReactNode, useId, useState } from "react";
+import { useForm } from "@tanstack/react-form";
+import { type ReactNode, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,15 @@ import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from "../currencies";
 import { normalizeNames } from "../names";
 
 type Status = CreateProjectBody["status"];
+
+const emptyValues = {
+  name: "",
+  field: "",
+  operator: "",
+  contractor: "",
+  status: "planned" as Status,
+  currency: DEFAULT_CURRENCY,
+};
 
 // The API is the source of truth for validation: this form only collects text and shows
 // the messages the API sends back, so the rules live in one place.
@@ -61,122 +71,208 @@ function NamesHint({ examples }: { examples: string[] }) {
   );
 }
 
+/** What the API said went wrong: a message for the form and messages for single fields. */
+function toServerErrors(error: unknown) {
+  if (!(error instanceof ApiError)) {
+    return { form: "Something went wrong.", fields: {} };
+  }
+  if (error.code === NAME_TAKEN_CODE) {
+    return { form: undefined, fields: { name: error.message } };
+  }
+  // Field messages are enough when the API pointed at specific fields.
+  const hasFieldErrors = Object.keys(error.fieldErrors).length > 0;
+  return {
+    form: hasFieldErrors ? undefined : error.message,
+    fields: error.fieldErrors,
+  };
+}
+
+// Errors come from the API (see `onSubmitAsync`), so they are plain strings.
+const firstError = (errors: unknown[]) =>
+  errors.find((error): error is string => typeof error === "string");
+
 export function NewProjectForm({ onCreated }: { onCreated: () => void }) {
   const createProject = useCreateProject();
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [status, setStatus] = useState<Status>("planned");
-  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const text = (key: string) => String(form.get(key) ?? "");
-    const field = text("field");
-
-    setFieldErrors({});
-    setFormError(null);
-
-    createProject.mutate(
-      {
-        name: text("name"),
-        operator: normalizeNames(text("operator")),
-        contractor: normalizeNames(text("contractor")),
-        // The database column is NOT NULL, so the field is always sent. An empty value
-        // gets the API's own validation message.
-        field,
-        status,
-        currency,
+  const form = useForm({
+    defaultValues: emptyValues,
+    validators: {
+      // Server-side validation: the API is the only place the rules live. Returning
+      // `{ form, fields }` puts its messages on the form and on the matching inputs.
+      onSubmitAsync: async ({ value }) => {
+        try {
+          await createProject.mutateAsync({
+            ...value,
+            operator: normalizeNames(value.operator),
+            contractor: normalizeNames(value.contractor),
+          });
+        } catch (error) {
+          return toServerErrors(error);
+        }
+        toast.add({ type: "success", title: "Project created" });
+        onCreated();
+        return undefined;
       },
-      {
-        onSuccess: () => {
-          toast.add({ type: "success", title: "Project created" });
-          onCreated();
-        },
-        onError: (error) => {
-          if (!(error instanceof ApiError)) return setFormError(error.message);
-          if (error.code === NAME_TAKEN_CODE) {
-            return setFieldErrors({ name: error.message });
-          }
-          setFieldErrors(error.fieldErrors);
-          // Field messages are enough when the API pointed at specific fields.
-          if (Object.keys(error.fieldErrors).length === 0) {
-            setFormError(error.message);
-          }
-        },
-      },
-    );
-  }
+    },
+  });
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        form.handleSubmit();
+      }}
       className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto"
     >
       <div className="grid gap-4 px-4 sm:grid-cols-2">
-        <Field label="Project name" error={fieldErrors.name}>
-          {({ id, invalid }) => (
-            <Input id={id} name="name" aria-invalid={invalid} autoFocus />
+        <form.Field name="name">
+          {(field) => (
+            <Field
+              label="Project name"
+              error={firstError(field.state.meta.errors)}
+            >
+              {({ id, invalid }) => (
+                <Input
+                  id={id}
+                  name={field.name}
+                  placeholder="e.g. South Pars Phase 14"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  aria-invalid={invalid}
+                  autoFocus
+                />
+              )}
+            </Field>
           )}
-        </Field>
-        <Field label="Field name" error={fieldErrors.field}>
-          {({ id, invalid }) => (
-            <Input id={id} name="field" aria-invalid={invalid} />
-          )}
-        </Field>
-        <Field
-          label="Operator(s)"
-          error={fieldErrors.operator}
-          hint={<NamesHint examples={["Shell", "TotalEnergies"]} />}
-        >
-          {({ id, invalid }) => (
-            <Input id={id} name="operator" aria-invalid={invalid} />
-          )}
-        </Field>
-        <Field
-          label="Contractor(s)"
-          error={fieldErrors.contractor}
-          hint={<NamesHint examples={["Halliburton", "Schlumberger"]} />}
-        >
-          {({ id, invalid }) => (
-            <Input id={id} name="contractor" aria-invalid={invalid} />
-          )}
-        </Field>
-        <Field label="Status" error={fieldErrors.status}>
-          {({ id, invalid }) => (
-            <SimpleSelect
-              id={id}
-              invalid={invalid}
-              options={STATUS_OPTIONS}
-              value={status}
-              onValueChange={(value) => value && setStatus(value as Status)}
-            />
-          )}
-        </Field>
-        <Field label="Currency" error={fieldErrors.currency}>
-          {({ id, invalid }) => (
-            <SimpleSelect
-              id={id}
-              invalid={invalid}
-              options={CURRENCY_OPTIONS}
-              value={currency}
-              onValueChange={(value) => value && setCurrency(value)}
-            />
-          )}
-        </Field>
+        </form.Field>
 
-        {formError && (
-          <p className="text-destructive text-sm sm:col-span-2">{formError}</p>
-        )}
+        <form.Field name="field">
+          {(field) => (
+            <Field
+              label="Field name"
+              error={firstError(field.state.meta.errors)}
+            >
+              {({ id, invalid }) => (
+                <Input
+                  id={id}
+                  name={field.name}
+                  placeholder="e.g. South Pars"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  aria-invalid={invalid}
+                />
+              )}
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field name="operator">
+          {(field) => (
+            <Field
+              label="Operator(s)"
+              error={firstError(field.state.meta.errors)}
+              hint={<NamesHint examples={["Shell", "TotalEnergies"]} />}
+            >
+              {({ id, invalid }) => (
+                <Input
+                  id={id}
+                  name={field.name}
+                  placeholder="e.g. Shell, TotalEnergies"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  aria-invalid={invalid}
+                />
+              )}
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field name="contractor">
+          {(field) => (
+            <Field
+              label="Contractor(s)"
+              error={firstError(field.state.meta.errors)}
+              hint={<NamesHint examples={["Halliburton", "Schlumberger"]} />}
+            >
+              {({ id, invalid }) => (
+                <Input
+                  id={id}
+                  name={field.name}
+                  placeholder="e.g. Halliburton, Schlumberger"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  aria-invalid={invalid}
+                />
+              )}
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field name="status">
+          {(field) => (
+            <Field label="Status" error={firstError(field.state.meta.errors)}>
+              {({ id, invalid }) => (
+                <SimpleSelect
+                  id={id}
+                  invalid={invalid}
+                  options={STATUS_OPTIONS}
+                  placeholder="Select a status"
+                  value={field.state.value}
+                  onValueChange={(value) =>
+                    value && field.handleChange(value as Status)
+                  }
+                />
+              )}
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field name="currency">
+          {(field) => (
+            <Field label="Currency" error={firstError(field.state.meta.errors)}>
+              {({ id, invalid }) => (
+                <SimpleSelect
+                  id={id}
+                  invalid={invalid}
+                  options={CURRENCY_OPTIONS}
+                  placeholder="Select a currency"
+                  value={field.state.value}
+                  onValueChange={(value) => value && field.handleChange(value)}
+                />
+              )}
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Subscribe selector={(state) => firstError(state.errors)}>
+          {(formError) =>
+            formError && (
+              <p className="text-destructive text-sm sm:col-span-2">
+                {formError}
+              </p>
+            )
+          }
+        </form.Subscribe>
       </div>
 
       <DialogFooter className="flex-row justify-end">
-        <DialogClose render={<Button variant="outline" type="button" />}>
+        <DialogClose
+          render={<Button variant="outline" type="button" className="h-10" />}
+        >
           Cancel
         </DialogClose>
-        <Button type="submit" disabled={createProject.isPending}>
-          {createProject.isPending ? "Creating…" : "Create project"}
-        </Button>
+        <form.Subscribe selector={(state) => state.isSubmitting}>
+          {(isSubmitting) => (
+            <Button type="submit" className="h-10" disabled={isSubmitting}>
+              {isSubmitting ? "Creating…" : "Create project"}
+            </Button>
+          )}
+        </form.Subscribe>
       </DialogFooter>
     </form>
   );
