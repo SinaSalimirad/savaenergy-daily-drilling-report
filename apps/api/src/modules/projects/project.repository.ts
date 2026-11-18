@@ -44,10 +44,7 @@ export async function insertProject(
   input: CreateProjectInput,
   executor: Executor = db,
 ) {
-  const [row] = await executor
-    .insert(projects)
-    .values({ ...input, field: input.field ?? null })
-    .returning();
+  const [row] = await executor.insert(projects).values(input).returning();
   return row;
 }
 

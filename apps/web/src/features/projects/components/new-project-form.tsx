@@ -13,6 +13,7 @@ import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from "../currencies";
 import { normalizeNames } from "../names";
 
 type Status = CreateProjectBody["status"];
+type Currency = CreateProjectBody["currency"];
 
 const emptyValues = {
   name: "",
@@ -20,7 +21,7 @@ const emptyValues = {
   operator: "",
   contractor: "",
   status: "planned" as Status,
-  currency: DEFAULT_CURRENCY,
+  currency: DEFAULT_CURRENCY as Currency,
 };
 
 // The API is the source of truth for validation: this form only collects text and shows
@@ -242,7 +243,9 @@ export function NewProjectForm({ onCreated }: { onCreated: () => void }) {
                   options={CURRENCY_OPTIONS}
                   placeholder="Select a currency"
                   value={field.state.value}
-                  onValueChange={(value) => value && field.handleChange(value)}
+                  onValueChange={(value) =>
+                    value && field.handleChange(value as Currency)
+                  }
                 />
               )}
             </Field>

@@ -12,9 +12,9 @@ export type ProjectDto = {
   name: string;
   operator: string;
   contractor: string;
-  field: string | null;
+  field: string;
   status: ProjectRow["status"];
-  currency: string;
+  currency: ProjectRow["currency"];
   archived_at: string | null;
   created_at: string;
   updated_at: string;
