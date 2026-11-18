@@ -76,7 +76,13 @@ const columns = columnHelper.columns([
   }),
 ]);
 
-export function ProjectsTable({ data }: { data: Project[] }) {
+export function ProjectsTable({
+  data,
+  emptyMessage,
+}: {
+  data: Project[];
+  emptyMessage: string;
+}) {
   const table = useTable({
     features,
     columns,
@@ -111,7 +117,7 @@ export function ProjectsTable({ data }: { data: Project[] }) {
                 colSpan={columns.length}
                 className="h-24 text-center text-muted-foreground"
               >
-                No projects yet.
+                {emptyMessage}
               </TableCell>
             </TableRow>
           ) : (

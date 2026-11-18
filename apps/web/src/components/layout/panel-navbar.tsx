@@ -26,7 +26,7 @@ function NavSectionMenu({
     <NavigationMenuItem>
       <NavigationMenuTrigger
         data-active={isActive || undefined}
-        className="h-9 gap-1.5 rounded-b-none px-3 text-sm data-active:bg-muted"
+        className="relative h-9 gap-1.5 rounded-b-none px-3 text-sm data-active:bg-muted data-active:after:absolute data-active:after:inset-x-0 data-active:after:bottom-0 data-active:after:h-0.5 data-active:after:bg-blue-500 data-active:after:content-['']"
       >
         <Icon className="size-4" aria-hidden="true" />
         {section.label}
