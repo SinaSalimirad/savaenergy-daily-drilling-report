@@ -1,0 +1,3 @@
+[test]
+# Runs once before every test file: gives component tests a DOM.
+preload = ["./src/test/setup.ts"]
