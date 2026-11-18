@@ -1,0 +1,97 @@
+"use client";
+
+import {
+  ArchiveIcon,
+  ArchiveRestoreIcon,
+  EyeIcon,
+  MoreHorizontalIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/toast";
+import { type Project, useArchiveProject, useRestoreProject } from "../api";
+
+// View, Edit and Delete are not wired yet: they wait for the Sheet/Dialog decision.
+// Archive and Restore need no extra UI, so they call the API directly.
+export function ProjectActionsMenu({ project }: { project: Project }) {
+  const archive = useArchiveProject();
+  const restore = useRestoreProject();
+  const isArchived = project.status === "archived";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`Actions for ${project.name}`}
+          />
+        }
+      >
+        <MoreHorizontalIcon />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="flex min-w-52 flex-col gap-1 p-1.5"
+      >
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Project actions</DropdownMenuLabel>
+        </DropdownMenuGroup>
+
+        <DropdownMenuItem className="px-2 py-2">
+          <EyeIcon />
+          View details
+        </DropdownMenuItem>
+        <DropdownMenuItem className="px-2 py-2">
+          <PencilIcon />
+          Edit project
+        </DropdownMenuItem>
+        {isArchived ? (
+          <DropdownMenuItem
+            className="px-2 py-2"
+            disabled={restore.isPending}
+            onClick={() =>
+              restore.mutate(project.id, {
+                onSuccess: () =>
+                  toast.add({ type: "success", title: "Project restored" }),
+              })
+            }
+          >
+            <ArchiveRestoreIcon />
+            Restore project
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem
+            className="px-2 py-2"
+            disabled={archive.isPending}
+            onClick={() =>
+              archive.mutate(project.id, {
+                onSuccess: () =>
+                  toast.add({ type: "success", title: "Project archived" }),
+              })
+            }
+          >
+            <ArchiveIcon />
+            Archive project
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" className="px-2 py-2">
+          <Trash2Icon />
+          Delete project
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

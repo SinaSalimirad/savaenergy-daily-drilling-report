@@ -27,7 +27,7 @@ export type DB = typeof db;
 // inside a caller's transaction take `executor: DB | Transaction = db`.
 export type Transaction = Parameters<Parameters<DB["transaction"]>[0]>[0];
 
-/** Closes every pooled connection. Call it on shutdown and at the end of scripts and tests. */
+/** Closes every pooled connection. Call it on shutdown and and at the end of scripts. */
 export async function closeDb(): Promise<void> {
   await pool.end();
 }

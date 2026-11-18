@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "@/styles/global.css";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toast";
+import { QueryProvider } from "@/lib/query-provider";
 import { cn } from "@/lib/utils";
 
 // Self-hosted variable font: one file covers every weight from 200 to 1000. No italic on purpose.
@@ -41,7 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col font-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Toaster>{children}</Toaster>
+          <Toaster>
+            <QueryProvider>{children}</QueryProvider>
+          </Toaster>
         </ThemeProvider>
       </body>
     </html>
