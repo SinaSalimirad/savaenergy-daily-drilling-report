@@ -1,4 +1,5 @@
 import { BellIcon, SearchIcon } from "lucide-react";
+import { PanelNavbar } from "@/components/layout/panel-navbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ export default function PanelLayout({
           </div>
         </div>
       </header>
+      <PanelNavbar />
       {children}
     </>
   );
