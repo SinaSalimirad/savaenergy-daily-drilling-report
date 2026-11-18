@@ -1,5 +1,6 @@
 import { afterEach } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import "./api-client-mock";
 
 GlobalRegistrator.register();
 
