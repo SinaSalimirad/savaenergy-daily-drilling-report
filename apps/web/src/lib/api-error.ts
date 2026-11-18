@@ -4,6 +4,8 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     message: string,
+    /** Validation messages by field name, for example `{ name: "Too small" }`. */
+    readonly fieldErrors: Record<string, string> = {},
   ) {
     super(message);
     this.name = "ApiError";
@@ -11,10 +13,13 @@ export class ApiError extends Error {
 }
 
 type EdenFailure = { status: number; value: unknown };
+type ErrorBody = {
+  code: string;
+  message: string;
+  errors?: { path: string; message: string }[];
+};
 
-function isErrorBody(
-  value: unknown,
-): value is { code: string; message: string } {
+function isErrorBody(value: unknown): value is ErrorBody {
   return (
     typeof value === "object" &&
     value !== null &&
@@ -28,8 +33,15 @@ function isErrorBody(
 // Eden returns `{ data, error }` instead of throwing. React Query needs a thrown error to
 // mark a query or mutation as failed, so every call goes through one of these two helpers.
 function toApiError({ status, value }: EdenFailure): ApiError {
-  if (isErrorBody(value))
-    return new ApiError(status, value.code, value.message);
+  if (isErrorBody(value)) {
+    // The API sends paths like "/name"; the form looks fields up by "name".
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of value.errors ?? []) {
+      const field = issue.path.replace(/^\//, "");
+      if (field && !(field in fieldErrors)) fieldErrors[field] = issue.message;
+    }
+    return new ApiError(status, value.code, value.message, fieldErrors);
+  }
   return new ApiError(status, "UNKNOWN_ERROR", "Something went wrong.");
 }
 
