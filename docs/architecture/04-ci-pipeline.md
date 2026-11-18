@@ -1,12 +1,13 @@
 # CI pipeline
 
-Every pull request and every push to `main` runs two GitHub Actions workflows. A pull request can only merge when all five checks pass. Items marked **(planned)** do not exist yet.
+Every pull request and every push to `main` runs two GitHub Actions workflows. A pull request can only merge when all six checks pass. Items marked **(planned)** do not exist yet.
 
 ## Checks
 
 | Check            | Workflow       | What it runs                                | Covers                                             |
 | ---------------- | -------------- | ------------------------------------------- | -------------------------------------------------- |
 | Code quality     | `ci.yml`       | `bunx biome ci .` and `bun run typecheck`   | Lint, format, code smell, complexity, static types |
+| Tests            | `ci.yml`       | `bun run test`                              | Unit and component tests of the web app            |
 | Build            | `ci.yml`       | `bun run build`                             | The apps still build                               |
 | SAST             | `security.yml` | CodeQL on TypeScript and the workflow files | Insecure code patterns                             |
 | Dependency audit | `security.yml` | `bun audit --audit-level=high`              | Known vulnerabilities in dependencies              |
@@ -27,7 +28,7 @@ Every pull request and every push to `main` runs two GitHub Actions workflows. A
 The `main` ruleset on GitHub enforces the git workflow:
 
 - Changes reach `main` only through a pull request, merged with squash merge.
-- All five checks above must pass, and CodeQL must report no new high-severity alert.
+- All six checks above must pass, and CodeQL must report no new high-severity alert.
 - `main` cannot be deleted or force-pushed.
 - Repository admins can bypass these rules. Use this for emergencies only, because a bypass skips every check.
 
@@ -36,6 +37,7 @@ The `main` ruleset on GitHub enforces the git workflow:
 ```bash
 bunx biome ci .
 bun run typecheck
+bun run test
 bun run build
 bun audit --audit-level=high
 ```
