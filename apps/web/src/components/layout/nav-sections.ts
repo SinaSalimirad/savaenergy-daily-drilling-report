@@ -28,6 +28,8 @@ type NavSectionConfig = {
   label: string;
   href: string;
   icon: LucideIcon;
+  // Adds an "Overview" item that links to the section's own page.
+  hasOverviewItem?: boolean;
   itemLabels: string[];
 };
 
@@ -36,7 +38,8 @@ const navSectionConfigs: NavSectionConfig[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboardIcon,
-    itemLabels: ["Overview", "Well summary", "Fleet"],
+    hasOverviewItem: true,
+    itemLabels: ["Well summary", "Fleet"],
   },
   {
     label: "Daily Reports",
@@ -116,6 +119,10 @@ function toNavSection(config: NavSectionConfig): NavSection {
     href: `${config.href}/${toSlug(label)}`,
   }));
 
+  if (config.hasOverviewItem) {
+    items.unshift({ label: "Overview", href: config.href });
+  }
+
   return {
     label: config.label,
     href: config.href,
@@ -125,3 +132,19 @@ function toNavSection(config: NavSectionConfig): NavSection {
 }
 
 export const navSections: NavSection[] = navSectionConfigs.map(toNavSection);
+
+// An item that points at its section's own page only matches that exact path.
+// Without this, "/dashboard" would be "active" for every page under it.
+function isItemActive(section: NavSection, item: NavItem, pathname: string) {
+  if (pathname === item.href) {
+    return true;
+  }
+  return item.href !== section.href && pathname.startsWith(`${item.href}/`);
+}
+
+export function isSectionActive(section: NavSection, pathname: string) {
+  return (
+    pathname === section.href ||
+    section.items.some((item) => isItemActive(section, item, pathname))
+  );
+}

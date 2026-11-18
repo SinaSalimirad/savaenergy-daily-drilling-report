@@ -10,7 +10,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { type NavSection, navSections } from "./nav-sections";
+import { isSectionActive, type NavSection, navSections } from "./nav-sections";
 
 function NavSectionMenu({
   section,
@@ -19,13 +19,13 @@ function NavSectionMenu({
   section: NavSection;
   pathname: string;
 }) {
-  const isSectionActive = pathname.startsWith(section.href);
+  const isActive = isSectionActive(section, pathname);
   const Icon = section.icon;
 
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger
-        data-active={isSectionActive || undefined}
+        data-active={isActive || undefined}
         className="h-9 gap-1.5 rounded-b-none px-3 text-sm data-active:bg-muted"
       >
         <Icon className="size-4" aria-hidden="true" />
