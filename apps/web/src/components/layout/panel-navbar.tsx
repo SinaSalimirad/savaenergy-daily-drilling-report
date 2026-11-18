@@ -20,23 +20,26 @@ function NavSectionMenu({
   pathname: string;
 }) {
   const isSectionActive = pathname.startsWith(section.href);
+  const Icon = section.icon;
 
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger
         data-active={isSectionActive || undefined}
-        className="data-active:bg-muted/50"
+        className="h-9 gap-1.5 rounded-b-none px-3 text-sm data-active:bg-muted"
       >
+        <Icon className="size-4" aria-hidden="true" />
         {section.label}
       </NavigationMenuTrigger>
 
       <NavigationMenuContent>
-        <ul className="grid w-56 gap-1">
+        <ul className="grid w-52 gap-0.5">
           {section.items.map((item) => (
             <li key={item.href}>
               <NavigationMenuLink
                 render={<Link href={item.href} />}
                 active={pathname === item.href}
+                className="px-2 py-1.5 text-sm hover:bg-muted"
               >
                 {item.label}
               </NavigationMenuLink>
@@ -52,7 +55,7 @@ export function PanelNavbar() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Main" className="border-y bg-card px-16 py-2">
+    <nav aria-label="Main" className="bg-card px-16">
       <NavigationMenu className="max-w-full justify-start">
         <NavigationMenuList className="flex-wrap justify-start gap-1">
           {navSections.map((section) => (
