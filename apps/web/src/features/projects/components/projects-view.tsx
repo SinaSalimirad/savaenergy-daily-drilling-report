@@ -1,10 +1,11 @@
 "use client";
 
-import { ArchiveIcon, PlusIcon } from "lucide-react";
+import { ArchiveIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useProjects } from "../api";
+import { NewProjectDialog } from "./new-project-dialog";
 import { ProjectsTable } from "./projects-table";
 
 const PAGE_SIZE = 10;
@@ -43,14 +44,7 @@ export function ProjectsView() {
               </span>
             )}
           </Button>
-          <Button
-            className="h-10 px-4 font-medium text-card"
-            nativeButton={false}
-            render={<Link href="#" />}
-          >
-            <PlusIcon data-icon="inline-start" />
-            New project
-          </Button>
+          <NewProjectDialog />
         </div>
       </div>
 

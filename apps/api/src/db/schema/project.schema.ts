@@ -13,14 +13,21 @@ export const PROJECT_STATUSES = [
 ] as const;
 export const projectStatus = pgEnum("project_status", PROJECT_STATUSES);
 
+export const PROJECT_CURRENCY = [
+  "USD",
+  "EUR",
+  "IRR"
+] as const
+export const projectCurrency = pgEnum("project_currency", PROJECT_CURRENCY)
+
 export const projects = pgTable("projects", {
   ...id,
   name: text().notNull().unique(),
   operator: text().notNull(),
   contractor: text().notNull(),
-  field: text(),
+  field: text().notNull(),
   status: projectStatus().notNull(),
-  currency: text().notNull(),
+  currency: projectCurrency().notNull(),
   archived_at: timestamp("archived_at", { withTimezone: true }),
   archived_by: uuid("archived_by").references(() => user.id),
   ...timestamps,
