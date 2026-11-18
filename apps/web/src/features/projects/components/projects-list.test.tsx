@@ -98,29 +98,30 @@ describe("ProjectsList", () => {
   });
 
   describe("pagination", () => {
-    it("hides the pager when everything fits on one page", async () => {
+    const button = (name: string) => screen.getByRole("button", { name });
+    const isDisabled = (name: string) => button(name).hasAttribute("disabled");
+
+    it("shows the total and the page count, even when everything fits on one page", async () => {
       respondWith(makeProjectsPage([makeProject()], 10));
 
       renderList();
-      await screen.findByRole("cell", { name: "North Sea Campaign" });
 
-      expect(screen.queryByText(/^Page /)).toBeNull();
+      expect(await screen.findByText("Page 1 of 1")).toBeTruthy();
+      expect(screen.getByText("10 project(s)")).toBeTruthy();
+      expect(isDisabled("Go to next page")).toBe(true);
+      expect(isDisabled("Go to last page")).toBe(true);
     });
 
-    it("shows the page count and disables Previous on the first page", async () => {
+    it("disables First and Previous on the first page", async () => {
       respondWith(makeProjectsPage([makeProject()], 25));
 
       renderList();
 
       expect(await screen.findByText("Page 1 of 3")).toBeTruthy();
-      expect(
-        screen
-          .getByRole("button", { name: "Previous" })
-          .hasAttribute("disabled"),
-      ).toBe(true);
-      expect(
-        screen.getByRole("button", { name: "Next" }).hasAttribute("disabled"),
-      ).toBe(false);
+      expect(isDisabled("Go to first page")).toBe(true);
+      expect(isDisabled("Go to previous page")).toBe(true);
+      expect(isDisabled("Go to next page")).toBe(false);
+      expect(isDisabled("Go to last page")).toBe(false);
     });
 
     it("requests the next page when Next is clicked", async () => {
@@ -128,7 +129,7 @@ describe("ProjectsList", () => {
       renderList();
       await screen.findByText("Page 1 of 3");
 
-      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      fireEvent.click(button("Go to next page"));
 
       await waitFor(() =>
         expect(listProjects).toHaveBeenCalledWith({
@@ -138,24 +139,44 @@ describe("ProjectsList", () => {
       expect(await screen.findByText("Page 2 of 3")).toBeTruthy();
     });
 
-    it("disables Next on the last page", async () => {
-      respondWith(makeProjectsPage([makeProject()], 11));
+    it("jumps to the last page and back to the first", async () => {
+      respondWith(makeProjectsPage([makeProject()], 25));
       renderList();
-      await screen.findByText("Page 1 of 2");
+      await screen.findByText("Page 1 of 3");
 
-      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      fireEvent.click(button("Go to last page"));
+      expect(await screen.findByText("Page 3 of 3")).toBeTruthy();
+      expect(isDisabled("Go to next page")).toBe(true);
 
-      await screen.findByText("Page 2 of 2");
-      expect(
-        screen.getByRole("button", { name: "Next" }).hasAttribute("disabled"),
-      ).toBe(true);
+      fireEvent.click(button("Go to first page"));
+      expect(await screen.findByText("Page 1 of 3")).toBeTruthy();
+    });
+
+    it("starts from the first page when the page size changes", async () => {
+      respondWith(makeProjectsPage([makeProject()], 45));
+      renderList();
+      await screen.findByText("Page 1 of 5");
+      fireEvent.click(button("Go to next page"));
+      await screen.findByText("Page 2 of 5");
+
+      const trigger = screen.getByRole("combobox", { name: "Rows per page" });
+      fireEvent.keyDown(trigger, { key: "ArrowDown" });
+      const option = await screen.findByRole("option", { name: "20" });
+      fireEvent.keyDown(option, { key: "Enter" });
+
+      await waitFor(() =>
+        expect(listProjects).toHaveBeenLastCalledWith({
+          query: { page: 1, pageSize: 20, archived: "false" },
+        }),
+      );
+      expect(await screen.findByText("Page 1 of 3")).toBeTruthy();
     });
 
     it("steps back a page when the last row of the last page disappears", async () => {
       respondWith(makeProjectsPage([makeProject()], 11));
       renderList();
       await screen.findByText("Page 1 of 2");
-      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      fireEvent.click(button("Go to next page"));
       await screen.findByText("Page 2 of 2");
 
       // The only project on page 2 gets archived: 10 projects remain, so page 2 no longer exists.
@@ -167,7 +188,7 @@ describe("ProjectsList", () => {
           query: { page: 1, pageSize: 10, archived: "false" },
         }),
       );
-      expect(screen.queryByText(/^Page /)).toBeNull();
+      expect(await screen.findByText("Page 1 of 1")).toBeTruthy();
     });
   });
 });
