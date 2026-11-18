@@ -37,3 +37,6 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: bun run build
+        env:
+          # Inlined into the web bundle at build time. Any URL works: nothing calls the API during the build.
+          NEXT_PUBLIC_API_URL: http://localhost:3001
