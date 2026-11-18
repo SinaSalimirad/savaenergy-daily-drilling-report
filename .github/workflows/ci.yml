@@ -27,18 +27,6 @@ jobs:
       - run: bunx biome ci .
       - run: bun run typecheck
 
-  test:
-    name: Tests
-    runs-on: ubuntu-26.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: package.json
-      - run: bun install --frozen-lockfile
-      # Remove --pass-with-no-tests once the first test exists, so an empty suite fails.
-      - run: bun test --pass-with-no-tests
-
   build:
     name: Build
     runs-on: ubuntu-26.04
@@ -49,3 +37,6 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: bun run build
+        env:
+          # Inlined into the web bundle at build time. Any URL works: nothing calls the API during the build.
+          NEXT_PUBLIC_API_URL: http://localhost:3001

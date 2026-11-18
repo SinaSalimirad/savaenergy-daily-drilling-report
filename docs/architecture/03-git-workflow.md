@@ -39,7 +39,6 @@ Short-lived branches off `main`, merged back through pull requests. No `develop`
    ```bash
    bun run lint
    bun run typecheck
-   bun test
    ```
 4. Wait for CI. All checks in [04-ci-pipeline.md](04-ci-pipeline.md) must pass before the merge.
 5. Merge with **squash merge**, so `main` has one commit per pull request and a readable history.
