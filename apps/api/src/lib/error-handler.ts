@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { AppError, type ErrorBody } from "./errors";
+import { logger } from "./logger";
 
 /** Turns every error into `{ code, message, errors? }`. Internals never reach the client. */
 export const errorHandler = new Elysia({ name: "error-handler" }).onError(
@@ -28,7 +29,7 @@ export const errorHandler = new Elysia({ name: "error-handler" }).onError(
     }
 
     // The real error is logged for us. The client only learns that something broke.
-    console.error("Unhandled error", error);
+    logger.error("Unhandled error", { error });
     set.status = 500;
     return { code: "INTERNAL_ERROR", message: "Something went wrong." };
   },
