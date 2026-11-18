@@ -13,12 +13,8 @@ export const PROJECT_STATUSES = [
 ] as const;
 export const projectStatus = pgEnum("project_status", PROJECT_STATUSES);
 
-export const PROJECT_CURRENCY = [
-  "USD",
-  "EUR",
-  "IRR"
-] as const
-export const projectCurrency = pgEnum("project_currency", PROJECT_CURRENCY)
+export const PROJECT_CURRENCY = ["USD", "EUR", "IRR"] as const;
+export const projectCurrency = pgEnum("project_currency", PROJECT_CURRENCY);
 
 export const projects = pgTable("projects", {
   ...id,

@@ -1,5 +1,5 @@
 {
-  "id": "741c1a9f-6bf0-419d-a1d7-364fd5bd5b26",
+  "id": "ac2ef378-5b86-4198-903e-1ddb0296bf4a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -37,25 +37,7 @@
           "name": "field",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
-        },
-        "well": {
-          "name": "well",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "active_well": {
-          "name": "active_well",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_report": {
-          "name": "last_report",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "status": {
           "name": "status",
@@ -66,7 +48,8 @@
         },
         "currency": {
           "name": "currency",
-          "type": "text",
+          "type": "project_currency",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -223,10 +206,15 @@
     }
   },
   "enums": {
+    "public.project_currency": {
+      "name": "project_currency",
+      "schema": "public",
+      "values": ["USD", "EUR", "IRR"]
+    },
     "public.project_status": {
       "name": "project_status",
       "schema": "public",
-      "values": ["planned", "active", "completed"]
+      "values": ["planned", "active", "completed", "archived"]
     }
   },
   "schemas": {},

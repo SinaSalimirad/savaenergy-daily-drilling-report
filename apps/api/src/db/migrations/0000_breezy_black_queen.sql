@@ -1,15 +1,13 @@
-CREATE TYPE "public"."project_status" AS ENUM('planned', 'active', 'completed');--> statement-breakpoint
+CREATE TYPE "public"."project_currency" AS ENUM('USD', 'EUR', 'IRR');--> statement-breakpoint
+CREATE TYPE "public"."project_status" AS ENUM('planned', 'active', 'completed', 'archived');--> statement-breakpoint
 CREATE TABLE "projects" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"operator" text NOT NULL,
 	"contractor" text NOT NULL,
-	"field" text,
-	"well" integer,
-	"active_well" integer,
-	"last_report" date,
+	"field" text NOT NULL,
 	"status" "project_status" NOT NULL,
-	"currency" text NOT NULL,
+	"currency" "project_currency" NOT NULL,
 	"archived_at" timestamp with time zone,
 	"archived_by" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,

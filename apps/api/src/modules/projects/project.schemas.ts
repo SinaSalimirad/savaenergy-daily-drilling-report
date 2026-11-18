@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { PROJECT_STATUSES } from "../../db/schema";
+import { PROJECT_CURRENCY, PROJECT_STATUSES } from "../../db/schema";
 
 const requiredText = z.string().trim().min(1).max(200);
 
@@ -15,10 +15,9 @@ export const createProjectSchema = z.object({
   name: requiredText,
   operator: requiredText,
   contractor: requiredText,
-  field: requiredText.nullish(),
+  field: requiredText,
   status: projectStatusSchema,
-  // ISO 4217 code, for example "USD" or "IRR".
-  currency: z.string().regex(/^[A-Z]{3}$/, "Use a 3-letter ISO currency code"),
+  currency: z.enum(PROJECT_CURRENCY),
 });
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 
