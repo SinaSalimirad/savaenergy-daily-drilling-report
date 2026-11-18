@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { NewProjectForm } from "./new-project-form";
+import { ProjectForm } from "./project-form";
 
 export function NewProjectDialog() {
   const [open, setOpen] = useState(false);
@@ -32,7 +32,7 @@ export function NewProjectDialog() {
             Add a project to start tracking its wells and daily reports.
           </DialogDescription>
         </DialogHeader>
-        <NewProjectForm onCreated={() => setOpen(false)} />
+        <ProjectForm onSaved={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );

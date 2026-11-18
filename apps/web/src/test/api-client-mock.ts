@@ -9,9 +9,13 @@ import { mock } from "bun:test";
 export const listProjects = mock();
 export const archiveProject = mock();
 export const restoreProject = mock();
+export const updateProject = mock();
+export const deleteProject = mock();
 export const projectById = mock((_: { id: string }) => ({
   archive: { post: archiveProject },
   restore: { post: restoreProject },
+  patch: updateProject,
+  delete: deleteProject,
 }));
 
 mock.module("@/lib/api-client", () => ({
@@ -22,5 +26,7 @@ export function resetApiClientMock() {
   listProjects.mockReset();
   archiveProject.mockReset();
   restoreProject.mockReset();
+  updateProject.mockReset();
+  deleteProject.mockReset();
   projectById.mockClear();
 }

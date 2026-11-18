@@ -8,7 +8,12 @@ import { Input } from "@/components/ui/input";
 import { SimpleSelect } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api-error";
-import { type CreateProjectBody, useCreateProject } from "../api";
+import {
+  type CreateProjectBody,
+  type Project,
+  useCreateProject,
+  useUpdateProject,
+} from "../api";
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from "../currencies";
 import { normalizeNames } from "../names";
 
@@ -23,6 +28,18 @@ const emptyValues = {
   status: "planned" as Status,
   currency: DEFAULT_CURRENCY as Currency,
 };
+
+function valuesFrom(project: Project): typeof emptyValues {
+  return {
+    name: project.name,
+    field: project.field ?? "",
+    operator: project.operator,
+    contractor: project.contractor,
+    // Archived projects cannot be edited (see the actions menu), so this is never "archived".
+    status: project.status as Status,
+    currency: project.currency as Currency,
+  };
+}
 
 // The API is the source of truth for validation: this form only collects text and shows
 // the messages the API sends back, so the rules live in one place.
@@ -92,26 +109,42 @@ function toServerErrors(error: unknown) {
 const firstError = (errors: unknown[]) =>
   errors.find((error): error is string => typeof error === "string");
 
-export function NewProjectForm({ onCreated }: { onCreated: () => void }) {
+/** Creates a project, or edits `project` when one is given. */
+export function ProjectForm({
+  project,
+  onSaved,
+}: {
+  project?: Project;
+  onSaved: () => void;
+}) {
   const createProject = useCreateProject();
+  const updateProject = useUpdateProject();
 
   const form = useForm({
-    defaultValues: emptyValues,
+    defaultValues: project ? valuesFrom(project) : emptyValues,
     validators: {
       // Server-side validation: the API is the only place the rules live. Returning
       // `{ form, fields }` puts its messages on the form and on the matching inputs.
       onSubmitAsync: async ({ value }) => {
+        const body = {
+          ...value,
+          operator: normalizeNames(value.operator),
+          contractor: normalizeNames(value.contractor),
+        };
         try {
-          await createProject.mutateAsync({
-            ...value,
-            operator: normalizeNames(value.operator),
-            contractor: normalizeNames(value.contractor),
-          });
+          if (project) {
+            await updateProject.mutateAsync({ id: project.id, body });
+          } else {
+            await createProject.mutateAsync(body);
+          }
         } catch (error) {
           return toServerErrors(error);
         }
-        toast.add({ type: "success", title: "Project created" });
-        onCreated();
+        toast.add({
+          type: "success",
+          title: project ? "Project updated" : "Project created",
+        });
+        onSaved();
         return undefined;
       },
     },
@@ -272,7 +305,13 @@ export function NewProjectForm({ onCreated }: { onCreated: () => void }) {
         <form.Subscribe selector={(state) => state.isSubmitting}>
           {(isSubmitting) => (
             <Button type="submit" className="h-10" disabled={isSubmitting}>
-              {isSubmitting ? "Creating…" : "Create project"}
+              {isSubmitting
+                ? project
+                  ? "Saving…"
+                  : "Creating…"
+                : project
+                  ? "Save changes"
+                  : "Create project"}
             </Button>
           )}
         </form.Subscribe>
