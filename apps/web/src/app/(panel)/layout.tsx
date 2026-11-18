@@ -1,11 +1,11 @@
 import { BellIcon, SearchIcon } from "lucide-react";
+import { PanelBreadcrumb } from "@/components/layout/panel-breadcrumb";
 import { PanelNavbar } from "@/components/layout/panel-navbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ThemeButton } from "@/components/ui/theme-button";
-import { PanelBreadcrumb } from "@/components/layout/panel-breadcrumb";
 
 export default function PanelLayout({
   children,
@@ -48,7 +48,7 @@ export default function PanelLayout({
       </header>
       <PanelNavbar />
       <PanelBreadcrumb />
-      
+
       {children}
     </>
   );

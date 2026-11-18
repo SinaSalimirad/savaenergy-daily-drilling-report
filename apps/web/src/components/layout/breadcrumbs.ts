@@ -10,10 +10,11 @@ function buildLabelsByHref(sections: NavSection[]) {
   const labelsByHref = new Map<string, string>();
 
   for (const section of sections) {
-    labelsByHref.set(section.href, section.label);
     for (const item of section.items) {
       labelsByHref.set(item.href, item.label);
     }
+    // Set last: the section label wins over its own "Overview" item.
+    labelsByHref.set(section.href, section.label);
   }
 
   return labelsByHref;
