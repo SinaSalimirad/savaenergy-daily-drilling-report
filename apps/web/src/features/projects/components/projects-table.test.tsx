@@ -21,11 +21,24 @@ describe("ProjectsTable", () => {
       "Operator(s)",
       "Contractor(s)",
       "Field",
+      "Wells",
       "Status",
       "Actions",
     ]) {
       expect(screen.getByRole("columnheader", { name: header })).toBeTruthy();
     }
+  });
+
+  it("shows the number of wells of each project", () => {
+    render(
+      <ProjectsTable
+        data={[makeProject({ wells: 12 })]}
+        emptyMessage="Nothing here."
+      />,
+      { wrapper: QueryWrapper },
+    );
+
+    expect(screen.getByRole("cell", { name: "12" })).toBeTruthy();
   });
 
   it("shows one row per project with its details", () => {

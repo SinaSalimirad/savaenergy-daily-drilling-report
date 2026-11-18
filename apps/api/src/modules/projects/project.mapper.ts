@@ -13,6 +13,7 @@ export type ProjectDto = {
   operator: string;
   contractor: string;
   field: string;
+  wells: number;
   status: ProjectRow["status"];
   currency: ProjectRow["currency"];
   archived_at: string | null;
@@ -27,6 +28,7 @@ export function toProjectDto(row: ProjectRow): ProjectDto {
     operator: row.operator,
     contractor: row.contractor,
     field: row.field,
+    wells: row.wells,
     status: row.status,
     currency: row.currency,
     archived_at: row.archived_at?.toISOString() ?? null,

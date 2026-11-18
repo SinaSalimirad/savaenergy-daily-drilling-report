@@ -1,33 +1,15 @@
+import { projectCreateSchema, projectUpdateSchema } from "schema";
 import * as z from "zod";
-import { PROJECT_CURRENCY, PROJECT_STATUSES } from "../../db/schema";
 
-const requiredText = z.string().trim().min(1).max(200);
-
-// `archived` is excluded: a project is archived and restored only through its own endpoints,
-// so `archived_at` can never disagree with `status`.
-export const projectStatusSchema = z
-  .enum(PROJECT_STATUSES)
-  .exclude(["archived"]);
-
-// `well`, `active_well`, `last_report` and `archived_*` are missing on purpose:
-// the server owns them, so a client can never send them.
-export const createProjectSchema = z.object({
-  name: requiredText,
-  operator: requiredText,
-  contractor: requiredText,
-  field: requiredText,
-  status: projectStatusSchema,
-  currency: z.enum(PROJECT_CURRENCY),
-});
+// What a client may send comes from packages/schema, shared with the web.
+// `archived_*` are missing on purpose: the server owns them, so a client can never send them.
+export const createProjectSchema = projectCreateSchema;
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 
-export const updateProjectSchema = createProjectSchema
-  .partial()
-  .refine((patch) => Object.keys(patch).length > 0, {
-    message: "Send at least one field to update",
-  });
+export const updateProjectSchema = projectUpdateSchema;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 
+// Only HTTP details stay here: they are not part of the contract the web form shares.
 export const projectIdParamsSchema = z.object({ id: z.uuid() });
 
 export const listProjectsQuerySchema = z.object({
