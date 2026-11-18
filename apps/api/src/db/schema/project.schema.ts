@@ -22,7 +22,7 @@ export const projects = pgTable("projects", {
   status: text().notNull(),
   currency: text().notNull(),
   archived_at: timestamp("archived_at", { withTimezone: true }),
-  archived_by: uuid("updated_by").references(() => user.id),
+  archived_by: uuid("archived_by").references(() => user.id),
   ...timestamps,
   ...authorship,
 });

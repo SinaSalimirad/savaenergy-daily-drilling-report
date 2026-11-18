@@ -12,6 +12,7 @@
     "@animate-ui/react": "^2.4.6",
     "@base-ui/react": "^1.9.0",
     "@elysiajs/eden": "^1.4.9",
+    "@tanstack/react-table": "^9.3.1",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
     "lucide-react": "^1.74.0",
