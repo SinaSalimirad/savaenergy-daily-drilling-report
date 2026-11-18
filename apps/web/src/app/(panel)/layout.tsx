@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ThemeButton } from "@/components/ui/theme-button";
+import { PanelBreadcrumb } from "@/components/layout/panel-breadcrumb";
 
 export default function PanelLayout({
   children,
@@ -13,12 +14,12 @@ export default function PanelLayout({
 }) {
   return (
     <>
-      <header className="flex flex-wrap items-center justify-between gap-4 px-16 py-6 bg-card">
+      <header className="flex flex-wrap items-center justify-between gap-4 px-16 py-8 bg-card">
         <span className="font-logo text-xl text-foreground">
           SavaDailyDrillingReport
         </span>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex flex-wrap items-center gap-x-6 ">
           <div className="relative">
             <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -46,6 +47,8 @@ export default function PanelLayout({
         </div>
       </header>
       <PanelNavbar />
+      <PanelBreadcrumb />
+      
       {children}
     </>
   );
