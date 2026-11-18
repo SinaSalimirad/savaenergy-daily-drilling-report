@@ -29,7 +29,10 @@ export function ProjectsList({
   return (
     <div className="mt-6">
       {projects.isPending && (
-        <p className="text-muted-foreground">Loading projects…</p>
+        // The status is for screen readers; sighted users see the placeholder rows.
+        <div role="status" aria-label="Loading projects">
+          <ProjectsTable data={[]} emptyMessage={emptyMessage} isLoading />
+        </div>
       )}
 
       {projects.isError && (

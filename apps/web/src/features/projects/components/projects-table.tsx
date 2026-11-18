@@ -5,6 +5,8 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
+import { cn } from "cn";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -76,12 +78,20 @@ const columns = columnHelper.columns([
   }),
 ]);
 
+const SKELETON_ROWS = 10;
+
+/**
+ * With `isLoading`, the header stays and the body becomes placeholder rows, so the page
+ * does not jump when the data arrives.
+ */
 export function ProjectsTable({
   data,
   emptyMessage,
+  isLoading = false,
 }: {
   data: Project[];
   emptyMessage: string;
+  isLoading?: boolean;
 }) {
   const table = useTable({
     features,
@@ -111,7 +121,27 @@ export function ProjectsTable({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.length === 0 ? (
+          {isLoading ? (
+            Array.from({ length: SKELETON_ROWS }, (_, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: placeholder rows have no identity
+              <TableRow key={index}>
+                {table.getAllLeafColumns().map((column) => (
+                  <TableCell key={column.id} className={alignClass(column.id)}>
+                    <Skeleton
+                      className={
+                        column.id === "actions"
+                          ? "ml-auto size-7"
+                          : cn(
+                              "h-4 w-3/4",
+                              CENTERED_COLUMN_IDS.has(column.id) && "mx-auto",
+                            )
+                      }
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : table.getRowModel().rows.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={columns.length}

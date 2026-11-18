@@ -35,13 +35,17 @@ function renderList(props: { archived?: boolean; emptyMessage?: string } = {}) {
 }
 
 describe("ProjectsList", () => {
-  it("shows a loading message until the first page arrives", () => {
+  it("shows a skeleton table until the first page arrives", () => {
     // A promise that never settles keeps the query pending.
     listProjects.mockReturnValue(new Promise(() => {}));
 
     renderList();
 
-    expect(screen.getByText("Loading projects…")).toBeTruthy();
+    expect(
+      screen.getByRole("status", { name: "Loading projects" }),
+    ).toBeTruthy();
+    expect(screen.getAllByRole("row").length).toBeGreaterThan(1);
+    expect(screen.queryByText("No projects yet.")).toBeNull();
   });
 
   it("shows the projects once they load", async () => {
@@ -54,7 +58,9 @@ describe("ProjectsList", () => {
     expect(
       await screen.findByRole("cell", { name: "North Sea Campaign" }),
     ).toBeTruthy();
-    expect(screen.queryByText("Loading projects…")).toBeNull();
+    expect(
+      screen.queryByRole("status", { name: "Loading projects" }),
+    ).toBeNull();
   });
 
   it("shows the API's error message and retries when Try again is clicked", async () => {
