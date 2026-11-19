@@ -31,21 +31,25 @@ export const wellWritableStatusSchema = wellStatusSchema.exclude(["archived"]);
 export type WellWritableStatus = z.infer<typeof wellWritableStatusSchema>;
 
 export const wellCreateSchema = z.object({
-  project_id: z.uuid(),
-  name: z.string().trim().min(1).max(120),
+  project_id: z.uuid("Choose a project."),
+  name: z
+    .string({ error: "Well name is required." })
+    .trim()
+    .min(1, "Well name is required.")
+    .max(120, "Well name must be 120 characters or fewer."),
   status: wellWritableStatusSchema,
   // Optional fields accept `null` too, so an edit can clear them. No `.default()`: inside
   // `.partial()` it would fill missing fields in a patch and overwrite stored values.
   designation: wellDesignationSchema.nullable().optional(),
   well_type: wellTypeSchema.nullable().optional(),
   // A calendar date as `YYYY-MM-DD`, the format of a Postgres `date` column.
-  spud_date: z.iso.date().nullable().optional(),
+  spud_date: z.iso.date("Enter a valid date.").nullable().optional(),
   // Matches numeric(12, 5): at most 7 digits before the point and 5 after it.
   water_depth: z
-    .number()
-    .min(0)
-    .lt(10_000_000)
-    .multipleOf(0.00001)
+    .number({ error: "Enter a number, for example 120.5." })
+    .min(0, "Water depth cannot be negative.")
+    .lt(10_000_000, "Water depth is too large.")
+    .multipleOf(0.00001, "Use at most 5 decimal places.")
     .nullable()
     .optional(),
 });

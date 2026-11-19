@@ -15,16 +15,25 @@ export const PROJECT_CURRENCIES = ["USD", "EUR", "IRR"] as const;
 export const projectCurrencySchema = z.enum(PROJECT_CURRENCIES);
 export type ProjectCurrency = z.infer<typeof projectCurrencySchema>;
 
-const requiredText = z.string().trim().min(1).max(120);
+// Messages are shown to users as they are, so they name the problem in plain words.
+const requiredText = (label: string) =>
+  z
+    .string({ error: `${label} is required.` })
+    .trim()
+    .min(1, `${label} is required.`)
+    .max(120, `${label} must be 120 characters or fewer.`);
 
 export const projectCreateSchema = z.object({
-  name: requiredText,
-  operator: requiredText,
-  contractor: requiredText,
-  field: requiredText,
+  name: requiredText("Project name"),
+  operator: requiredText("Operator"),
+  contractor: requiredText("Contractor"),
+  field: requiredText("Field"),
   // A whole number sent as a JSON number. No `z.coerce`: it would make the input type
   // `unknown` and the web would lose the type of this field.
-  wells: z.number().int().positive(),
+  wells: z
+    .number({ error: "Enter the number of wells." })
+    .int("Enter a whole number, for example 12.")
+    .positive("Number of wells must be at least 1."),
   currency: projectCurrencySchema,
 });
 export type ProjectCreate = z.infer<typeof projectCreateSchema>;
