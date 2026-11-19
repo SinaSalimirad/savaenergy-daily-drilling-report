@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { WellsView } from "@/features/wells/components/wells-view";
 
-export default function Page() {
-  return <PagePlaceholder title="Wells" />;
+export default function WellsPage() {
+  return <WellsView />;
 }

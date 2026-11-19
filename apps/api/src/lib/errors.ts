@@ -26,6 +26,8 @@ export type ErrorBody = {
 
 /** Postgres error codes we map to HTTP errors. */
 const UNIQUE_VIOLATION = "23505";
+const FOREIGN_KEY_VIOLATION = "23503";
+const CHECK_VIOLATION = "23514";
 
 // Drizzle wraps the driver error in a DrizzleQueryError, so the Postgres code is on `cause`.
 function postgresCode(error: unknown): string | undefined {
@@ -38,4 +40,12 @@ function postgresCode(error: unknown): string | undefined {
 
 export function isUniqueViolation(error: unknown): boolean {
   return postgresCode(error) === UNIQUE_VIOLATION;
+}
+
+export function isForeignKeyViolation(error: unknown): boolean {
+  return postgresCode(error) === FOREIGN_KEY_VIOLATION;
+}
+
+export function isCheckViolation(error: unknown): boolean {
+  return postgresCode(error) === CHECK_VIOLATION;
 }
