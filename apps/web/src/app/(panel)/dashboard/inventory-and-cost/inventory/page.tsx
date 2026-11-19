@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { InventoryView } from "@/features/inventory/components/inventory-view";
 
 export default function Page() {
-  return <PagePlaceholder title="Inventory" />;
+  return <InventoryView />;
 }
