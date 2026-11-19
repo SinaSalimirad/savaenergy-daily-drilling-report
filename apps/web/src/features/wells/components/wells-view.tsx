@@ -3,13 +3,20 @@
 import { ArchiveIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useProjectFilter } from "@/features/projects/project-filter";
 import { useWells } from "../api";
 import { NewWellDialog } from "./new-well-dialog";
 import { WellsList } from "./wells-list";
 
 export function WellsView() {
   // pageSize 1: only `meta.total` is needed for the badge, not the rows.
-  const archived = useWells({ page: 1, pageSize: 1, archived: true });
+  const { projectId } = useProjectFilter();
+  const archived = useWells({
+    page: 1,
+    pageSize: 1,
+    archived: true,
+    projectId: projectId ?? undefined,
+  });
 
   return (
     <main className="px-16">

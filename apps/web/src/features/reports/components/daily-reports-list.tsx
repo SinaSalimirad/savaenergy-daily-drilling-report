@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProjectsPagination } from "@/features/projects/components/projects-pagination";
+import { useProjectFilter } from "@/features/projects/project-filter";
 import { useDailyReports } from "../api";
 import { DailyReportsTable } from "./daily-reports-table";
 
@@ -13,7 +14,16 @@ const EMPTY_MESSAGE = "No daily reports yet.";
 export function DailyReportsList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const reports = useDailyReports({ page, pageSize });
+  const { projectId } = useProjectFilter();
+  const reports = useDailyReports({
+    page,
+    pageSize,
+    projectId: projectId ?? undefined,
+  });
+
+  // The old page number may not exist for another project: start from the top.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `projectId` is the trigger, not a value used inside.
+  useEffect(() => setPage(1), [projectId]);
 
   const total = reports.data?.meta.total ?? 0;
   const lastPage = Math.max(1, Math.ceil(total / pageSize));
@@ -24,7 +34,7 @@ export function DailyReportsList() {
   }, [page, lastPage]);
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 rounded-xl bg-card px-3 py-5">
       {reports.isPending && (
         // The status is for screen readers; sighted users see the placeholder rows.
         <div role="status" aria-label="Loading daily reports">
@@ -33,7 +43,7 @@ export function DailyReportsList() {
       )}
 
       {reports.isError && (
-        <div className="flex items-center gap-3 rounded-lg bg-card p-4">
+        <div className="flex items-center gap-3 p-4">
           <p className="text-destructive">{reports.error.message}</p>
           <Button variant="outline" onClick={() => reports.refetch()}>
             Try again

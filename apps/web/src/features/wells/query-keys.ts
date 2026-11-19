@@ -2,6 +2,8 @@ export type WellsListParams = {
   page: number;
   pageSize: number;
   archived: boolean;
+  // Left out, wells of every project are listed.
+  projectId?: string;
 };
 
 // `all` is what mutations invalidate: it matches every list below it.

@@ -47,7 +47,7 @@ export function ProjectsPagination({
   const onLastPage = page >= lastPage;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 px-4 pt-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 border-t border-divider px-2 pt-5 mt-5">
       <p className="text-sm text-muted-foreground">
         {total} {itemLabel}
       </p>

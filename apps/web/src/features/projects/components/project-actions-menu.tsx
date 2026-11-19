@@ -3,6 +3,7 @@
 import {
   ArchiveIcon,
   ArchiveRestoreIcon,
+  CheckIcon,
   EyeIcon,
   MoreHorizontalIcon,
   PencilIcon,
@@ -21,10 +22,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
 import { type Project, useArchiveProject, useRestoreProject } from "../api";
+import { useProjectFilter } from "../project-filter";
 import { DeleteProjectDialog } from "./delete-project-dialog";
 import { EditProjectDialog } from "./edit-project-dialog";
 
-// View is not wired yet. Archive and Restore need no extra UI, so they call the API
+// View is not wired yet. "Set as current" picks the project in the header filter. Archive and Restore need no extra UI, so they call the API
 // directly. Edit and Delete open a dialog, which lives outside the menu: the menu content
 // unmounts as soon as an item is clicked, and it would take the dialog with it.
 type OpenDialog = "edit" | "delete" | null;
@@ -32,6 +34,7 @@ type OpenDialog = "edit" | "delete" | null;
 export function ProjectActionsMenu({ project }: { project: Project }) {
   const archive = useArchiveProject();
   const restore = useRestoreProject();
+  const { projectId, setProjectId } = useProjectFilter();
   const [openDialog, setOpenDialog] = useState<OpenDialog>(null);
   const isArchived = project.status === "archived";
 
@@ -61,6 +64,23 @@ export function ProjectActionsMenu({ project }: { project: Project }) {
             <EyeIcon />
             View details
           </DropdownMenuItem>
+          {/* The header filter lists only projects that are not archived. */}
+          {!isArchived && (
+            <DropdownMenuItem
+              className="px-2 py-2"
+              disabled={projectId === project.id}
+              onClick={() => {
+                setProjectId(project.id);
+                toast.add({
+                  type: "success",
+                  title: `${project.name} is now the current project`,
+                });
+              }}
+            >
+              <CheckIcon />
+              Set as current
+            </DropdownMenuItem>
+          )}
           {/* The API does not accept status "archived" in an edit, so an archived project
             is restored first. */}
           {!isArchived && (

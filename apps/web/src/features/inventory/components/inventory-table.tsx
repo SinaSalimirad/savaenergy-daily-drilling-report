@@ -95,9 +95,9 @@ export function InventoryTable({
   emptyMessage: string;
 }) {
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-hidden">
       <Table>
-        <TableHeader className="bg-muted">
+        <TableHeader>
           <TableRow>
             <TableHead rowSpan={2} scope="col" className={HEAD}>
               No.
@@ -195,14 +195,14 @@ export function InventoryTable({
             <TableRow>
               <TableCell
                 colSpan={15}
-                className="h-24 px-4 text-center text-muted-foreground"
+                className="h-24 px-2 text-center text-muted-foreground"
               >
                 {emptyMessage}
               </TableCell>
             </TableRow>
           ) : (
             rows.map((row, index) => (
-              <TableRow key={row.product_id} className="even:bg-muted/40">
+              <TableRow key={row.product_id}>
                 <InventoryRowCells row={row} index={index} />
               </TableRow>
             ))

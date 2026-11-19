@@ -10,7 +10,7 @@ export function InventoryView() {
     <main className="px-16">
       <h2 className="text-3xl font-bold">Inventory</h2>
 
-      <div className="mt-6">
+      <div className="mt-6 rounded-xl bg-card px-3 py-5">
         <InventoryTable
           rows={SAMPLE_INVENTORY_ROWS}
           emptyMessage="No products in this project yet."

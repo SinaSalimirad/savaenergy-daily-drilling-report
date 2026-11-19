@@ -1,6 +1,8 @@
 export type DailyReportsListParams = {
   page: number;
   pageSize: number;
+  // Left out, reports of every project are listed.
+  projectId?: string;
 };
 
 // `all` is what mutations invalidate: it matches every list below it.

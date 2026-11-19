@@ -24,7 +24,7 @@ export function SectionsList() {
   }, [page, lastPage]);
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 rounded-xl bg-card px-3 py-5">
       {sections.isPending && (
         // The status is for screen readers; sighted users see the placeholder rows.
         <div role="status" aria-label="Loading sections">
@@ -33,7 +33,7 @@ export function SectionsList() {
       )}
 
       {sections.isError && (
-        <div className="flex items-center gap-3 rounded-lg bg-card p-4">
+        <div className="flex items-center gap-3 p-4">
           <p className="text-destructive">{sections.error.message}</p>
           <Button variant="outline" onClick={() => sections.refetch()}>
             Try again

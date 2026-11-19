@@ -10,7 +10,15 @@ import { ensureOk, unwrap } from "@/lib/api-error";
 import { type DailyReportsListParams, dailyReportKeys } from "./query-keys";
 
 async function fetchDailyReports(params: DailyReportsListParams) {
-  return unwrap(await api["daily-reports"].get({ query: params }));
+  return unwrap(
+    await api["daily-reports"].get({
+      query: {
+        page: params.page,
+        pageSize: params.pageSize,
+        project_id: params.projectId,
+      },
+    }),
+  );
 }
 
 // Types come from the API through Eden, so a change there breaks this file's typecheck.

@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import { ProjectFilterProvider } from "@/features/projects/project-filter";
 
+// Also provides the project filter, which parts of the UI (like the actions menu) read.
 // One client shared by all tests: Biome forbids declaring the wrapper component inside a
 // factory function. Call `resetTestQueryClient` in `beforeEach` so no data leaks between tests.
 // `retry: false` makes a failed request show up as an error immediately.
@@ -15,7 +17,7 @@ export function resetTestQueryClient() {
 export function QueryWrapper({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={testQueryClient}>
-      {children}
+      <ProjectFilterProvider>{children}</ProjectFilterProvider>
     </QueryClientProvider>
   );
 }

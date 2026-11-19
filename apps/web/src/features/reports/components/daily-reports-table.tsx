@@ -75,8 +75,8 @@ const columns = columnHelper.columns([
 ]);
 
 // Spacing of the shadcn data-table block: roomy rows, 16px of padding on the sides.
-const HEAD_CELL = "px-4";
-const BODY_CELL = "h-[53px] px-4";
+const HEAD_CELL = "px-2";
+const BODY_CELL = "h-[68px] px-2";
 
 const SKELETON_ROWS = 10;
 
@@ -98,9 +98,9 @@ export function DailyReportsTable({
   });
 
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-hidden">
       <Table>
-        <TableHeader className="bg-muted">
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -145,7 +145,7 @@ export function DailyReportsTable({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-24 px-4 text-center text-muted-foreground"
+                className="h-24 px-2 text-center text-muted-foreground"
               >
                 {emptyMessage}
               </TableCell>

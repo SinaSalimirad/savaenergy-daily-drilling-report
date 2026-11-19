@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ThemeButton } from "@/components/ui/theme-button";
+import { ProjectFilterSelect } from "@/features/projects/components/project-filter-select";
+import { ProjectFilterProvider } from "@/features/projects/project-filter";
 
 export default function PanelLayout({
   children,
@@ -13,13 +15,20 @@ export default function PanelLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <ProjectFilterProvider>
       <header className="flex flex-wrap items-center justify-between gap-4 px-16 py-8 bg-card">
         <span className="font-logo text-xl text-foreground">
           SavaDailyDrillingReport
         </span>
 
         <div className="flex flex-wrap items-center gap-x-6 ">
+          <ProjectFilterSelect />
+
+          <Separator
+            orientation="vertical"
+            className="h-8 data-vertical:self-center max-md:hidden"
+          />
+
           <div className="relative">
             <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -50,6 +59,6 @@ export default function PanelLayout({
       <PanelBreadcrumb />
 
       {children}
-    </>
+    </ProjectFilterProvider>
   );
 }

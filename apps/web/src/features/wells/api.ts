@@ -12,7 +12,12 @@ import { type WellsListParams, wellKeys } from "./query-keys";
 async function fetchWells(params: WellsListParams) {
   const result = await api.wells.get({
     // The API reads the flag from the URL, where every value is text.
-    query: { ...params, archived: params.archived ? "true" : "false" },
+    query: {
+      page: params.page,
+      pageSize: params.pageSize,
+      archived: params.archived ? "true" : "false",
+      project_id: params.projectId,
+    },
   });
   return unwrap(result);
 }

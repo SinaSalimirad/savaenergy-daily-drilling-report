@@ -10,6 +10,7 @@ import {
   updateProject,
 } from "@/test/api-client-mock";
 import { QueryWrapper, resetTestQueryClient } from "@/test/query-wrapper";
+import { useProjectFilter } from "../project-filter";
 import { makeProject } from "../project-fixtures";
 import { ProjectActionsMenu } from "./project-actions-menu";
 
@@ -25,7 +26,50 @@ function openMenu(projectName: string) {
   );
 }
 
+// Shows what the project filter holds, so a test can read it.
+function CurrentProject() {
+  return <p data-testid="current">{useProjectFilter().projectId ?? "all"}</p>;
+}
+
 describe("ProjectActionsMenu", () => {
+  it("sets the project as the current one and confirms with a toast", async () => {
+    const add = spyOn(toast, "add").mockReturnValue("toast-id");
+    render(
+      <>
+        <ProjectActionsMenu project={makeProject({ id: "p1" })} />
+        <CurrentProject />
+      </>,
+      { wrapper: QueryWrapper },
+    );
+
+    openMenu("North Sea Campaign");
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "Set as current" }),
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("current").textContent).toBe("p1"),
+    );
+    expect(add).toHaveBeenCalledWith({
+      type: "success",
+      title: "North Sea Campaign is now the current project",
+    });
+  });
+
+  it("does not offer Set as current for an archived project", async () => {
+    render(
+      <ProjectActionsMenu project={makeProject({ status: "archived" })} />,
+      { wrapper: QueryWrapper },
+    );
+
+    openMenu("North Sea Campaign");
+
+    await screen.findByRole("menuitem", { name: "Restore project" });
+    expect(
+      screen.queryByRole("menuitem", { name: "Set as current" }),
+    ).toBeNull();
+  });
+
   it("offers Archive, not Restore, for a project that is not archived", async () => {
     render(<ProjectActionsMenu project={makeProject({ status: "active" })} />, {
       wrapper: QueryWrapper,

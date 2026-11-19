@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProjectsPagination } from "@/features/projects/components/projects-pagination";
+import { useProjectFilter } from "@/features/projects/project-filter";
 import { useWells } from "../api";
 import { WellsTable } from "./wells-table";
 
@@ -18,7 +19,17 @@ export function WellsList({
 }) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const wells = useWells({ page, pageSize, archived });
+  const { projectId } = useProjectFilter();
+  const wells = useWells({
+    page,
+    pageSize,
+    archived,
+    projectId: projectId ?? undefined,
+  });
+
+  // The old page number may not exist for another project: start from the top.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `projectId` is the trigger, not a value used inside.
+  useEffect(() => setPage(1), [projectId]);
 
   const total = wells.data?.meta.total ?? 0;
   const lastPage = Math.max(1, Math.ceil(total / pageSize));
@@ -29,7 +40,7 @@ export function WellsList({
   }, [page, lastPage]);
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 rounded-xl bg-card px-3 py-5">
       {wells.isPending && (
         // The status is for screen readers; sighted users see the placeholder rows.
         <div role="status" aria-label="Loading wells">
@@ -38,7 +49,7 @@ export function WellsList({
       )}
 
       {wells.isError && (
-        <div className="flex items-center gap-3 rounded-lg bg-card p-4">
+        <div className="flex items-center gap-3 p-4">
           <p className="text-destructive">{wells.error.message}</p>
           <Button variant="outline" onClick={() => wells.refetch()}>
             Try again
