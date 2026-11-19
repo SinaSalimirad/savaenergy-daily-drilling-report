@@ -229,6 +229,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Hides the browser's up/down spinner on number inputs (WebKit and Firefox). */
+  input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+  }
   html {
     @apply font-sans;
   }

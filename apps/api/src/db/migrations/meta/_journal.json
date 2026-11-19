@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1795020566936,
-      "tag": "0000_breezy_black_queen",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1795036902269,
-      "tag": "0001_milky_blockbuster",
+      "when": 1795067061092,
+      "tag": "0000_lumpy_selene",
       "breakpoints": true
     }
   ]

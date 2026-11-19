@@ -1,5 +1,5 @@
 {
-  "id": "ac2ef378-5b86-4198-903e-1ddb0296bf4a",
+  "id": "5ed125f6-5a29-4d8c-bc8d-74d8912beec3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -39,10 +39,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "status": {
-          "name": "status",
-          "type": "project_status",
-          "typeSchema": "public",
+        "wells": {
+          "name": "wells",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -98,8 +97,12 @@
           "name": "projects_archived_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": ["archived_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "archived_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -107,8 +110,12 @@
           "name": "projects_created_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": ["created_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -116,8 +123,12 @@
           "name": "projects_updated_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": ["updated_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "updated_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -127,11 +138,18 @@
         "projects_name_unique": {
           "name": "projects_name_unique",
           "nullsNotDistinct": false,
-          "columns": ["name"]
+          "columns": [
+            "name"
+          ]
         }
       },
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "projects_wells_positive": {
+          "name": "projects_wells_positive",
+          "value": "\"projects\".\"wells\" > 0"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.user": {
@@ -197,11 +215,183 @@
         "user_username_unique": {
           "name": "user_username_unique",
           "nullsNotDistinct": false,
-          "columns": ["username"]
+          "columns": [
+            "username"
+          ]
         }
       },
       "policies": {},
       "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.wells": {
+      "name": "wells",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "designation": {
+          "name": "designation",
+          "type": "well_designation",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "well_type": {
+          "name": "well_type",
+          "type": "well_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "well_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spud_date": {
+          "name": "spud_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "water_depth": {
+          "name": "water_depth",
+          "type": "numeric(12, 5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archived_by": {
+          "name": "archived_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "wells_project_id_projects_id_fk": {
+          "name": "wells_project_id_projects_id_fk",
+          "tableFrom": "wells",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "wells_archived_by_user_id_fk": {
+          "name": "wells_archived_by_user_id_fk",
+          "tableFrom": "wells",
+          "tableTo": "user",
+          "columnsFrom": [
+            "archived_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "wells_created_by_user_id_fk": {
+          "name": "wells_created_by_user_id_fk",
+          "tableFrom": "wells",
+          "tableTo": "user",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "wells_updated_by_user_id_fk": {
+          "name": "wells_updated_by_user_id_fk",
+          "tableFrom": "wells",
+          "tableTo": "user",
+          "columnsFrom": [
+            "updated_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "wells_project_id_name_unique": {
+          "name": "wells_project_id_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "project_id",
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "wells_water_depth_non_negative": {
+          "name": "wells_water_depth_non_negative",
+          "value": "\"wells\".\"water_depth\" >= 0"
+        }
+      },
       "isRLSEnabled": false
     }
   },
@@ -209,12 +399,41 @@
     "public.project_currency": {
       "name": "project_currency",
       "schema": "public",
-      "values": ["USD", "EUR", "IRR"]
+      "values": [
+        "USD",
+        "EUR",
+        "IRR"
+      ]
     },
-    "public.project_status": {
-      "name": "project_status",
+    "public.well_designation": {
+      "name": "well_designation",
       "schema": "public",
-      "values": ["planned", "active", "completed", "archived"]
+      "values": [
+        "exploration",
+        "appraisal",
+        "development",
+        "injection",
+        "observation"
+      ]
+    },
+    "public.well_status": {
+      "name": "well_status",
+      "schema": "public",
+      "values": [
+        "planned",
+        "active",
+        "completed",
+        "archived",
+        "suspended"
+      ]
+    },
+    "public.well_type": {
+      "name": "well_type",
+      "schema": "public",
+      "values": [
+        "vertical",
+        "directional"
+      ]
     }
   },
   "schemas": {},

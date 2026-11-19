@@ -9,20 +9,11 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-import { WELL_STATUSES } from "schema";
+import { WELL_DESIGNATIONS, WELL_STATUSES, WELL_TYPES } from "schema";
 import { archive } from "./_shared/archive";
 import { authorship } from "./_shared/authorship";
 import { id, timestamps } from "./_shared/columns";
 import { projects } from "./project.schema";
-
-export const WELL_DESIGNATIONS = [
-  "exploration",
-  "appraisal",
-  "development",
-  "injection",
-  "observation",
-] as const;
-export const WELL_TYPES = ["vertical", "directional"] as const;
 
 export const wellDesignation = pgEnum("well_designation", WELL_DESIGNATIONS);
 export const wellType = pgEnum("well_type", WELL_TYPES);
