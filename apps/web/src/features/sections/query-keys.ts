@@ -1,6 +1,8 @@
 export type SectionsListParams = {
   page: number;
   pageSize: number;
+  // Only the sections of one well. Left out, every section is listed.
+  well_id?: string;
 };
 
 // `all` is what mutations invalidate: it matches every list below it.

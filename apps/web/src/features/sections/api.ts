@@ -34,6 +34,21 @@ export function useSections(params: SectionsListParams) {
   return useQuery(sectionsQueryOptions(params));
 }
 
+// The sections of one well, for forms that must pick a section of the chosen well. Nothing is
+// requested until a well is chosen: without `well_id` the API would list every section.
+const WELL_SECTIONS_LIMIT = 100;
+
+export function useWellSections(wellId: string) {
+  return useQuery({
+    ...sectionsQueryOptions({
+      page: 1,
+      pageSize: WELL_SECTIONS_LIMIT,
+      well_id: wellId,
+    }),
+    enabled: wellId !== "",
+  });
+}
+
 // Every mutation refreshes all section lists: a change can move a row to another page and
 // change the totals, so refreshing one list is not enough.
 function useSectionMutation<TVariables>(
