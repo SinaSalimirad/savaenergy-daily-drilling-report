@@ -38,6 +38,20 @@ function postgresCode(error: unknown): string | undefined {
   return undefined;
 }
 
+/** The name of the constraint a violation broke, so one error code can map to several rules. */
+export function violatedConstraint(error: unknown): string | undefined {
+  const source = error instanceof DrizzleQueryError ? error.cause : error;
+  if (
+    typeof source === "object" &&
+    source !== null &&
+    "constraint" in source &&
+    typeof source.constraint === "string"
+  ) {
+    return source.constraint;
+  }
+  return undefined;
+}
+
 export function isUniqueViolation(error: unknown): boolean {
   return postgresCode(error) === UNIQUE_VIOLATION;
 }

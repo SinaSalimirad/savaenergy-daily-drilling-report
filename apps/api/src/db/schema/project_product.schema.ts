@@ -9,7 +9,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { authorship } from "./_shared/authorship";
 import { id, timestamps } from "./_shared/columns";
-import { PROJECT_CURRENCIES } from "schema";
 import { products } from "./product.schema";
 import { projects } from "./project.schema";
 
@@ -17,12 +16,6 @@ export const projectProductOrigin = pgEnum("project_product_origin", [
   "foreign",
   "local",
 ]);
-
-// Same list as the project currency, shared from packages/schema.
-export const projectProductCurrency = pgEnum(
-  "project_product_currency",
-  PROJECT_CURRENCIES,
-);
 
 export const projectProducts = pgTable(
   "project_product",
@@ -35,8 +28,8 @@ export const projectProducts = pgTable(
       .notNull()
       .references(() => products.id),
     origin: projectProductOrigin().notNull(),
-    currency: projectProductCurrency().notNull(),
-    // Unit price in `currency`; per usage unit (package/m²) or per day for equipment.
+    // Unit price in the project's currency (`project.currency`); per usage unit (package/m²)
+    // or per day for equipment.
     price: numeric({ precision: 14, scale: 5, mode: "number" }),
     ...timestamps,
     ...authorship,
