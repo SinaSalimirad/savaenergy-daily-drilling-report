@@ -18,8 +18,16 @@ export const projectById = mock((_: { id: string }) => ({
   delete: deleteProject,
 }));
 
+export const moveSection = mock();
+export const sectionById = mock((_: { id: string }) => ({
+  move: { post: moveSection },
+}));
+
 mock.module("@/lib/api-client", () => ({
-  api: { projects: Object.assign(projectById, { get: listProjects }) },
+  api: {
+    projects: Object.assign(projectById, { get: listProjects }),
+    sections: Object.assign(sectionById, { get: mock() }),
+  },
 }));
 
 export function resetApiClientMock() {
@@ -29,4 +37,6 @@ export function resetApiClientMock() {
   updateProject.mockReset();
   deleteProject.mockReset();
   projectById.mockClear();
+  moveSection.mockReset();
+  sectionById.mockClear();
 }
