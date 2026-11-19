@@ -11,7 +11,6 @@ const validProject = {
   contractor: "Halliburton",
   field: "South Pars",
   wells: 12,
-  status: "planned",
   currency: "USD",
 };
 
@@ -41,13 +40,13 @@ describe("projectCreateSchema", () => {
     expect(projectCreateSchema.safeParse(withoutWells).success).toBe(false);
   });
 
-  it("does not let a client create an archived project", () => {
-    const result = projectCreateSchema.safeParse({
+  it("ignores a status sent by a client, because the API derives it", () => {
+    const result = projectCreateSchema.parse({
       ...validProject,
       status: "archived",
     });
 
-    expect(result.success).toBe(false);
+    expect("status" in result).toBe(false);
   });
 });
 
@@ -62,7 +61,11 @@ describe("projectUpdateSchema", () => {
 });
 
 describe("projectStatusSchema", () => {
-  it("still knows `archived`, which the API sets through its own endpoint", () => {
-    expect(projectStatusSchema.safeParse("archived").success).toBe(true);
+  it("knows the three derived statuses", () => {
+    expect(projectStatusSchema.options).toEqual([
+      "active",
+      "inactive",
+      "archived",
+    ]);
   });
 });

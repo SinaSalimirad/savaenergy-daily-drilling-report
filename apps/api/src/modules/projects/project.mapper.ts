@@ -1,6 +1,4 @@
-import type { projects } from "../../db/schema";
-
-type ProjectRow = typeof projects.$inferSelect;
+import type { ProjectRow } from "./project.repository";
 
 /**
  * The shape the web app receives. Dates are ISO strings because JSON has no Date type,
@@ -14,7 +12,7 @@ export type ProjectDto = {
   contractor: string;
   field: string;
   wells: number;
-  status: ProjectRow["status"];
+  status: ProjectRow["status"]; // derived, see project.repository.ts
   currency: ProjectRow["currency"];
   archived_at: string | null;
   created_at: string;

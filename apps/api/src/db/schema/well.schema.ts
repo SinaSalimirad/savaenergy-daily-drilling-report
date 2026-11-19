@@ -1,0 +1,53 @@
+import { sql } from "drizzle-orm";
+import {
+  check,
+  date,
+  numeric,
+  pgEnum,
+  pgTable,
+  text,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { WELL_STATUSES } from "schema";
+import { archive } from "./_shared/archive";
+import { authorship } from "./_shared/authorship";
+import { id, timestamps } from "./_shared/columns";
+import { projects } from "./project.schema";
+
+export const WELL_DESIGNATIONS = [
+  "exploration",
+  "appraisal",
+  "development",
+  "injection",
+  "observation",
+] as const;
+export const WELL_TYPES = ["vertical", "directional"] as const;
+
+export const wellDesignation = pgEnum("well_designation", WELL_DESIGNATIONS);
+export const wellType = pgEnum("well_type", WELL_TYPES);
+export const wellStatus = pgEnum("well_status", WELL_STATUSES);
+
+export const wells = pgTable(
+  "wells",
+  {
+    ...id,
+    project_id: uuid("project_id")
+      .notNull()
+      .references(() => projects.id),
+    name: text().notNull(),
+    designation: wellDesignation(),
+    well_type: wellType(),
+    status: wellStatus().notNull(),
+    spud_date: date(),
+    // `mode: "number"` returns a JS number instead of a string.
+    water_depth: numeric({ precision: 12, scale: 5, mode: "number" }),
+    ...archive,
+    ...timestamps,
+    ...authorship,
+  },
+  (table) => [
+    unique("wells_project_id_name_unique").on(table.project_id, table.name),
+    check("wells_water_depth_non_negative", sql`${table.water_depth} >= 0`),
+  ],
+);

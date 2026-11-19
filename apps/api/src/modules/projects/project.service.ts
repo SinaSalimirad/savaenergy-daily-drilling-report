@@ -18,9 +18,6 @@ import type {
 
 const PROJECT = "Project";
 
-// The status before archiving is not stored, so restore needs a fixed target.
-const RESTORED_STATUS = "planned";
-
 const nameTaken = () =>
   new AppError(
     409,
@@ -84,7 +81,7 @@ export async function archiveProject(id: string): Promise<ProjectDto> {
 }
 
 export async function restoreProject(id: string): Promise<ProjectDto> {
-  const row = await markRestored(id, RESTORED_STATUS);
+  const row = await markRestored(id);
   if (row) return toProjectDto(row);
 
   if (!(await findProjectById(id))) throw notFound(PROJECT);
