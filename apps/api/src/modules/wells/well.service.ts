@@ -103,6 +103,18 @@ export async function restoreWell(id: string): Promise<WellDto> {
 }
 
 export async function deleteWell(id: string): Promise<void> {
-  const deleted = await deleteWellById(id);
-  if (!deleted) throw notFound(WELL);
+  // The foreign key from sections is the guarantee, for the same reason as in `writeWell`.
+  try {
+    const deleted = await deleteWellById(id);
+    if (!deleted) throw notFound(WELL);
+  } catch (error) {
+    if (isForeignKeyViolation(error)) {
+      throw new AppError(
+        409,
+        "WELL_HAS_SECTIONS",
+        "This well still has sections. Delete them first.",
+      );
+    }
+    throw error;
+  }
 }

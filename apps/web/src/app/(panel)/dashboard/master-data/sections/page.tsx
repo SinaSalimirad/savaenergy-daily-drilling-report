@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { SectionsView } from "@/features/sections/components/sections-view";
 
-export default function Page() {
-  return <PagePlaceholder title="Sections" />;
+export default function SectionsPage() {
+  return <SectionsView />;
 }

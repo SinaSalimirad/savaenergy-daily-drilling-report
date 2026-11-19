@@ -3,5 +3,6 @@ export * from "./_shared/archive";
 export * from "./_shared/authorship";
 export * from "./_shared/columns";
 export * from "./project.schema";
+export * from "./section.schema";
 export * from "./user.schema";
 export * from "./well.schema";
