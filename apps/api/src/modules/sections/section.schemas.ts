@@ -22,5 +22,7 @@ export const listSectionsQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   // Only the sections of one well. Without it, every section is listed.
   well_id: z.uuid().optional(),
+  // Only the sections of the wells of one project. Combined with `well_id`, both must match.
+  project_id: z.uuid().optional(),
 });
 export type ListSectionsQuery = z.infer<typeof listSectionsQuerySchema>;

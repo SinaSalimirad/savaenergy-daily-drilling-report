@@ -1,9 +1,6 @@
 import * as z from "zod";
 
 // Single source of truth for well values, shared by the API (Postgres enum) and the web.
-// Archiving is not a status: it is `archived_at`, so a well keeps its status while archived and
-// returns to it on restore. The API shows `archived` as the status of an archived well (see
-// `wellDisplayStatusSchema` below), but it is never stored and a client never sends it.
 export const WELL_STATUSES = [
   "planned",
   "active",
@@ -30,10 +27,6 @@ export type WellType = z.infer<typeof wellTypeSchema>;
 export const RIG_TYPES = ["onshore", "offshore"] as const;
 export const rigTypeSchema = z.enum(RIG_TYPES);
 export type RigType = z.infer<typeof rigTypeSchema>;
-
-// What the API returns as `status`: the stored status, or `archived` while `archived_at` is set.
-export const wellDisplayStatusSchema = z.enum([...WELL_STATUSES, "archived"]);
-export type WellDisplayStatus = z.infer<typeof wellDisplayStatusSchema>;
 
 const wellFields = z.object({
   project_id: z.uuid("Choose a project."),

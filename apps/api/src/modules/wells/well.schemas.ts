@@ -14,8 +14,6 @@ export const wellIdParamsSchema = z.object({ id: z.uuid() });
 export const listWellsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  // Query strings are text, so `archived=true` arrives as the string "true".
-  archived: z.enum(["true", "false"]).default("false"),
   // Only the wells of one project. Without it, every project's wells are listed.
   project_id: z.uuid().optional(),
 });

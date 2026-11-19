@@ -38,8 +38,7 @@ export function DeleteWellDialog({
           <DialogTitle>Delete well</DialogTitle>
           <DialogDescription>
             Delete <strong className="text-foreground">{well.name}</strong>{" "}
-            permanently? This cannot be undone. To keep the data, archive the
-            well instead.
+            permanently? This cannot be undone.
           </DialogDescription>
         </DialogHeader>
         {deleteWell.error && (

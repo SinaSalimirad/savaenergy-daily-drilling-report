@@ -15,7 +15,6 @@ import {
   WELL_STATUSES,
   WELL_TYPES,
 } from "schema";
-import { archive } from "./_shared/archive";
 import { authorship } from "./_shared/authorship";
 import { id, timestamps } from "./_shared/columns";
 import { projects } from "./project.schema";
@@ -41,7 +40,6 @@ export const wells = pgTable(
     rig_type: rigType().notNull(),
     // `mode: "number"` returns a JS number instead of a string.
     water_depth: numeric({ precision: 12, scale: 5, mode: "number" }),
-    ...archive,
     ...timestamps,
     ...authorship,
   },

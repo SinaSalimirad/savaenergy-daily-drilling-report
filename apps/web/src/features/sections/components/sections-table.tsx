@@ -86,6 +86,7 @@ const columns = columnHelper.columns([
     cell: ({ row }) => <DragHandle section={row.original} />,
   }),
   columnHelper.accessor("well_name", { header: "Well" }),
+  columnHelper.accessor("project_name", { header: "Project" }),
   columnHelper.accessor("order", { header: "Order" }),
   columnHelper.accessor("hole_size", {
     header: "Hole size",

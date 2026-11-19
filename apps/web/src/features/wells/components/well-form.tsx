@@ -45,8 +45,7 @@ function valuesFrom(well: Well): typeof emptyValues {
   return {
     project_id: well.project_id,
     name: well.name,
-    // Archived wells cannot be edited (see the actions menu), so this is never "archived".
-    status: well.status as WellStatus,
+    status: well.status,
     rig_name: well.rig_name,
     rig_type: well.rig_type,
     designation: well.designation ?? NONE,

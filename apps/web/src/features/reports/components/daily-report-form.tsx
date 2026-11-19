@@ -192,13 +192,13 @@ export function DailyReportForm({
   onSaved: () => void;
 }) {
   const form = useDailyReportForm(report, onSaved);
-  // The API allows at most 100 per page; the select lists the wells that are not archived.
-  const wells = useWells({ page: 1, pageSize: 100, archived: false });
+  // The API allows at most 100 per page; the select lists the wells.
+  const wells = useWells({ page: 1, pageSize: 100 });
   const wellOptions = (wells.data?.data ?? []).map((well) => ({
     value: well.id,
     label: `${well.name} (${well.project_name})`,
   }));
-  // The well of an existing report may be archived since: keep it in the list so it shows.
+  // The well of an existing report may be beyond the first 100: keep it in the list so it shows.
   if (
     report &&
     !wellOptions.some((option) => option.value === report.well_id)

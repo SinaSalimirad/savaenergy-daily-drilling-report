@@ -48,6 +48,7 @@ async function writeSection(
 export async function listSections(query: ListSectionsQuery) {
   const { rows, total } = await findSections({
     wellId: query.well_id,
+    projectId: query.project_id,
     limit: query.pageSize,
     offset: (query.page - 1) * query.pageSize,
   });

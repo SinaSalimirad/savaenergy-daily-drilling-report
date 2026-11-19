@@ -31,7 +31,6 @@ describe("POST /wells", () => {
       ...payload,
       project_name: "Alpha",
       water_depth: null,
-      archived_at: null,
     });
     expect(body.data).not.toHaveProperty("created_by");
   });
@@ -68,7 +67,7 @@ describe("POST /wells", () => {
     expect(status).toBe(422);
   });
 
-  test("rejects the archived status: only the archive endpoint sets it", async () => {
+  test("rejects the archived status: wells cannot be archived", async () => {
     const { status } = await call(
       "POST",
       "/wells",
@@ -168,19 +167,6 @@ describe("GET /wells", () => {
     expect(body.meta.total).toBe(1);
   });
 
-  test("keeps the archived filter when a project is requested", async () => {
-    const archived = await createWell(projectId, { name: "Archived" });
-    await createWell(projectId, { name: "Active" });
-    await call("POST", `/wells/${archived.id}/archive`);
-
-    const { body } = await call(
-      "GET",
-      `/wells?project_id=${projectId}&archived=true`,
-    );
-
-    expect(body.data.map((w: { id: string }) => w.id)).toEqual([archived.id]);
-  });
-
   test("returns an empty page for a project without wells", async () => {
     await createWell(projectId);
 
@@ -194,33 +180,14 @@ describe("GET /wells", () => {
     expect(body.meta.total).toBe(0);
   });
 
-  test.each([
-    "page=0",
-    "pageSize=101",
-    "archived=maybe",
-    "project_id=not-a-uuid",
-  ])("rejects the query %s with 422", async (query) => {
-    const { status } = await call("GET", `/wells?${query}`);
+  test.each(["page=0", "pageSize=101", "project_id=not-a-uuid"])(
+    "rejects the query %s with 422",
+    async (query) => {
+      const { status } = await call("GET", `/wells?${query}`);
 
-    expect(status).toBe(422);
-  });
-
-  test("keeps archived wells out of the default list", async () => {
-    const kept = await createWell(projectId, { name: "Kept" });
-    const archived = await createWell(projectId, { name: "Archived" });
-    await call("POST", `/wells/${archived.id}/archive`);
-
-    const active = await call("GET", "/wells");
-    const archivedList = await call("GET", "/wells?archived=true");
-
-    expect(active.body.data.map((w: { id: string }) => w.id)).toEqual([
-      kept.id,
-    ]);
-    expect(archivedList.body.data.map((w: { id: string }) => w.id)).toEqual([
-      archived.id,
-    ]);
-    expect(archivedList.body.meta.total).toBe(1);
-  });
+      expect(status).toBe(422);
+    },
+  );
 });
 
 describe("GET /wells/:id", () => {
@@ -361,71 +328,15 @@ describe("PATCH /wells/:id", () => {
   });
 });
 
-describe("archive and restore", () => {
-  test("archive sets archived_at and shows archived as the status", async () => {
-    const well = await createWell(projectId, { status: "active" });
-
-    const { status, body } = await call("POST", `/wells/${well.id}/archive`);
-
-    expect(status).toBe(200);
-    expect(body.data.status).toBe("archived");
-    expect(body.data.archived_at).toBeString();
-  });
-
-  test("archiving twice returns 409", async () => {
-    const well = await createWell(projectId);
-    await call("POST", `/wells/${well.id}/archive`);
-
-    const { status, body } = await call("POST", `/wells/${well.id}/archive`);
-
-    expect(status).toBe(409);
-    expect(body.code).toBe("WELL_ALREADY_ARCHIVED");
-  });
-
-  test("archiving an unknown well returns 404", async () => {
-    const { status } = await call("POST", `/wells/${MISSING_ID}/archive`);
-
-    expect(status).toBe(404);
-  });
-
-  test.each(["planned", "active", "completed", "suspended"])(
-    "restore brings back the %s status the well had",
-    async (before) => {
-      const well = await createWell(projectId, { status: before });
-      await call("POST", `/wells/${well.id}/archive`);
-
-      const { status, body } = await call("POST", `/wells/${well.id}/restore`);
-
-      expect(status).toBe(200);
-      expect(body.data.status).toBe(before);
-      expect(body.data.archived_at).toBeNull();
-    },
-  );
-
-  test("restoring a well that is not archived returns 409", async () => {
+describe("archive endpoints", () => {
+  test("wells have no archive or restore endpoint", async () => {
     const well = await createWell(projectId);
 
-    const { status, body } = await call("POST", `/wells/${well.id}/restore`);
+    const archive = await call("POST", `/wells/${well.id}/archive`);
+    const restore = await call("POST", `/wells/${well.id}/restore`);
 
-    expect(status).toBe(409);
-    expect(body.code).toBe("WELL_NOT_ARCHIVED");
-  });
-
-  test("restoring an unknown well returns 404", async () => {
-    const { status } = await call("POST", `/wells/${MISSING_ID}/restore`);
-
-    expect(status).toBe(404);
-  });
-
-  test("two parallel archive requests: one wins, one gets 409", async () => {
-    const well = await createWell(projectId);
-
-    const results = await Promise.all([
-      call("POST", `/wells/${well.id}/archive`),
-      call("POST", `/wells/${well.id}/archive`),
-    ]);
-
-    expect(results.map((r) => r.status).sort()).toEqual([200, 409]);
+    expect(archive.status).toBe(404);
+    expect(restore.status).toBe(404);
   });
 });
 

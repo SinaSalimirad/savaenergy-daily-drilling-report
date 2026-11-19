@@ -9,6 +9,7 @@ export type SectionDto = {
   id: string;
   well_id: string;
   well_name: string;
+  project_name: string;
   order: number;
   hole_size: number;
   hole_type: SectionRow["hole_type"];
@@ -21,6 +22,7 @@ export function toSectionDto(row: SectionRow): SectionDto {
     id: row.id,
     well_id: row.well_id,
     well_name: row.well_name,
+    project_name: row.project_name,
     order: row.order,
     hole_size: row.hole_size,
     hole_type: row.hole_type,

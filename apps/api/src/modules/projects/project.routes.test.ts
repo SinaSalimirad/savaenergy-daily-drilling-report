@@ -189,27 +189,6 @@ describe("project status", () => {
     expect(body.data.status).toBe("inactive");
   });
 
-  test("ignores an active well that is archived", async () => {
-    const project = await createProject();
-    const well = await createWell(project.id, { status: "active" });
-    await call("POST", `/wells/${well.id}/archive`);
-
-    const { body } = await call("GET", `/projects/${project.id}`);
-
-    expect(body.data.status).toBe("inactive");
-  });
-
-  test("is active again when that well is restored", async () => {
-    const project = await createProject();
-    const well = await createWell(project.id, { status: "active" });
-    await call("POST", `/wells/${well.id}/archive`);
-    await call("POST", `/wells/${well.id}/restore`);
-
-    const { body } = await call("GET", `/projects/${project.id}`);
-
-    expect(body.data.status).toBe("active");
-  });
-
   test("is archived once the project is archived, even with an active well", async () => {
     const project = await createProject();
     await createWell(project.id, { status: "active" });

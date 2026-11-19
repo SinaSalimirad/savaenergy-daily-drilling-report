@@ -9,6 +9,7 @@ const makeSection = (overrides: Partial<Section>): Section => ({
   id: "s1",
   well_id: "w1",
   well_name: "A-1",
+  project_name: "Alpha",
   order: 1,
   hole_size: 12.25,
   hole_type: null,
@@ -46,7 +47,7 @@ function ordersShown() {
   return screen
     .getAllByRole("row")
     .slice(1)
-    .map((row) => row.querySelectorAll("td")[2]?.textContent);
+    .map((row) => row.querySelectorAll("td")[3]?.textContent);
 }
 
 /** Drags the handle of body row `from` onto the place of body row `to`. */

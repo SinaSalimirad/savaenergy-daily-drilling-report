@@ -11,26 +11,39 @@ import {
   sql,
 } from "drizzle-orm";
 import { type DB, db, type Transaction } from "../../db";
-import { sections, wells } from "../../db/schema";
+import { projects, sections, wells } from "../../db/schema";
 import type { CreateSectionInput, UpdateSectionInput } from "./section.schemas";
 
 type Executor = DB | Transaction;
 
-// The well name is joined in, so the list can show it without a request per row.
+// The well and project names are joined in, so the list can show it without a request per row.
 const sectionColumns = {
   ...getTableColumns(sections),
   well_name: wells.name,
+  project_name: projects.name,
 };
 
-export type SectionRow = typeof sections.$inferSelect & { well_name: string };
+export type SectionRow = typeof sections.$inferSelect & {
+  well_name: string;
+  project_name: string;
+};
 
-type ListParams = { wellId?: string; limit: number; offset: number };
+type ListParams = {
+  wellId?: string;
+  projectId?: string;
+  limit: number;
+  offset: number;
+};
 
 export async function findSections(
-  { wellId, limit, offset }: ListParams,
+  { wellId, projectId, limit, offset }: ListParams,
   executor: Executor = db,
 ) {
-  const where = wellId ? eq(sections.well_id, wellId) : undefined;
+  // The project is reached through the well, so the list and the total both join `wells`.
+  const where = and(
+    wellId ? eq(sections.well_id, wellId) : undefined,
+    projectId ? eq(wells.project_id, projectId) : undefined,
+  );
   // Sections are grouped by well and follow their order inside it. `id` breaks ties so a page
   // never repeats or skips a row.
   const [rows, totals] = await Promise.all([
@@ -38,11 +51,16 @@ export async function findSections(
       .select(sectionColumns)
       .from(sections)
       .innerJoin(wells, eq(wells.id, sections.well_id))
+      .innerJoin(projects, eq(projects.id, wells.project_id))
       .where(where)
       .orderBy(asc(wells.name), asc(sections.order), asc(sections.id))
       .limit(limit)
       .offset(offset),
-    executor.select({ total: count() }).from(sections).where(where),
+    executor
+      .select({ total: count() })
+      .from(sections)
+      .innerJoin(wells, eq(wells.id, sections.well_id))
+      .where(where),
   ]);
   return { rows, total: totals[0]?.total ?? 0 };
 }
@@ -52,6 +70,7 @@ export async function findSectionById(id: string, executor: Executor = db) {
     .select(sectionColumns)
     .from(sections)
     .innerJoin(wells, eq(wells.id, sections.well_id))
+    .innerJoin(projects, eq(projects.id, wells.project_id))
     .where(eq(sections.id, id));
   return row;
 }

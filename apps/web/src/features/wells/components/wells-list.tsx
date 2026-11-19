@@ -9,21 +9,14 @@ import { WellsTable } from "./wells-table";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-// Shared by the active and archived pages: loading, error, table and pagination.
-export function WellsList({
-  archived,
-  emptyMessage,
-}: {
-  archived: boolean;
-  emptyMessage: string;
-}) {
+// Loading, error, table and pagination.
+export function WellsList({ emptyMessage }: { emptyMessage: string }) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const { projectId } = useProjectFilter();
   const wells = useWells({
     page,
     pageSize,
-    archived,
     projectId: projectId ?? undefined,
   });
 
@@ -34,7 +27,7 @@ export function WellsList({
   const total = wells.data?.meta.total ?? 0;
   const lastPage = Math.max(1, Math.ceil(total / pageSize));
 
-  // Archiving/restoring the last row of the last page leaves that page empty: step back one page.
+  // Deleting the last row of the last page leaves that page empty: step back one page.
   useEffect(() => {
     if (page > lastPage) setPage(lastPage);
   }, [page, lastPage]);
