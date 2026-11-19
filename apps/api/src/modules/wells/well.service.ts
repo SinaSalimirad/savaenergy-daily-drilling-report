@@ -11,8 +11,6 @@ import {
   findWellById,
   findWells,
   insertWell,
-  markArchived,
-  markRestored,
   updateWellById,
   type WellRow,
 } from "./well.repository";
@@ -57,7 +55,6 @@ async function writeWell(
 
 export async function listWells(query: ListWellsQuery) {
   const { rows, total } = await findWells({
-    archived: query.archived === "true",
     projectId: query.project_id,
     limit: query.pageSize,
     offset: (query.page - 1) * query.pageSize,
@@ -83,24 +80,6 @@ export function updateWell(id: string, patch: UpdateWellInput) {
   const next =
     patch.rig_type === "onshore" ? { ...patch, water_depth: null } : patch;
   return writeWell(() => updateWellById(id, next));
-}
-
-export async function archiveWell(id: string): Promise<WellDto> {
-  const row = await markArchived(id);
-  if (row) return toWellDto(row);
-  if (!(await findWellById(id))) throw notFound(WELL);
-  throw new AppError(
-    409,
-    "WELL_ALREADY_ARCHIVED",
-    "This well is already archived.",
-  );
-}
-
-export async function restoreWell(id: string): Promise<WellDto> {
-  const row = await markRestored(id);
-  if (row) return toWellDto(row);
-  if (!(await findWellById(id))) throw notFound(WELL);
-  throw new AppError(409, "WELL_NOT_ARCHIVED", "This well is not archived.");
 }
 
 export async function deleteWell(id: string): Promise<void> {

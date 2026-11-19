@@ -33,6 +33,7 @@ describe("POST /sections", () => {
     expect(body.data).toMatchObject({
       well_id: wellId,
       well_name: "A-1",
+      project_name: "Alpha",
       order: 2,
       hole_size: 8.5,
       hole_type: "open_hole",
@@ -172,6 +173,38 @@ describe("GET /sections", () => {
 
     expect(body.data.map((s: { id: string }) => s.id)).toEqual([wanted.id]);
     expect(body.meta.total).toBe(1);
+  });
+
+  test("filters by project and counts only that project's sections", async () => {
+    const project = await createProject({ name: "Beta" });
+    const other = await createWell(project.id, { name: "B-1" });
+    await createSection(wellId);
+    const wanted = await createSection(other.id);
+
+    const { body } = await call("GET", `/sections?project_id=${project.id}`);
+
+    expect(body.data.map((s: { id: string }) => s.id)).toEqual([wanted.id]);
+    expect(body.meta.total).toBe(1);
+  });
+
+  test("returns nothing when the well is not in the requested project", async () => {
+    const project = await createProject({ name: "Beta" });
+    await createSection(wellId);
+
+    const { status, body } = await call(
+      "GET",
+      `/sections?project_id=${project.id}&well_id=${wellId}`,
+    );
+
+    expect(status).toBe(200);
+    expect(body.data).toEqual([]);
+    expect(body.meta.total).toBe(0);
+  });
+
+  test("rejects a project id that is not a uuid with 422", async () => {
+    const { status } = await call("GET", "/sections?project_id=nope");
+
+    expect(status).toBe(422);
   });
 
   test("pages the results and reports the total", async () => {

@@ -19,8 +19,20 @@ type ProjectOption = { value: string; label: string };
 // The way back to "no filter": picking it clears the project.
 const ALL_PROJECTS: ProjectOption = { value: "", label: "All projects" };
 
-/** Header control: a button that opens a searchable list of projects to filter the app by. */
-export function ProjectFilterSelect() {
+// "header": plain text button in the page header. "page": same look as the other buttons next to
+// a page title (the old Archive button), for use beside "New ..." buttons.
+const TRIGGER_STYLES = {
+  header: { variant: "ghost", className: "text-base" },
+  page: { variant: "outline", className: "h-10 border-0 bg-card" },
+} as const;
+
+/** A button that opens a searchable list of projects to filter the app by. */
+export function ProjectFilterSelect({
+  appearance = "header",
+}: {
+  appearance?: keyof typeof TRIGGER_STYLES;
+}) {
+  const style = TRIGGER_STYLES[appearance];
   const { projectId, setProjectId } = useProjectFilter();
   // The API allows at most 100 per page; the filter lists the projects that are not archived.
   const projects = useProjects({ page: 1, pageSize: 100, archived: false });
@@ -50,10 +62,10 @@ export function ProjectFilterSelect() {
       }
     >
       <ComboboxTrigger
-        render={<Button variant="ghost" size="lg" />}
+        render={<Button variant={style.variant} size="lg" />}
         aria-label="Filter by project"
         disabled={projects.isError}
-        className="text-base"
+        className={style.className}
       >
         {selected?.value ? selected.label : "Select Project"}
       </ComboboxTrigger>

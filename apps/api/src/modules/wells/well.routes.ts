@@ -6,12 +6,10 @@ import {
   wellIdParamsSchema,
 } from "./well.schemas";
 import {
-  archiveWell,
   createWell,
   deleteWell,
   getWell,
   listWells,
-  restoreWell,
   updateWell,
 } from "./well.service";
 
@@ -37,16 +35,6 @@ export const wellRoutes = new Elysia({ prefix: "/wells" })
     "/:id",
     async ({ params, body }) => ({ data: await updateWell(params.id, body) }),
     { params: wellIdParamsSchema, body: updateWellSchema },
-  )
-  .post(
-    "/:id/archive",
-    async ({ params }) => ({ data: await archiveWell(params.id) }),
-    { params: wellIdParamsSchema },
-  )
-  .post(
-    "/:id/restore",
-    async ({ params }) => ({ data: await restoreWell(params.id) }),
-    { params: wellIdParamsSchema },
   )
   .delete(
     "/:id",

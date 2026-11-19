@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProjectsPagination } from "@/features/projects/components/projects-pagination";
+import { useProjectFilter } from "@/features/projects/project-filter";
 import { useSections } from "../api";
 import { SectionsTable } from "./sections-table";
 
@@ -13,7 +14,16 @@ const EMPTY_MESSAGE = "No sections yet.";
 export function SectionsList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const sections = useSections({ page, pageSize });
+  const { projectId } = useProjectFilter();
+  const sections = useSections({
+    page,
+    pageSize,
+    project_id: projectId ?? undefined,
+  });
+
+  // The old page number may not exist for another project: start from the top.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `projectId` is the trigger, not a value used inside.
+  useEffect(() => setPage(1), [projectId]);
 
   const total = sections.data?.meta.total ?? 0;
   const lastPage = Math.max(1, Math.ceil(total / pageSize));

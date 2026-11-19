@@ -15,7 +15,6 @@ async function fetchWells(params: WellsListParams) {
     query: {
       page: params.page,
       pageSize: params.pageSize,
-      archived: params.archived ? "true" : "false",
       project_id: params.projectId,
     },
   });
@@ -43,8 +42,8 @@ export function useWells(params: WellsListParams) {
   return useQuery(wellsQueryOptions(params));
 }
 
-// Every mutation refreshes all well lists: a change can move a row between the active
-// and archived lists and change the totals, so refreshing one list is not enough.
+// Every mutation refreshes all well lists: a change can move a row to another page and change
+// the totals, so refreshing one list is not enough.
 // Projects are refreshed too, because their status is derived from their wells.
 function useWellMutation<TVariables>(
   mutationFn: (variables: TVariables) => Promise<unknown>,
@@ -70,18 +69,6 @@ export function useUpdateWell() {
   return useWellMutation(
     async ({ id, body }: { id: string; body: UpdateWellBody }) =>
       unwrap(await api.wells({ id }).patch(body)),
-  );
-}
-
-export function useArchiveWell() {
-  return useWellMutation(async (id: string) =>
-    unwrap(await api.wells({ id }).archive.post()),
-  );
-}
-
-export function useRestoreWell() {
-  return useWellMutation(async (id: string) =>
-    unwrap(await api.wells({ id }).restore.post()),
   );
 }
 

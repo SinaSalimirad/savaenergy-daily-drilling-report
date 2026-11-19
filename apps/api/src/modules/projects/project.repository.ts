@@ -25,12 +25,7 @@ const status = sql<ProjectStatus>`case
       .select({ one: sql`1` })
       .from(wells)
       .where(
-        and(
-          eq(wells.project_id, projects.id),
-          eq(wells.status, "active"),
-          // An archived well keeps its status, but it no longer counts.
-          isNull(wells.archived_at),
-        ),
+        and(eq(wells.project_id, projects.id), eq(wells.status, "active")),
       ),
   )} then 'active'
   else 'inactive'

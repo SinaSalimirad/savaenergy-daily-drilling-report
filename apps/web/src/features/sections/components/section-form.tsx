@@ -88,8 +88,8 @@ export function SectionForm({
 }) {
   const createSection = useCreateSection();
   const updateSection = useUpdateSection();
-  // The API allows at most 100 per page; the select lists the wells that are not archived.
-  const wells = useWells({ page: 1, pageSize: 100, archived: false });
+  // The API allows at most 100 per page; the select lists the wells.
+  const wells = useWells({ page: 1, pageSize: 100 });
   const wellOptions = (wells.data?.data ?? []).map((well) => ({
     value: well.id,
     label: `${well.name} (${well.project_name})`,
