@@ -32,12 +32,15 @@ export function ProjectsPagination({
   total,
   onPageChange,
   onPageSizeChange,
+  itemLabel = "project(s)",
 }: {
   page: number;
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
+  /** Shown after the total, e.g. "12 well(s)". */
+  itemLabel?: string;
 }) {
   const lastPage = Math.max(1, Math.ceil(total / pageSize));
   const onFirstPage = page <= 1;
@@ -45,7 +48,9 @@ export function ProjectsPagination({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 px-4 pt-4">
-      <p className="text-sm text-muted-foreground">{total} project(s)</p>
+      <p className="text-sm text-muted-foreground">
+        {total} {itemLabel}
+      </p>
 
       <div className="flex flex-wrap items-center gap-6 lg:gap-8">
         <div className="flex items-center gap-2">
