@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useWells } from "../api";
 import { ProjectsPagination } from "@/features/projects/components/projects-pagination";
+import { useWells } from "../api";
 import { WellsTable } from "./wells-table";
 
 const DEFAULT_PAGE_SIZE = 10;

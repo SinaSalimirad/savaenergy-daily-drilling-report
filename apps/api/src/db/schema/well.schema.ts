@@ -10,8 +10,8 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import {
-  WELL_DESIGNATIONS,
   RIG_TYPES,
+  WELL_DESIGNATIONS,
   WELL_STATUSES,
   WELL_TYPES,
 } from "schema";

@@ -20,18 +20,18 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { SimpleSelect } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
-import { ApiError } from "@/lib/api-error";
 import { useProjects } from "@/features/projects/api";
-import { type Well, useCreateWell, useUpdateWell } from "../api";
+import { ApiError } from "@/lib/api-error";
+import { useCreateWell, useUpdateWell, type Well } from "../api";
 import {
   DESIGNATION_OPTIONS,
   NONE,

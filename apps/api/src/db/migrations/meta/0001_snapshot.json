@@ -97,12 +97,8 @@
           "name": "projects_archived_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": [
-            "archived_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -110,12 +106,8 @@
           "name": "projects_created_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -123,12 +115,8 @@
           "name": "projects_updated_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -138,9 +126,7 @@
         "projects_name_unique": {
           "name": "projects_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -215,9 +201,7 @@
         "user_username_unique": {
           "name": "user_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},
@@ -338,12 +322,8 @@
           "name": "wells_project_id_projects_id_fk",
           "tableFrom": "wells",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -351,12 +331,8 @@
           "name": "wells_archived_by_user_id_fk",
           "tableFrom": "wells",
           "tableTo": "user",
-          "columnsFrom": [
-            "archived_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -364,12 +340,8 @@
           "name": "wells_created_by_user_id_fk",
           "tableFrom": "wells",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -377,12 +349,8 @@
           "name": "wells_updated_by_user_id_fk",
           "tableFrom": "wells",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -392,10 +360,7 @@
         "wells_project_id_name_unique": {
           "name": "wells_project_id_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "project_id",
-            "name"
-          ]
+          "columns": ["project_id", "name"]
         }
       },
       "policies": {},
@@ -416,19 +381,12 @@
     "public.project_currency": {
       "name": "project_currency",
       "schema": "public",
-      "values": [
-        "USD",
-        "EUR",
-        "IRR"
-      ]
+      "values": ["USD", "EUR", "IRR"]
     },
     "public.rig_type": {
       "name": "rig_type",
       "schema": "public",
-      "values": [
-        "onshore",
-        "offshore"
-      ]
+      "values": ["onshore", "offshore"]
     },
     "public.well_designation": {
       "name": "well_designation",
@@ -444,21 +402,12 @@
     "public.well_status": {
       "name": "well_status",
       "schema": "public",
-      "values": [
-        "planned",
-        "active",
-        "completed",
-        "archived",
-        "suspended"
-      ]
+      "values": ["planned", "active", "completed", "archived", "suspended"]
     },
     "public.well_type": {
       "name": "well_type",
       "schema": "public",
-      "values": [
-        "vertical",
-        "directional"
-      ]
+      "values": ["vertical", "directional"]
     }
   },
   "schemas": {},
