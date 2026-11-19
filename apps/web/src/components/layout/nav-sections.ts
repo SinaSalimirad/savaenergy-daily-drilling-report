@@ -63,7 +63,7 @@ const navSectionConfigs: NavSectionConfig[] = [
     label: "Inventory & Cost",
     href: "/dashboard/inventory-and-cost",
     icon: BoxesIcon,
-    itemLabels: ["Stock", "Products used", "Price list", "Cost"],
+    itemLabels: ["Inventory", "Products used", "Price list", "Cost"],
   },
   {
     label: "Hydraulics",
