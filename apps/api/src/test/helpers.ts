@@ -101,4 +101,21 @@ export async function createSection(
   return body.data;
 }
 
+export async function createDailyReport(
+  wellId: string,
+  sectionId: string,
+  overrides: Record<string, unknown> = {},
+) {
+  const { status, body } = await call("POST", "/daily-reports", {
+    well_id: wellId,
+    section_id: sectionId,
+    report_date: "2026-03-01",
+    ...overrides,
+  });
+  if (status !== 201) {
+    throw new Error(`Could not create a daily report: ${status}`);
+  }
+  return body.data;
+}
+
 export const MISSING_ID = "00000000-0000-4000-8000-000000000000";

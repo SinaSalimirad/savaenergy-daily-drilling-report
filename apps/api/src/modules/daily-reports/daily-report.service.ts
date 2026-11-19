@@ -75,6 +75,7 @@ function translateViolation(error: unknown): unknown {
 export async function listDailyReports(query: ListDailyReportsQuery) {
   const { rows, total } = await findDailyReports({
     wellId: query.well_id,
+    projectId: query.project_id,
     limit: query.pageSize,
     offset: (query.page - 1) * query.pageSize,
   });

@@ -15,5 +15,7 @@ export const listDailyReportsQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   // Only the reports of one well. Without it, every report is listed.
   well_id: z.uuid().optional(),
+  // Only the reports of the wells of one project. Combined with `well_id`, both must match.
+  project_id: z.uuid().optional(),
 });
 export type ListDailyReportsQuery = z.infer<typeof listDailyReportsQuerySchema>;

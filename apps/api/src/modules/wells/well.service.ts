@@ -58,6 +58,7 @@ async function writeWell(
 export async function listWells(query: ListWellsQuery) {
   const { rows, total } = await findWells({
     archived: query.archived === "true",
+    projectId: query.project_id,
     limit: query.pageSize,
     offset: (query.page - 1) * query.pageSize,
   });

@@ -157,14 +157,53 @@ describe("GET /wells", () => {
     expect(second.body.meta).toEqual({ page: 2, pageSize: 2, total: 3 });
   });
 
-  test.each(["page=0", "pageSize=101", "archived=maybe"])(
-    "rejects the query %s with 422",
-    async (query) => {
-      const { status } = await call("GET", `/wells?${query}`);
+  test("lists only the wells of the requested project and counts only those", async () => {
+    const otherProjectId = (await createProject({ name: "Beta" })).id;
+    const mine = await createWell(projectId, { name: "Mine" });
+    await createWell(otherProjectId, { name: "Theirs" });
 
-      expect(status).toBe(422);
-    },
-  );
+    const { body } = await call("GET", `/wells?project_id=${projectId}`);
+
+    expect(body.data.map((w: { id: string }) => w.id)).toEqual([mine.id]);
+    expect(body.meta.total).toBe(1);
+  });
+
+  test("keeps the archived filter when a project is requested", async () => {
+    const archived = await createWell(projectId, { name: "Archived" });
+    await createWell(projectId, { name: "Active" });
+    await call("POST", `/wells/${archived.id}/archive`);
+
+    const { body } = await call(
+      "GET",
+      `/wells?project_id=${projectId}&archived=true`,
+    );
+
+    expect(body.data.map((w: { id: string }) => w.id)).toEqual([archived.id]);
+  });
+
+  test("returns an empty page for a project without wells", async () => {
+    await createWell(projectId);
+
+    const { status, body } = await call(
+      "GET",
+      `/wells?project_id=${MISSING_ID}`,
+    );
+
+    expect(status).toBe(200);
+    expect(body.data).toEqual([]);
+    expect(body.meta.total).toBe(0);
+  });
+
+  test.each([
+    "page=0",
+    "pageSize=101",
+    "archived=maybe",
+    "project_id=not-a-uuid",
+  ])("rejects the query %s with 422", async (query) => {
+    const { status } = await call("GET", `/wells?${query}`);
+
+    expect(status).toBe(422);
+  });
 
   test("keeps archived wells out of the default list", async () => {
     const kept = await createWell(projectId, { name: "Kept" });

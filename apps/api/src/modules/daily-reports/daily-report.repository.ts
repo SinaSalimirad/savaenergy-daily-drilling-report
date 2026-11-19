@@ -1,4 +1,4 @@
-import { count, desc, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { type DB, db, type Transaction } from "../../db";
 import { dailyReports, sections, wells } from "../../db/schema";
 import type {
@@ -22,13 +22,22 @@ export type DailyReportRow = typeof dailyReports.$inferSelect & {
   section_hole_size: number;
 };
 
-type ListParams = { wellId?: string; limit: number; offset: number };
+type ListParams = {
+  wellId?: string;
+  projectId?: string;
+  limit: number;
+  offset: number;
+};
 
 export async function findDailyReports(
-  { wellId, limit, offset }: ListParams,
+  { wellId, projectId, limit, offset }: ListParams,
   executor: Executor = db,
 ) {
-  const where = wellId ? eq(dailyReports.well_id, wellId) : undefined;
+  // The project is reached through the well, so the list and the total both join `wells`.
+  const where = and(
+    wellId ? eq(dailyReports.well_id, wellId) : undefined,
+    projectId ? eq(wells.project_id, projectId) : undefined,
+  );
   // Newest report first. `id` breaks ties so a page never repeats or skips a row.
   const [rows, totals] = await Promise.all([
     executor
@@ -40,7 +49,11 @@ export async function findDailyReports(
       .orderBy(desc(dailyReports.report_date), desc(dailyReports.id))
       .limit(limit)
       .offset(offset),
-    executor.select({ total: count() }).from(dailyReports).where(where),
+    executor
+      .select({ total: count() })
+      .from(dailyReports)
+      .innerJoin(wells, eq(wells.id, dailyReports.well_id))
+      .where(where),
   ]);
   return { rows, total: totals[0]?.total ?? 0 };
 }

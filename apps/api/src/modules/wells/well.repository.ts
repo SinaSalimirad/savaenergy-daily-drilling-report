@@ -18,15 +18,22 @@ const wellColumns = { ...getTableColumns(wells), project_name: projects.name };
 
 export type WellRow = typeof wells.$inferSelect & { project_name: string };
 
-type ListParams = { archived: boolean; limit: number; offset: number };
+type ListParams = {
+  archived: boolean;
+  projectId?: string;
+  limit: number;
+  offset: number;
+};
 
 export async function findWells(
-  { archived, limit, offset }: ListParams,
+  { archived, projectId, limit, offset }: ListParams,
   executor: Executor = db,
 ) {
-  const where = archived
-    ? isNotNull(wells.archived_at)
-    : isNull(wells.archived_at);
+  // `and` skips an `undefined` condition, so no project means no project filter.
+  const where = and(
+    archived ? isNotNull(wells.archived_at) : isNull(wells.archived_at),
+    projectId ? eq(wells.project_id, projectId) : undefined,
+  );
   // `id` breaks ties so a page never repeats or skips a row with the same created_at.
   const [rows, totals] = await Promise.all([
     executor
