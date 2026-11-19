@@ -1,0 +1,3 @@
+[test]
+# Runs once before the tests: points the API at the test database and applies the migrations.
+preload = ["./src/test/setup.ts"]

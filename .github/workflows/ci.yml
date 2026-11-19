@@ -30,6 +30,23 @@ jobs:
   test:
     name: Tests
     runs-on: ubuntu-26.04
+    # The API tests run against a real Postgres, so the constraints and queries are the real ones.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # The test setup creates this database and applies the migrations on its own.
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/sava_drilling_api_test
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
