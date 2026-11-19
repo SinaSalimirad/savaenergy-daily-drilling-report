@@ -1,21 +1,17 @@
 import { sql } from "drizzle-orm";
 import { check, numeric, pgEnum, pgTable, text } from "drizzle-orm/pg-core";
+import { PRODUCT_KINDS, PRODUCT_PACKAGE_UNITS } from "schema";
 import { id, timestamps } from "./_shared/columns";
 
-export const productPackageUnit = pgEnum("product_package_unit", [
-  "kg",
-  "lb",
-  "mt",
-  "gal",
-  "l",
-  "m3",
-  "bbl",
-]);
+// Same lists as the shared schema, so the API, the database and the web cannot drift apart.
+export const productPackageUnit = pgEnum(
+  "product_package_unit",
+  PRODUCT_PACKAGE_UNITS,
+);
 
 // bulk        = packaged by weight/volume (needs package size, unit, specific gravity)
 // dimensional = sheet/fabric items such as a tarpaulin (needs length x width)
 // equipment   = items with only a name (e.g. mud skid), every other field must be empty
-export const PRODUCT_KINDS = ["bulk", "dimensional", "equipment"] as const;
 export const productKind = pgEnum("product_kind", PRODUCT_KINDS);
 
 export const products = pgTable(

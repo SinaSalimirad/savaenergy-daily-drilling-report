@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { ProductsView } from "@/features/products/components/products-view";
 
-export default function Page() {
-  return <PagePlaceholder title="Products" />;
+export default function ProductsPage() {
+  return <ProductsView />;
 }
