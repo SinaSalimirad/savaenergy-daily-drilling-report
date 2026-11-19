@@ -90,12 +90,8 @@
           "name": "daily_report_well_id_wells_id_fk",
           "tableFrom": "daily_report",
           "tableTo": "wells",
-          "columnsFrom": [
-            "well_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["well_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -103,12 +99,8 @@
           "name": "daily_report_created_by_user_id_fk",
           "tableFrom": "daily_report",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -116,12 +108,8 @@
           "name": "daily_report_updated_by_user_id_fk",
           "tableFrom": "daily_report",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -129,14 +117,8 @@
           "name": "daily_report_section_belongs_to_well_fk",
           "tableFrom": "daily_report",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id",
-            "well_id"
-          ],
-          "columnsTo": [
-            "id",
-            "well_id"
-          ],
+          "columnsFrom": ["section_id", "well_id"],
+          "columnsTo": ["id", "well_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -146,18 +128,12 @@
         "daily_report_well_id_report_date_unique": {
           "name": "daily_report_well_id_report_date_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "well_id",
-            "report_date"
-          ]
+          "columns": ["well_id", "report_date"]
         },
         "daily_report_well_id_report_no_unique": {
           "name": "daily_report_well_id_report_no_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "well_id",
-            "report_no"
-          ]
+          "columns": ["well_id", "report_no"]
         }
       },
       "policies": {},
@@ -333,12 +309,8 @@
           "name": "product_inventory_report_id_daily_report_id_fk",
           "tableFrom": "product_inventory",
           "tableTo": "daily_report",
-          "columnsFrom": [
-            "report_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["report_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -346,12 +318,8 @@
           "name": "product_inventory_project_product_id_project_product_id_fk",
           "tableFrom": "product_inventory",
           "tableTo": "project_product",
-          "columnsFrom": [
-            "project_product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_product_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -361,10 +329,7 @@
         "product_inventory_report_id_project_product_id_unique": {
           "name": "product_inventory_report_id_project_product_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "report_id",
-            "project_product_id"
-          ]
+          "columns": ["report_id", "project_product_id"]
         }
       },
       "policies": {},
@@ -457,12 +422,8 @@
           "name": "project_product_project_id_projects_id_fk",
           "tableFrom": "project_product",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -470,12 +431,8 @@
           "name": "project_product_product_id_product_id_fk",
           "tableFrom": "project_product",
           "tableTo": "product",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -483,12 +440,8 @@
           "name": "project_product_created_by_user_id_fk",
           "tableFrom": "project_product",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -496,12 +449,8 @@
           "name": "project_product_updated_by_user_id_fk",
           "tableFrom": "project_product",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -511,10 +460,7 @@
         "project_product_project_id_product_id_unique": {
           "name": "project_product_project_id_product_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "project_id",
-            "product_id"
-          ]
+          "columns": ["project_id", "product_id"]
         }
       },
       "policies": {},
@@ -619,12 +565,8 @@
           "name": "projects_archived_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": [
-            "archived_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -632,12 +574,8 @@
           "name": "projects_created_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -645,12 +583,8 @@
           "name": "projects_updated_by_user_id_fk",
           "tableFrom": "projects",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -660,9 +594,7 @@
         "projects_name_unique": {
           "name": "projects_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -743,12 +675,8 @@
           "name": "sections_well_id_wells_id_fk",
           "tableFrom": "sections",
           "tableTo": "wells",
-          "columnsFrom": [
-            "well_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["well_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -756,12 +684,8 @@
           "name": "sections_created_by_user_id_fk",
           "tableFrom": "sections",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -769,12 +693,8 @@
           "name": "sections_updated_by_user_id_fk",
           "tableFrom": "sections",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -784,18 +704,12 @@
         "sections_well_id_order_unique": {
           "name": "sections_well_id_order_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "well_id",
-            "order"
-          ]
+          "columns": ["well_id", "order"]
         },
         "sections_id_well_id_unique": {
           "name": "sections_id_well_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "id",
-            "well_id"
-          ]
+          "columns": ["id", "well_id"]
         }
       },
       "policies": {},
@@ -870,9 +784,7 @@
         "user_username_unique": {
           "name": "user_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},
@@ -993,12 +905,8 @@
           "name": "wells_project_id_projects_id_fk",
           "tableFrom": "wells",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1006,12 +914,8 @@
           "name": "wells_archived_by_user_id_fk",
           "tableFrom": "wells",
           "tableTo": "user",
-          "columnsFrom": [
-            "archived_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1019,12 +923,8 @@
           "name": "wells_created_by_user_id_fk",
           "tableFrom": "wells",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1032,12 +932,8 @@
           "name": "wells_updated_by_user_id_fk",
           "tableFrom": "wells",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1047,10 +943,7 @@
         "wells_project_id_name_unique": {
           "name": "wells_project_id_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "project_id",
-            "name"
-          ]
+          "columns": ["project_id", "name"]
         }
       },
       "policies": {},
@@ -1071,59 +964,32 @@
     "public.product_kind": {
       "name": "product_kind",
       "schema": "public",
-      "values": [
-        "bulk",
-        "dimensional",
-        "equipment"
-      ]
+      "values": ["bulk", "dimensional", "equipment"]
     },
     "public.product_package_unit": {
       "name": "product_package_unit",
       "schema": "public",
-      "values": [
-        "kg",
-        "lb",
-        "mt",
-        "gal",
-        "l",
-        "m3",
-        "bbl"
-      ]
+      "values": ["kg", "lb", "mt", "gal", "l", "m3", "bbl"]
     },
     "public.project_product_origin": {
       "name": "project_product_origin",
       "schema": "public",
-      "values": [
-        "foreign",
-        "local"
-      ]
+      "values": ["foreign", "local"]
     },
     "public.project_currency": {
       "name": "project_currency",
       "schema": "public",
-      "values": [
-        "USD",
-        "EUR",
-        "IRR"
-      ]
+      "values": ["USD", "EUR", "IRR"]
     },
     "public.hole_type": {
       "name": "hole_type",
       "schema": "public",
-      "values": [
-        "conductor",
-        "casing",
-        "liner",
-        "open_hole"
-      ]
+      "values": ["conductor", "casing", "liner", "open_hole"]
     },
     "public.rig_type": {
       "name": "rig_type",
       "schema": "public",
-      "values": [
-        "onshore",
-        "offshore"
-      ]
+      "values": ["onshore", "offshore"]
     },
     "public.well_designation": {
       "name": "well_designation",
@@ -1139,20 +1005,12 @@
     "public.well_status": {
       "name": "well_status",
       "schema": "public",
-      "values": [
-        "planned",
-        "active",
-        "completed",
-        "suspended"
-      ]
+      "values": ["planned", "active", "completed", "suspended"]
     },
     "public.well_type": {
       "name": "well_type",
       "schema": "public",
-      "values": [
-        "vertical",
-        "directional"
-      ]
+      "values": ["vertical", "directional"]
     }
   },
   "schemas": {},

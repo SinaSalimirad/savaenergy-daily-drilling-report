@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, integer, numeric, pgTable, unique, uuid } from "drizzle-orm/pg-core";
+import { check, integer, pgTable, unique, uuid } from "drizzle-orm/pg-core";
 import { id, timestamps } from "./_shared/columns";
 import { dailyReports } from "./daily_report.schema";
 import { projectProducts } from "./project_product.schema";
@@ -28,7 +28,13 @@ export const productInventories = pgTable(
     ),
     check("product_inventory_initial_nonnegative", sql`${table.initial} >= 0`),
     check("product_inventory_used_nonnegative", sql`${table.used} >= 0`),
-    check("product_inventory_received_nonnegative", sql`${table.received} >= 0`),
-    check("product_inventory_returned_nonnegative", sql`${table.returned} >= 0`),
+    check(
+      "product_inventory_received_nonnegative",
+      sql`${table.received} >= 0`,
+    ),
+    check(
+      "product_inventory_returned_nonnegative",
+      sql`${table.returned} >= 0`,
+    ),
   ],
 );
