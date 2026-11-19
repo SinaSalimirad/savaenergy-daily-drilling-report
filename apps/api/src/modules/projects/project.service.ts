@@ -1,4 +1,9 @@
-import { AppError, isUniqueViolation, notFound } from "../../lib/errors";
+import {
+  AppError,
+  isForeignKeyViolation,
+  isUniqueViolation,
+  notFound,
+} from "../../lib/errors";
 import { type ProjectDto, toProjectDto } from "./project.mapper";
 import {
   deleteProjectById,
@@ -93,6 +98,19 @@ export async function restoreProject(id: string): Promise<ProjectDto> {
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const deleted = await deleteProjectById(id);
-  if (!deleted) throw notFound(PROJECT);
+  // The foreign key from wells is the guarantee. Counting the wells first would race with a
+  // parallel request that adds one, so we run the delete and translate the violation.
+  try {
+    const deleted = await deleteProjectById(id);
+    if (!deleted) throw notFound(PROJECT);
+  } catch (error) {
+    if (isForeignKeyViolation(error)) {
+      throw new AppError(
+        409,
+        "PROJECT_HAS_WELLS",
+        "This project still has wells. Delete them first.",
+      );
+    }
+    throw error;
+  }
 }

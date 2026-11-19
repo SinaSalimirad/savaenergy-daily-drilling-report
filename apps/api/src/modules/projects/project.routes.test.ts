@@ -369,8 +369,27 @@ describe("DELETE /projects/:id", () => {
     expect(status).toBe(404);
   });
 
-  // The service does not translate the foreign key violation, so the client gets a 500.
-  test.todo("returns 409 when the project still has wells");
+  test("returns 409 when the project still has wells", async () => {
+    const project = await createProject();
+    const well = await createWell(project.id);
+
+    const { status, body } = await call("DELETE", `/projects/${project.id}`);
+
+    expect(status).toBe(409);
+    expect(body.code).toBe("PROJECT_HAS_WELLS");
+    // Nothing was deleted.
+    expect((await call("GET", `/wells/${well.id}`)).status).toBe(200);
+  });
+
+  test("can be deleted once its wells are gone", async () => {
+    const project = await createProject();
+    const well = await createWell(project.id);
+    await call("DELETE", `/wells/${well.id}`);
+
+    const { status } = await call("DELETE", `/projects/${project.id}`);
+
+    expect(status).toBe(204);
+  });
 });
 
 describe("app", () => {
