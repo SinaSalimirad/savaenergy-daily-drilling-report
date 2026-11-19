@@ -5,6 +5,7 @@ import { env } from "./config/env";
 import { errorHandler } from "./lib/error-handler";
 import "./lib/logger";
 import { projectRoutes } from "./modules/projects/project.routes";
+import { sectionRoutes } from "./modules/sections/section.routes";
 import { wellRoutes } from "./modules/wells/well.routes";
 
 // App is built separately from the server start, so it can be used without opening a port.
@@ -29,7 +30,8 @@ export const app = new Elysia()
     data: { status: "ok" },
   }))
   .use(projectRoutes)
-  .use(wellRoutes);
+  .use(wellRoutes)
+  .use(sectionRoutes);
 
 // The web app imports only this type (never the runtime code) so Eden can infer every route.
 export type App = typeof app;
