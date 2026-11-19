@@ -91,10 +91,10 @@ const navSectionConfigs: NavSectionConfig[] = [
       "Projects",
       "Wells",
       "Sections",
+      "Products",
       "Pits",
       "Pumps",
       "Solids control",
-      "Products",
     ],
   },
   {
