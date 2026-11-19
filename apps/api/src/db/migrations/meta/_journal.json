@@ -15,6 +15,13 @@
       "when": 1795070985620,
       "tag": "0001_dizzy_jackal",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795075490649,
+      "tag": "0002_well_archive_is_not_a_status",
+      "breakpoints": true
     }
   ]
 }

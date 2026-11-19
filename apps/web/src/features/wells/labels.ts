@@ -1,8 +1,8 @@
 import {
   RIG_TYPES,
   WELL_DESIGNATIONS,
+  WELL_STATUSES,
   WELL_TYPES,
-  wellWritableStatusSchema,
 } from "schema";
 import type { SelectOption } from "@/components/ui/select";
 
@@ -17,7 +17,7 @@ const toOptions = (values: readonly string[]): SelectOption[] =>
 export const NONE = "none";
 const NONE_OPTION: SelectOption = { value: NONE, label: "Not set" };
 
-export const STATUS_OPTIONS = toOptions(wellWritableStatusSchema.options);
+export const STATUS_OPTIONS = toOptions(WELL_STATUSES);
 export const DESIGNATION_OPTIONS = [
   NONE_OPTION,
   ...toOptions(WELL_DESIGNATIONS),

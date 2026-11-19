@@ -1,3 +1,4 @@
+import type { WellDisplayStatus } from "schema";
 import type { WellRow } from "./well.repository";
 
 /**
@@ -12,7 +13,9 @@ export type WellDto = {
   name: string;
   designation: WellRow["designation"];
   well_type: WellRow["well_type"];
-  status: WellRow["status"];
+  // The stored status, or "archived" while `archived_at` is set. Archiving never overwrites
+  // the stored status, so restoring brings the well back exactly as it was.
+  status: WellDisplayStatus;
   rig_name: WellRow["rig_name"];
   rig_type: WellRow["rig_type"];
   spud_date: string | null;
@@ -30,7 +33,7 @@ export function toWellDto(row: WellRow): WellDto {
     name: row.name,
     designation: row.designation,
     well_type: row.well_type,
-    status: row.status,
+    status: row.archived_at ? "archived" : row.status,
     rig_name: row.rig_name,
     rig_type: row.rig_type,
     spud_date: row.spud_date,

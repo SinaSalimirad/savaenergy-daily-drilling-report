@@ -23,8 +23,6 @@ import type {
 } from "./well.schemas";
 
 const WELL = "Well";
-// The status before archiving is not stored, so restore needs a fixed target.
-const RESTORED_STATUS = "planned";
 
 // The database constraints are the guarantee. Checking first would race with a parallel
 // request, so we run the write and translate the violation.
@@ -98,7 +96,7 @@ export async function archiveWell(id: string): Promise<WellDto> {
 }
 
 export async function restoreWell(id: string): Promise<WellDto> {
-  const row = await markRestored(id, RESTORED_STATUS);
+  const row = await markRestored(id);
   if (row) return toWellDto(row);
   if (!(await findWellById(id))) throw notFound(WELL);
   throw new AppError(409, "WELL_NOT_ARCHIVED", "This well is not archived.");

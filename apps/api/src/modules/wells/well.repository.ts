@@ -1,4 +1,12 @@
-import { and, count, desc, eq, getTableColumns, ne } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  isNotNull,
+  isNull,
+} from "drizzle-orm";
 import { type DB, db, type Transaction } from "../../db";
 import { projects, wells } from "../../db/schema";
 import type { CreateWellInput, UpdateWellInput } from "./well.schemas";
@@ -17,8 +25,8 @@ export async function findWells(
   executor: Executor = db,
 ) {
   const where = archived
-    ? eq(wells.status, "archived")
-    : ne(wells.status, "archived");
+    ? isNotNull(wells.archived_at)
+    : isNull(wells.archived_at);
   // `id` breaks ties so a page never repeats or skips a row with the same created_at.
   const [rows, totals] = await Promise.all([
     executor
@@ -67,27 +75,23 @@ export async function updateWellById(
   return row && findWellById(row.id, executor);
 }
 
-// The `status` guard makes archive and restore atomic: two parallel requests cannot both
-// succeed. An empty result means "missing or already in that state".
+// The `archived_at` guard makes archive and restore atomic: two parallel requests cannot both
+// succeed. An empty result means "missing or already in that state". `status` is not touched,
+// so a restored well returns to the status it had.
 export async function markArchived(id: string, executor: Executor = db) {
   const [row] = await executor
     .update(wells)
-    .set({ status: "archived", archived_at: new Date() })
-    .where(and(eq(wells.id, id), ne(wells.status, "archived")))
+    .set({ archived_at: new Date() })
+    .where(and(eq(wells.id, id), isNull(wells.archived_at)))
     .returning({ id: wells.id });
   return row && findWellById(row.id, executor);
 }
 
-// The status before archiving is not stored, so a restored well returns to `status`.
-export async function markRestored(
-  id: string,
-  status: Exclude<WellRow["status"], "archived">,
-  executor: Executor = db,
-) {
+export async function markRestored(id: string, executor: Executor = db) {
   const [row] = await executor
     .update(wells)
-    .set({ status, archived_at: null, archived_by: null })
-    .where(and(eq(wells.id, id), eq(wells.status, "archived")))
+    .set({ archived_at: null, archived_by: null })
+    .where(and(eq(wells.id, id), isNotNull(wells.archived_at)))
     .returning({ id: wells.id });
   return row && findWellById(row.id, executor);
 }

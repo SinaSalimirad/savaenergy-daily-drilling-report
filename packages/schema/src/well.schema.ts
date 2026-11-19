@@ -1,11 +1,13 @@
 import * as z from "zod";
 
 // Single source of truth for well values, shared by the API (Postgres enum) and the web.
+// Archiving is not a status: it is `archived_at`, so a well keeps its status while archived and
+// returns to it on restore. The API shows `archived` as the status of an archived well (see
+// `wellDisplayStatusSchema` below), but it is never stored and a client never sends it.
 export const WELL_STATUSES = [
   "planned",
   "active",
   "completed",
-  "archived",
   "suspended",
 ] as const;
 export const wellStatusSchema = z.enum(WELL_STATUSES);
@@ -29,10 +31,9 @@ export const RIG_TYPES = ["onshore", "offshore"] as const;
 export const rigTypeSchema = z.enum(RIG_TYPES);
 export type RigType = z.infer<typeof rigTypeSchema>;
 
-// `archived` is excluded: a well is archived and restored only through its own endpoints,
-// so `archived_at` can never disagree with `status`.
-export const wellWritableStatusSchema = wellStatusSchema.exclude(["archived"]);
-export type WellWritableStatus = z.infer<typeof wellWritableStatusSchema>;
+// What the API returns as `status`: the stored status, or `archived` while `archived_at` is set.
+export const wellDisplayStatusSchema = z.enum([...WELL_STATUSES, "archived"]);
+export type WellDisplayStatus = z.infer<typeof wellDisplayStatusSchema>;
 
 const wellFields = z.object({
   project_id: z.uuid("Choose a project."),
@@ -41,7 +42,7 @@ const wellFields = z.object({
     .trim()
     .min(1, "Well name is required.")
     .max(120, "Well name must be 120 characters or fewer."),
-  status: wellWritableStatusSchema,
+  status: wellStatusSchema,
   rig_name: z
     .string({ error: "Rig name is required." })
     .trim()

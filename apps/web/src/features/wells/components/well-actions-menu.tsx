@@ -61,7 +61,7 @@ export function WellActionsMenu({ well }: { well: Well }) {
             <EyeIcon />
             View details
           </DropdownMenuItem>
-          {/* The API does not accept status "archived" in an edit, so an archived well
+          {/* The form only edits real statuses, so an archived well
             is restored first. */}
           {!isArchived && (
             <DropdownMenuItem

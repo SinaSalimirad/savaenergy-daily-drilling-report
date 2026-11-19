@@ -4,12 +4,7 @@ import { useForm } from "@tanstack/react-form";
 import { format, parse } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { type ReactNode, useId, useState } from "react";
-import type {
-  RigType,
-  WellDesignation,
-  WellType,
-  WellWritableStatus,
-} from "schema";
+import type { RigType, WellDesignation, WellStatus, WellType } from "schema";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -43,7 +38,7 @@ import {
 const emptyValues = {
   project_id: "",
   name: "",
-  status: "planned" as WellWritableStatus,
+  status: "planned" as WellStatus,
   rig_name: "",
   rig_type: "onshore" as RigType,
   designation: NONE as WellDesignation | typeof NONE,
@@ -58,7 +53,7 @@ function valuesFrom(well: Well): typeof emptyValues {
     project_id: well.project_id,
     name: well.name,
     // Archived wells cannot be edited (see the actions menu), so this is never "archived".
-    status: well.status as WellWritableStatus,
+    status: well.status as WellStatus,
     rig_name: well.rig_name,
     rig_type: well.rig_type,
     designation: well.designation ?? NONE,
@@ -297,7 +292,7 @@ export function WellForm({
                   placeholder="Select a status"
                   value={field.state.value}
                   onValueChange={(value) =>
-                    value && field.handleChange(value as WellWritableStatus)
+                    value && field.handleChange(value as WellStatus)
                   }
                 />
               )}

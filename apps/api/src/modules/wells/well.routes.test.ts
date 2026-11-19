@@ -323,7 +323,7 @@ describe("PATCH /wells/:id", () => {
 });
 
 describe("archive and restore", () => {
-  test("archive sets the status and archived_at", async () => {
+  test("archive sets archived_at and shows archived as the status", async () => {
     const well = await createWell(projectId, { status: "active" });
 
     const { status, body } = await call("POST", `/wells/${well.id}/archive`);
@@ -349,16 +349,19 @@ describe("archive and restore", () => {
     expect(status).toBe(404);
   });
 
-  test("restore returns the well to planned and clears archived_at", async () => {
-    const well = await createWell(projectId, { status: "active" });
-    await call("POST", `/wells/${well.id}/archive`);
+  test.each(["planned", "active", "completed", "suspended"])(
+    "restore brings back the %s status the well had",
+    async (before) => {
+      const well = await createWell(projectId, { status: before });
+      await call("POST", `/wells/${well.id}/archive`);
 
-    const { status, body } = await call("POST", `/wells/${well.id}/restore`);
+      const { status, body } = await call("POST", `/wells/${well.id}/restore`);
 
-    expect(status).toBe(200);
-    expect(body.data.status).toBe("planned");
-    expect(body.data.archived_at).toBeNull();
-  });
+      expect(status).toBe(200);
+      expect(body.data.status).toBe(before);
+      expect(body.data.archived_at).toBeNull();
+    },
+  );
 
   test("restoring a well that is not archived returns 409", async () => {
     const well = await createWell(projectId);
