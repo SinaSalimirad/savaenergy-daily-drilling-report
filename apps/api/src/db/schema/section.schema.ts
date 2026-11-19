@@ -35,6 +35,9 @@ export const sections = pgTable(
   },
   (table) => [
     unique("sections_well_id_order_unique").on(table.well_id, table.order),
+    // Redundant for uniqueness (id is already the PK), but required as the target
+    // of the composite FK from daily_report, which ties a section to its well.
+    unique("sections_id_well_id_unique").on(table.id, table.well_id),
     check("sections_order_non_negative", sql`${table.order} >= 0`),
   ],
 );
