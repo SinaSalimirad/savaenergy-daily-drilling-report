@@ -2,7 +2,7 @@
 
 import { useForm } from "@tanstack/react-form";
 import { type ReactNode, useId } from "react";
-import type { ProjectCurrency, ProjectWritableStatus } from "schema";
+import type { ProjectCurrency } from "schema";
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import { type Project, useCreateProject, useUpdateProject } from "../api";
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from "../currencies";
 import { normalizeNames } from "../names";
 
-type Status = ProjectWritableStatus;
 type Currency = ProjectCurrency;
 
 const emptyValues = {
@@ -23,7 +22,6 @@ const emptyValues = {
   contractor: "",
   // Kept as text while typing; converted to a number on submit.
   wells: "",
-  status: "planned" as Status,
   currency: DEFAULT_CURRENCY as Currency,
 };
 
@@ -34,20 +32,12 @@ function valuesFrom(project: Project): typeof emptyValues {
     operator: project.operator,
     contractor: project.contractor,
     wells: String(project.wells),
-    // Archived projects cannot be edited (see the actions menu), so this is never "archived".
-    status: project.status as Status,
     currency: project.currency as Currency,
   };
 }
 
 // The API is the source of truth for validation: this form only collects text and shows
 // the messages the API sends back, so the rules live in one place.
-const STATUS_OPTIONS: { value: Status; label: string }[] = [
-  { value: "planned", label: "Planned" },
-  { value: "active", label: "Active" },
-  { value: "completed", label: "Completed" },
-];
-
 const NAME_TAKEN_CODE = "PROJECT_NAME_TAKEN";
 
 type FieldProps = {
@@ -267,25 +257,6 @@ export function ProjectForm({
                   onChange={(event) => field.handleChange(event.target.value)}
                   onBlur={field.handleBlur}
                   aria-invalid={invalid}
-                />
-              )}
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="status">
-          {(field) => (
-            <Field label="Status" error={firstError(field.state.meta.errors)}>
-              {({ id, invalid }) => (
-                <SimpleSelect
-                  id={id}
-                  invalid={invalid}
-                  options={STATUS_OPTIONS}
-                  placeholder="Select a status"
-                  value={field.state.value}
-                  onValueChange={(value) =>
-                    value && field.handleChange(value as Status)
-                  }
                 />
               )}
             </Field>

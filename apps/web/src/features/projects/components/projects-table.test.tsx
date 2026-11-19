@@ -65,13 +65,13 @@ describe("ProjectsTable", () => {
   it("shows the status as text", () => {
     render(
       <ProjectsTable
-        data={[makeProject({ status: "completed" })]}
+        data={[makeProject({ status: "inactive" })]}
         emptyMessage="Nothing here."
       />,
       { wrapper: QueryWrapper },
     );
 
-    expect(screen.getByRole("cell", { name: "completed" })).toBeTruthy();
+    expect(screen.getByRole("cell", { name: "inactive" })).toBeTruthy();
   });
 
   it("shows the empty message instead of rows when there are no projects", () => {

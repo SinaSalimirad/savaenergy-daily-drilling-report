@@ -3,21 +3,13 @@ import * as z from "zod";
 // Single source of truth for project values. The API builds its Postgres enums from these
 // tuples (`pgEnum` needs a tuple, which `schema.options` is not), and the web builds its
 // select lists from the same values.
-export const PROJECT_STATUSES = [
-  "planned",
-  "active",
-  "completed",
-  "archived",
-] as const;
+//
+// A project has no status column. The API derives it for reading: `archived` when
+// `archived_at` is set, `active` when one of its wells is active, otherwise `inactive`.
+// A client never sends it.
+export const PROJECT_STATUSES = ["active", "inactive", "archived"] as const;
 export const projectStatusSchema = z.enum(PROJECT_STATUSES);
 export type ProjectStatus = z.infer<typeof projectStatusSchema>;
-
-// `archived` is excluded: a project is archived and restored only through its own endpoints,
-// so `archived_at` can never disagree with `status`.
-export const projectWritableStatusSchema = projectStatusSchema.exclude([
-  "archived",
-]);
-export type ProjectWritableStatus = z.infer<typeof projectWritableStatusSchema>;
 
 export const PROJECT_CURRENCIES = ["USD", "EUR", "IRR"] as const;
 export const projectCurrencySchema = z.enum(PROJECT_CURRENCIES);
@@ -33,7 +25,6 @@ export const projectCreateSchema = z.object({
   // A whole number sent as a JSON number. No `z.coerce`: it would make the input type
   // `unknown` and the web would lose the type of this field.
   wells: z.number().int().positive(),
-  status: projectWritableStatusSchema,
   currency: projectCurrencySchema,
 });
 export type ProjectCreate = z.infer<typeof projectCreateSchema>;
