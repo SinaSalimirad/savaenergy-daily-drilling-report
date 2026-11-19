@@ -42,10 +42,10 @@ const navSectionConfigs: NavSectionConfig[] = [
     itemLabels: ["Well summary", "Fleet"],
   },
   {
-    label: "Daily Reports",
-    href: "/dashboard/daily-reports",
+    label: "Reports",
+    href: "/dashboard/reports",
     icon: ClipboardListIcon,
-    itemLabels: ["Report list", "Report editor", "Activities", "Remarks"],
+    itemLabels: ["Daily Reports"],
   },
   {
     label: "Fluid Properties",

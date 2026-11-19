@@ -14,6 +14,14 @@ import { id, timestamps } from "./_shared/columns";
 import { sections } from "./section.schema";
 import { wells } from "./well.schema";
 
+// Constraint names in one place: the table below creates them, the service reads them to tell
+// which rule a write broke.
+export const DAILY_REPORT_CONSTRAINTS = {
+  uniqueDate: "daily_report_well_id_report_date_unique",
+  uniqueNumber: "daily_report_well_id_report_no_unique",
+  sectionBelongsToWell: "daily_report_section_belongs_to_well_fk",
+} as const;
+
 // One report per well per day.
 export const dailyReports = pgTable(
   "daily_report",
@@ -41,15 +49,15 @@ export const dailyReports = pgTable(
     // (well_id, section_id) must match an existing (well_id, id) pair in sections,
     // so a report of well A can never point to a section of well B.
     foreignKey({
-      name: "daily_report_section_belongs_to_well_fk",
+      name: DAILY_REPORT_CONSTRAINTS.sectionBelongsToWell,
       columns: [table.section_id, table.well_id],
       foreignColumns: [sections.id, sections.well_id],
     }),
-    unique("daily_report_well_id_report_date_unique").on(
+    unique(DAILY_REPORT_CONSTRAINTS.uniqueDate).on(
       table.well_id,
       table.report_date,
     ),
-    unique("daily_report_well_id_report_no_unique").on(
+    unique(DAILY_REPORT_CONSTRAINTS.uniqueNumber).on(
       table.well_id,
       table.report_no,
     ),
