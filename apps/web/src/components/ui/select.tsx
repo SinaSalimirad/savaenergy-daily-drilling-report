@@ -1,6 +1,6 @@
 "use client";
 
-import { Select as SelectPrimitive } from "@base-ui/react/select";
+import { Select as SelectPrimitive } from "@animate-ui/react/primitives/base-ui/select";
 import { cn } from "cn";
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import type * as React from "react";
@@ -50,7 +50,7 @@ function SelectContent({
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            "max-h-(--available-height) w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "max-h-(--available-height) w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
             className,
           )}
           {...props}
