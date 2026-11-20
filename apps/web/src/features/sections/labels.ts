@@ -3,10 +3,13 @@ import type { SelectOption } from "@/components/ui/select";
 
 // Labels are a display concern. The value lists come from packages/schema.
 // A select holds text, so a hole size travels as text and is converted back on submit.
-export const HOLE_SIZE_OPTIONS: SelectOption[] = HOLE_SIZES.map((size) => ({
-  value: String(size),
-  label: formatHoleSize(size),
-}));
+// Largest first, the order a well is drilled in (the surface hole is the widest).
+export const HOLE_SIZE_OPTIONS: SelectOption[] = [...HOLE_SIZES]
+  .sort((a, b) => b - a)
+  .map((size) => ({
+    value: String(size),
+    label: formatHoleSize(size),
+  }));
 
 const HOLE_TYPE_LABELS: Record<(typeof HOLE_TYPES)[number], string> = {
   conductor: "Conductor",

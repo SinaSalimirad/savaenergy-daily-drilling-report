@@ -172,3 +172,16 @@ describe("DELETE /project-products/:id", () => {
     expect(status).toBe(404);
   });
 });
+
+describe("DELETE /projects/:id with products", () => {
+  test("is refused with 409 PROJECT_HAS_PRODUCTS", async () => {
+    const project = await createProject();
+    const product = await createProduct();
+    await call("POST", "/project-products", link(project.id, product.id));
+
+    const { status, body } = await call("DELETE", `/projects/${project.id}`);
+
+    expect(status).toBe(409);
+    expect(body.code).toBe("PROJECT_HAS_PRODUCTS");
+  });
+});

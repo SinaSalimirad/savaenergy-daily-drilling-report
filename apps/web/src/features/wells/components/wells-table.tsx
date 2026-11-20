@@ -6,7 +6,9 @@ import {
   useTable,
 } from "@tanstack/react-table";
 import { cn } from "cn";
+import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -28,6 +30,7 @@ const EMPTY_VALUE = "—";
 
 // Numeric/date columns read better centered than left-aligned.
 const CENTERED_COLUMN_IDS = new Set([
+  "row",
   "rig_type",
   "designation",
   "well_type",
@@ -40,51 +43,62 @@ function alignClass(columnId: string) {
   return CENTERED_COLUMN_IDS.has(columnId) ? "text-center" : undefined;
 }
 
-const columns = columnHelper.columns([
-  columnHelper.accessor("name", { header: "Well" }),
-  columnHelper.accessor("project_name", { header: "Project" }),
-  columnHelper.accessor("rig_name", { header: "Rig" }),
-  columnHelper.accessor("rig_type", {
-    header: "Rig type",
-    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
-  }),
-  columnHelper.accessor("designation", {
-    header: "Designation",
-    cell: (info) => (
-      <span className="capitalize">{info.getValue() ?? EMPTY_VALUE}</span>
-    ),
-  }),
-  columnHelper.accessor("well_type", {
-    header: "Type",
-    cell: (info) => (
-      <span className="capitalize">{info.getValue() ?? EMPTY_VALUE}</span>
-    ),
-  }),
-  columnHelper.accessor("spud_date", {
-    header: "Spud date",
-    cell: (info) => info.getValue() ?? EMPTY_VALUE,
-  }),
-  columnHelper.accessor("water_depth", {
-    header: "Water depth",
-    cell: (info) => info.getValue() ?? EMPTY_VALUE,
-  }),
-  columnHelper.accessor("status", {
-    header: "Status",
-    // The API stores lowercase values; the label is only a display concern.
-    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
-  }),
-  columnHelper.display({
-    id: "actions",
-    header: () => (
-      <span className="flex items-center justify-end">Actions</span>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-end gap-1">
-        <WellActionsMenu well={row.original} />
-      </div>
-    ),
-  }),
-]);
+// The counter continues across pages, so the first row of page 2 is not numbered 1 again.
+const makeColumns = (firstRowNumber: number) =>
+  columnHelper.columns([
+    // A counter: the row's place in the list. Its header is empty on purpose.
+    columnHelper.display({
+      id: "row",
+      header: () => <span className="sr-only">Row</span>,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {firstRowNumber + row.index}
+        </span>
+      ),
+    }),
+    columnHelper.accessor("name", { header: "Well" }),
+    columnHelper.accessor("project_name", { header: "Project" }),
+    columnHelper.accessor("rig_name", { header: "Rig" }),
+    columnHelper.accessor("rig_type", {
+      header: "Rig type",
+      cell: (info) => <span className="capitalize">{info.getValue()}</span>,
+    }),
+    columnHelper.accessor("designation", {
+      header: "Designation",
+      cell: (info) => (
+        <span className="capitalize">{info.getValue() ?? EMPTY_VALUE}</span>
+      ),
+    }),
+    columnHelper.accessor("well_type", {
+      header: "Type",
+      cell: (info) => (
+        <span className="capitalize">{info.getValue() ?? EMPTY_VALUE}</span>
+      ),
+    }),
+    columnHelper.accessor("spud_date", {
+      header: "Spud date",
+      cell: (info) => info.getValue() ?? EMPTY_VALUE,
+    }),
+    columnHelper.accessor("water_depth", {
+      header: "Water depth",
+      cell: (info) => info.getValue() ?? EMPTY_VALUE,
+    }),
+    columnHelper.accessor("status", {
+      header: "Status",
+      cell: (info) => <StatusBadge status={info.getValue()} />,
+    }),
+    columnHelper.display({
+      id: "actions",
+      header: () => (
+        <span className="flex items-center justify-end">Actions</span>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-1">
+          <WellActionsMenu well={row.original} />
+        </div>
+      ),
+    }),
+  ]);
 
 // Spacing of the shadcn data-table block: roomy rows, 16px of padding on the sides.
 const HEAD_CELL = "px-2";
@@ -100,11 +114,14 @@ export function WellsTable({
   data,
   emptyMessage,
   isLoading = false,
+  firstRowNumber = 1,
 }: {
   data: Well[];
   emptyMessage: string;
   isLoading?: boolean;
+  firstRowNumber?: number;
 }) {
+  const columns = useMemo(() => makeColumns(firstRowNumber), [firstRowNumber]);
   const table = useTable({
     features,
     columns,

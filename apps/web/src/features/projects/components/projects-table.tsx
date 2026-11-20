@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { cn } from "cn";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -29,6 +30,7 @@ const EMPTY_VALUE = "—";
 // Numeric/date columns read better centered than left-aligned.
 const CENTERED_COLUMN_IDS = new Set([
   "field",
+  "currency",
   "wells",
   "active_well",
   "last_report",
@@ -47,6 +49,7 @@ const columns = columnHelper.columns([
     header: "Field",
     cell: (info) => info.getValue() ?? EMPTY_VALUE,
   }),
+  columnHelper.accessor("currency", { header: "Currency" }),
   columnHelper.accessor("wells", { header: "Wells" }),
   // TODO: WE WILL HAVE THESE PART BUT in Future and when Implementing `WELL SCHEMA`, Skip for now
   // columnHelper.accessor("active_well", {
@@ -59,8 +62,7 @@ const columns = columnHelper.columns([
   // }),
   columnHelper.accessor("status", {
     header: "Status",
-    // The API stores lowercase values; the label is only a display concern.
-    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
+    cell: (info) => <StatusBadge status={info.getValue()} />,
   }),
   columnHelper.display({
     id: "actions",

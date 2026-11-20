@@ -52,7 +52,11 @@ export function WellsList({ emptyMessage }: { emptyMessage: string }) {
 
       {wells.data && (
         <>
-          <WellsTable data={wells.data.data} emptyMessage={emptyMessage} />
+          <WellsTable
+            data={wells.data.data}
+            emptyMessage={emptyMessage}
+            firstRowNumber={(page - 1) * pageSize + 1}
+          />
           <ProjectsPagination
             itemLabel="well(s)"
             page={page}

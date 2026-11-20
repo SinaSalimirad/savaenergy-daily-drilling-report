@@ -47,7 +47,7 @@ function ordersShown() {
   return screen
     .getAllByRole("row")
     .slice(1)
-    .map((row) => row.querySelectorAll("td")[3]?.textContent);
+    .map((row) => row.querySelectorAll("td")[1]?.textContent);
 }
 
 /** Drags the handle of body row `from` onto the place of body row `to`. */

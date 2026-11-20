@@ -100,6 +100,18 @@ export function updateDailyReport(id: string, patch: UpdateDailyReportInput) {
 }
 
 export async function deleteDailyReport(id: string): Promise<void> {
-  const deleted = await deleteDailyReportById(id);
-  if (!deleted) throw notFound(DAILY_REPORT);
+  try {
+    const deleted = await deleteDailyReportById(id);
+    if (!deleted) throw notFound(DAILY_REPORT);
+  } catch (error) {
+    // The inventory rows of the report hold a foreign key to it.
+    if (isForeignKeyViolation(error)) {
+      throw new AppError(
+        409,
+        "DAILY_REPORT_HAS_INVENTORY",
+        "This report still has inventory rows. Remove them first.",
+      );
+    }
+    throw error;
+  }
 }

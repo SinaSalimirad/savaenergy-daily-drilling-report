@@ -54,10 +54,18 @@ const columnHelper = createColumnHelper<typeof features, Section>();
 
 const EMPTY_VALUE = "—";
 
-const CENTERED_COLUMN_IDS = new Set(["order", "hole_size", "hole_type"]);
+// Every column reads left to right, so Order, Well and Project sit close together. The grip,
+// Order and Actions columns are only as wide as their content: the rest share the space.
+const CENTERED_COLUMN_IDS = new Set<string>();
+
+const NARROW_COLUMN_WIDTHS: Record<string, string> = {
+  drag: "w-10",
+  order: "w-20",
+  actions: "w-24",
+};
 
 function alignClass(columnId: string) {
-  return CENTERED_COLUMN_IDS.has(columnId) ? "text-center" : undefined;
+  return NARROW_COLUMN_WIDTHS[columnId];
 }
 
 /** The grip a row is dragged by. It also works from the keyboard (Space, then arrow keys). */
@@ -85,9 +93,9 @@ const columns = columnHelper.columns([
     header: () => <span className="sr-only">Reorder</span>,
     cell: ({ row }) => <DragHandle section={row.original} />,
   }),
+  columnHelper.accessor("order", { header: "Order" }),
   columnHelper.accessor("well_name", { header: "Well" }),
   columnHelper.accessor("project_name", { header: "Project" }),
-  columnHelper.accessor("order", { header: "Order" }),
   columnHelper.accessor("hole_size", {
     header: "Hole size",
     cell: (info) => formatHoleSize(info.getValue()),

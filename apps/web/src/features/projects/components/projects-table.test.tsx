@@ -21,6 +21,7 @@ describe("ProjectsTable", () => {
       "Operator(s)",
       "Contractor(s)",
       "Field",
+      "Currency",
       "Wells",
       "Status",
       "Actions",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { type ReactNode, useId } from "react";
+import { type ReactNode, useId, useState } from "react";
 import type { HoleType } from "schema";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { SimpleSelect } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
+import { useProjects } from "@/features/projects/api";
 import { useWells } from "@/features/wells/api";
 import { ApiError } from "@/lib/api-error";
 import { type Section, useCreateSection, useUpdateSection } from "../api";
@@ -90,10 +91,22 @@ export function SectionForm({
   const updateSection = useUpdateSection();
   // The API allows at most 100 per page; the select lists the wells.
   const wells = useWells({ page: 1, pageSize: 100 });
-  const wellOptions = (wells.data?.data ?? []).map((well) => ({
-    value: well.id,
-    label: `${well.name} (${well.project_name})`,
+  const projects = useProjects({ page: 1, pageSize: 100, archived: false });
+  const projectOptions = (projects.data?.data ?? []).map((project) => ({
+    value: project.id,
+    label: project.name,
   }));
+
+  // The project only narrows the wells, it is not sent. Until one is chosen, an edited
+  // section shows the project of its well.
+  const [chosenProjectId, setChosenProjectId] = useState<string | null>(null);
+  const projectId =
+    chosenProjectId ??
+    wells.data?.data.find((well) => well.id === section?.well_id)?.project_id ??
+    "";
+  const wellOptions = (wells.data?.data ?? [])
+    .filter((well) => well.project_id === projectId)
+    .map((well) => ({ value: well.id, label: well.name }));
 
   const form = useForm({
     defaultValues: section ? valuesFrom(section) : emptyValues,
@@ -139,6 +152,41 @@ export function SectionForm({
       className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto"
     >
       <div className="grid gap-4 px-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <Field label="Project">
+            {({ id }) => (
+              <Combobox
+                items={projectOptions}
+                value={
+                  projectOptions.find((option) => option.value === projectId) ??
+                  null
+                }
+                onValueChange={(option) => {
+                  setChosenProjectId(option?.value ?? "");
+                  // The chosen well may belong to another project.
+                  form.setFieldValue("well_id", "");
+                }}
+              >
+                <ComboboxInput
+                  id={id}
+                  className="h-9 w-full rounded-md bg-transparent shadow-xs"
+                  placeholder="Search for a project"
+                />
+                <ComboboxContent>
+                  <ComboboxEmpty>No projects found.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(option: { value: string; label: string }) => (
+                      <ComboboxItem key={option.value} value={option}>
+                        {option.label}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            )}
+          </Field>
+        </div>
+
         <form.Field name="well_id">
           {(field) => (
             <div className="sm:col-span-2">
@@ -159,11 +207,19 @@ export function SectionForm({
                       id={id}
                       // Same height, radius and shadow as the other inputs.
                       className="h-9 w-full rounded-md bg-transparent shadow-xs"
-                      placeholder="Search for a well"
+                      placeholder={
+                        projectId
+                          ? "Search for a well"
+                          : "Select a project first"
+                      }
                       aria-invalid={invalid}
                     />
                     <ComboboxContent>
-                      <ComboboxEmpty>No wells found.</ComboboxEmpty>
+                      <ComboboxEmpty>
+                        {projectId
+                          ? "No wells in this project."
+                          : "Select a project first."}
+                      </ComboboxEmpty>
                       <ComboboxList>
                         {(option: { value: string; label: string }) => (
                           <ComboboxItem key={option.value} value={option}>

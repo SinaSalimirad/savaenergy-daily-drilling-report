@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "cn";
+import type { ReactNode } from "react";
 import {
   Table,
   TableBody,
@@ -9,7 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { InventoryRow } from "../types";
+import { packageText } from "@/features/project-products/labels";
+import type { InventoryRow } from "../api";
 
 const EMPTY_VALUE = "—";
 
@@ -43,9 +45,9 @@ function InventoryRowCells({
       <TableCell className="text-center text-muted-foreground">
         {index + 1}
       </TableCell>
-      <TableCell className="font-medium">{row.name}</TableCell>
+      <TableCell className="font-medium">{row.product.name}</TableCell>
       <TableCell className="text-center">
-        {row.package ?? EMPTY_VALUE}
+        {packageText(row.product) ?? EMPTY_VALUE}
       </TableCell>
       <TableCell className={numeric}>{money(row.unit_price)}</TableCell>
 
@@ -90,9 +92,12 @@ function InventoryRowCells({
 export function InventoryTable({
   rows,
   emptyMessage,
+  renderActions,
 }: {
   rows: InventoryRow[];
   emptyMessage: string;
+  // When given, a last column holds this for every row (the edit and remove menu).
+  renderActions?: (row: InventoryRow) => ReactNode;
 }) {
   return (
     <div className="overflow-hidden">
@@ -164,6 +169,15 @@ export function InventoryTable({
             >
               Daily cost
             </TableHead>
+            {renderActions && (
+              <TableHead
+                rowSpan={2}
+                scope="col"
+                className={cn(HEAD, GROUP_START)}
+              >
+                <span className="sr-only">Actions</span>
+              </TableHead>
+            )}
           </TableRow>
           <TableRow>
             <TableHead scope="col" className={cn(HEAD, GROUP_START)}>
@@ -194,7 +208,7 @@ export function InventoryTable({
           {rows.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={15}
+                colSpan={renderActions ? 16 : 15}
                 className="h-24 px-2 text-center text-muted-foreground"
               >
                 {emptyMessage}
@@ -202,8 +216,13 @@ export function InventoryTable({
             </TableRow>
           ) : (
             rows.map((row, index) => (
-              <TableRow key={row.product_id}>
+              <TableRow key={row.id}>
                 <InventoryRowCells row={row} index={index} />
+                {renderActions && (
+                  <TableCell className={cn("text-center", GROUP_START)}>
+                    {renderActions(row)}
+                  </TableCell>
+                )}
               </TableRow>
             ))
           )}

@@ -3,6 +3,7 @@ import {
   isForeignKeyViolation,
   isUniqueViolation,
   notFound,
+  violatedConstraint,
 } from "../../lib/errors";
 import { type ProjectDto, toProjectDto } from "./project.mapper";
 import {
@@ -22,6 +23,7 @@ import type {
 } from "./project.schemas";
 
 const PROJECT = "Project";
+const PROJECT_PRODUCT_FK = "project_product_project_id_projects_id_fk";
 
 const nameTaken = () =>
   new AppError(
@@ -105,6 +107,14 @@ export async function deleteProject(id: string): Promise<void> {
     if (!deleted) throw notFound(PROJECT);
   } catch (error) {
     if (isForeignKeyViolation(error)) {
+      // Wells and products of the project both hold a foreign key to it.
+      if (violatedConstraint(error) === PROJECT_PRODUCT_FK) {
+        throw new AppError(
+          409,
+          "PROJECT_HAS_PRODUCTS",
+          "This project still has products. Remove them first.",
+        );
+      }
       throw new AppError(
         409,
         "PROJECT_HAS_WELLS",

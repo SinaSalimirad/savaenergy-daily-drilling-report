@@ -41,7 +41,8 @@ export function dailyReportsQueryOptions(params: DailyReportsListParams) {
 }
 
 export function useDailyReports(params: DailyReportsListParams) {
-  return useQuery(dailyReportsQueryOptions(params));
+  const { enabled = true, ...listParams } = params;
+  return useQuery({ ...dailyReportsQueryOptions(listParams), enabled });
 }
 
 // Every mutation refreshes all report lists: a change can move a row to another page (the list
