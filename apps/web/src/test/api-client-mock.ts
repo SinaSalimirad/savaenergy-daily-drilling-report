@@ -23,10 +23,43 @@ export const sectionById = mock((_: { id: string }) => ({
   move: { post: moveSection },
 }));
 
+export const listWells = mock();
+export const listDailyReports = mock();
+export const listProducts = mock();
+
+export const listProjectProducts = mock();
+export const addProjectProduct = mock();
+export const updateProjectProduct = mock();
+export const removeProjectProduct = mock();
+export const projectProductById = mock((_: { id: string }) => ({
+  patch: updateProjectProduct,
+  delete: removeProjectProduct,
+}));
+
+export const listInventory = mock();
+export const createInventory = mock();
+export const updateInventory = mock();
+export const deleteInventory = mock();
+export const inventoryById = mock((_: { id: string }) => ({
+  patch: updateInventory,
+  delete: deleteInventory,
+}));
+
 mock.module("@/lib/api-client", () => ({
   api: {
     projects: Object.assign(projectById, { get: listProjects }),
     sections: Object.assign(sectionById, { get: mock() }),
+    wells: { get: listWells },
+    "daily-reports": { get: listDailyReports },
+    products: { get: listProducts },
+    "project-products": Object.assign(projectProductById, {
+      get: listProjectProducts,
+      post: addProjectProduct,
+    }),
+    inventory: Object.assign(inventoryById, {
+      get: listInventory,
+      post: createInventory,
+    }),
   },
 }));
 
@@ -39,4 +72,30 @@ export function resetApiClientMock() {
   projectById.mockClear();
   moveSection.mockReset();
   sectionById.mockClear();
+  for (const fn of [
+    listWells,
+    listDailyReports,
+    listProducts,
+    listProjectProducts,
+    addProjectProduct,
+    updateProjectProduct,
+    removeProjectProduct,
+    projectProductById,
+    listInventory,
+    createInventory,
+    updateInventory,
+    deleteInventory,
+    inventoryById,
+  ]) {
+    fn.mockReset();
+  }
+  // `mockReset` also drops the implementations of the "by id" helpers: put them back.
+  projectProductById.mockImplementation(() => ({
+    patch: updateProjectProduct,
+    delete: removeProjectProduct,
+  }));
+  inventoryById.mockImplementation(() => ({
+    patch: updateInventory,
+    delete: deleteInventory,
+  }));
 }

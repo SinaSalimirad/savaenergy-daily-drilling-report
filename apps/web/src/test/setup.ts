@@ -17,4 +17,9 @@ Animation.prototype.cancel = function cancel() {
 const { cleanup } = await import("@testing-library/react");
 
 // Unmount what a test rendered so the next test starts from an empty document.
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  // The project filter lives in localStorage: a test that chose a project must not leak it to
+  // the next test or file.
+  localStorage.clear();
+});

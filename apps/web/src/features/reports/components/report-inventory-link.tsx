@@ -21,6 +21,7 @@ export function ReportInventoryLink({ report }: { report: DailyReport }) {
     <Button
       variant="outline"
       size="sm"
+      nativeButton={false}
       render={
         <Link
           href={`/dashboard/inventory-and-cost/inventory?report=${report.id}`}

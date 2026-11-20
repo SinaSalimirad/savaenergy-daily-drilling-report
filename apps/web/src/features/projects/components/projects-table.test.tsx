@@ -116,4 +116,38 @@ describe("ProjectsTable", () => {
       await screen.findByRole("menuitem", { name: "Restore project" }),
     ).toBeTruthy();
   });
+
+  it("shows the currency of each project", () => {
+    render(
+      <ProjectsTable
+        data={[
+          makeProject({ id: "1", name: "A", currency: "USD" }),
+          makeProject({ id: "2", name: "B", currency: "IRR" }),
+        ]}
+        emptyMessage="Nothing here."
+      />,
+      { wrapper: QueryWrapper },
+    );
+
+    expect(screen.getByRole("cell", { name: "USD" })).toBeTruthy();
+    expect(screen.getByRole("cell", { name: "IRR" })).toBeTruthy();
+  });
+
+  it("shows the status as a badge with its own colour", () => {
+    render(
+      <ProjectsTable
+        data={[
+          makeProject({ id: "1", name: "A", status: "active" }),
+          makeProject({ id: "2", name: "B", status: "inactive" }),
+        ]}
+        emptyMessage="Nothing here."
+      />,
+      { wrapper: QueryWrapper },
+    );
+
+    const active = screen.getByText("active");
+    const inactive = screen.getByText("inactive");
+    expect(active.className).toContain("rounded-full");
+    expect(active.className).not.toBe(inactive.className);
+  });
 });

@@ -214,3 +214,91 @@ describe("GET /project-products paging", () => {
     expect(bad.status).toBe(422);
   });
 });
+
+describe("PATCH /project-products/:id", () => {
+  async function addOne(price: number | null = 10) {
+    const project = await createProject();
+    const product = await createProduct();
+    const { body } = await call(
+      "POST",
+      "/project-products",
+      link(project.id, product.id, { price, origin: "local" }),
+    );
+    return { project, product, row: body.data };
+  }
+
+  test("changes the origin and the price", async () => {
+    const { row } = await addOne();
+
+    const { status, body } = await call(
+      "PATCH",
+      `/project-products/${row.id}`,
+      {
+        origin: "foreign",
+        price: 99.5,
+      },
+    );
+
+    expect(status).toBe(200);
+    expect(body.data).toMatchObject({
+      id: row.id,
+      origin: "foreign",
+      price: 99.5,
+    });
+    expect(body.data.product.name).toBe(row.product.name);
+  });
+
+  test("changing one field keeps the other", async () => {
+    const { row } = await addOne(10);
+
+    const { body } = await call("PATCH", `/project-products/${row.id}`, {
+      origin: "foreign",
+    });
+
+    expect(body.data).toMatchObject({ origin: "foreign", price: 10 });
+  });
+
+  test("null removes the price", async () => {
+    const { row } = await addOne(10);
+
+    const { body } = await call("PATCH", `/project-products/${row.id}`, {
+      price: null,
+    });
+
+    expect(body.data.price).toBeNull();
+  });
+
+  test("never moves the link to another project or product", async () => {
+    const { project, product, row } = await addOne();
+    const other = await createProject();
+
+    const { body } = await call("PATCH", `/project-products/${row.id}`, {
+      origin: "foreign",
+      project_id: other.id,
+    });
+
+    expect(body.data.project_id).toBe(project.id);
+    expect(body.data.product_id).toBe(product.id);
+  });
+
+  test("rejects an empty patch, a bad origin and a price of 0 with 422", async () => {
+    const { row } = await addOne();
+
+    for (const patch of [{}, { origin: "mars" }, { price: 0 }]) {
+      const { status } = await call(
+        "PATCH",
+        `/project-products/${row.id}`,
+        patch,
+      );
+      expect(status).toBe(422);
+    }
+  });
+
+  test("returns 404 for an unknown id", async () => {
+    const { status } = await call("PATCH", `/project-products/${MISSING_ID}`, {
+      origin: "local",
+    });
+
+    expect(status).toBe(404);
+  });
+});
