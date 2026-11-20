@@ -32,7 +32,7 @@ export async function call(
 /** Empties every table. Call it in `beforeEach` so tests do not depend on each other. */
 export async function resetDb(): Promise<void> {
   await db.execute(
-    sql`truncate table sections, wells, projects, product restart identity cascade`,
+    sql`truncate table sections, pumps, wells, projects, product restart identity cascade`,
   );
 }
 
@@ -98,6 +98,32 @@ export async function createSection(
     sectionPayload(wellId, overrides),
   );
   if (status !== 201) throw new Error(`Could not create a section: ${status}`);
+  return body.data;
+}
+
+export const pumpPayload = (
+  projectId: string,
+  overrides: Record<string, unknown> = {},
+) => ({
+  project_id: projectId,
+  model: "FH 1500",
+  type: "triplex",
+  liner_diameter: 6,
+  stroke_length: 12,
+  efficiency: 95,
+  ...overrides,
+});
+
+export async function createPump(
+  projectId: string,
+  overrides: Record<string, unknown> = {},
+) {
+  const { status, body } = await call(
+    "POST",
+    "/pumps",
+    pumpPayload(projectId, overrides),
+  );
+  if (status !== 201) throw new Error(`Could not create a pump: ${status}`);
   return body.data;
 }
 

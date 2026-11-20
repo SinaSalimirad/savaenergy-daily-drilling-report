@@ -23,6 +23,8 @@ export const sectionById = mock((_: { id: string }) => ({
   move: { post: moveSection },
 }));
 
+export const listPumps = mock();
+export const createPump = mock();
 export const listWells = mock();
 export const listDailyReports = mock();
 export const listProducts = mock();
@@ -49,6 +51,7 @@ mock.module("@/lib/api-client", () => ({
   api: {
     projects: Object.assign(projectById, { get: listProjects }),
     sections: Object.assign(sectionById, { get: mock() }),
+    pumps: Object.assign(mock(), { get: listPumps, post: createPump }),
     wells: { get: listWells },
     "daily-reports": { get: listDailyReports },
     products: { get: listProducts },
@@ -73,6 +76,8 @@ export function resetApiClientMock() {
   moveSection.mockReset();
   sectionById.mockClear();
   for (const fn of [
+    listPumps,
+    createPump,
     listWells,
     listDailyReports,
     listProducts,

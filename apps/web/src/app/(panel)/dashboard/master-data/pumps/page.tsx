@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { PumpsView } from "@/features/pumps/components/pumps-view";
 
-export default function Page() {
-  return <PagePlaceholder title="Pumps" />;
+export default function PumpsPage() {
+  return <PumpsView />;
 }

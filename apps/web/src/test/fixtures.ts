@@ -1,6 +1,7 @@
 import type { InventoryRow } from "@/features/inventory/api";
 import type { Product } from "@/features/products/api";
 import type { ProjectProduct } from "@/features/project-products/api";
+import type { Pump } from "@/features/pumps/api";
 import type { DailyReport } from "@/features/reports/api";
 import type { Well } from "@/features/wells/api";
 
@@ -64,6 +65,24 @@ export function makeInventoryRow(
     cumulative_returned: 0,
     final_stock: 10,
     daily_cost: 0,
+    ...overrides,
+  };
+}
+
+export function makePump(overrides: Partial<Pump> = {}): Pump {
+  return {
+    id: "pump-1",
+    project_id: "p1",
+    project_name: "North Sea",
+    order: 1,
+    model: "FH 1500",
+    type: "triplex",
+    liner_diameter: 6,
+    stroke_length: 12,
+    efficiency: 95,
+    gal_per_stroke: 4.19,
+    created_at: DATE,
+    updated_at: DATE,
     ...overrides,
   };
 }
