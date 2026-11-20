@@ -1,6 +1,12 @@
 "use client";
 
-import { CheckIcon, PencilIcon, Trash2Icon, XIcon } from "lucide-react";
+import {
+  CheckIcon,
+  PackagePlusIcon,
+  PencilIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { useState } from "react";
 import type { ProjectProductOrigin } from "schema";
 import { Button } from "@/components/ui/button";
@@ -41,31 +47,69 @@ import { AddProjectProductForm } from "./add-project-product-form";
 
 const EMPTY_VALUE = "—";
 
-function RemoveButton({ item }: { item: ProjectProduct }) {
+// Removing takes two steps: the trash icon asks, "Confirm" removes. "Cancel" (or the X) backs out.
+function RemoveButton({
+  item,
+  confirming,
+  onConfirmingChange,
+}: {
+  item: ProjectProduct;
+  confirming: boolean;
+  onConfirmingChange: (confirming: boolean) => void;
+}) {
   const remove = useRemoveProjectProduct();
+
+  if (!confirming) {
+    return (
+      <Button
+        variant="destructive"
+        size="icon"
+        aria-label={`Remove ${item.product.name}`}
+        onClick={() => onConfirmingChange(true)}
+      >
+        <Trash2Icon />
+      </Button>
+    );
+  }
+
   return (
-    <Button
-      variant="destructive"
-      size="icon"
-      aria-label={`Remove ${item.product.name}`}
-      disabled={remove.isPending}
-      onClick={() =>
-        remove.mutate(item.id, {
-          onSuccess: () =>
-            toast.add({ type: "success", title: "Product removed" }),
-          // For example: the product is already used in an inventory.
-          onError: (error) =>
-            toast.add({ type: "error", title: error.message }),
-        })
-      }
-    >
-      <Trash2Icon />
-    </Button>
+    <>
+      <Button
+        variant="destructive"
+        className="w-24"
+        aria-label={`Confirm removing ${item.product.name}`}
+        disabled={remove.isPending}
+        onClick={() =>
+          remove.mutate(item.id, {
+            onSuccess: () =>
+              toast.add({ type: "success", title: "Product removed" }),
+            // For example: the product is already used in an inventory.
+            onError: (error) => {
+              toast.add({ type: "error", title: error.message });
+              onConfirmingChange(false);
+            },
+          })
+        }
+      >
+        {remove.isPending ? "Removing…" : "Confirm"}
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Cancel removing"
+        disabled={remove.isPending}
+        onClick={() => onConfirmingChange(false)}
+      >
+        <XIcon />
+      </Button>
+    </>
   );
 }
 
 function ProjectProductRow({ item }: { item: ProjectProduct }) {
   const [editing, setEditing] = useState(false);
+  // While the removal waits for its second click, the edit icon is hidden.
+  const [confirming, setConfirming] = useState(false);
   const [origin, setOrigin] = useState<ProjectProductOrigin>(item.origin);
   // Kept as text while typing; empty means "no price".
   const [price, setPrice] = useState(
@@ -148,7 +192,7 @@ function ProjectProductRow({ item }: { item: ProjectProduct }) {
         )}
       </TableCell>
       <TableCell>
-        <div className="flex items-center justify-end gap-1">
+        <div className="flex h-9 w-36 items-center justify-end gap-1">
           {editing ? (
             <>
               <Button
@@ -172,15 +216,21 @@ function ProjectProductRow({ item }: { item: ProjectProduct }) {
             </>
           ) : (
             <>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={`Edit ${item.product.name}`}
-                onClick={startEditing}
-              >
-                <PencilIcon />
-              </Button>
-              <RemoveButton item={item} />
+              {!confirming && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Edit ${item.product.name}`}
+                  onClick={startEditing}
+                >
+                  <PencilIcon />
+                </Button>
+              )}
+              <RemoveButton
+                item={item}
+                confirming={confirming}
+                onConfirmingChange={setConfirming}
+              />
             </>
           )}
         </div>
@@ -207,7 +257,7 @@ function ProjectProductsTable({
             <TableHead className="text-center">
               Price{currency ? ` (${currency})` : ""}
             </TableHead>
-            <TableHead className="w-28" />
+            <TableHead className="w-40" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -285,15 +335,16 @@ export function ProjectProductsDialog() {
           <Button variant="outline" className="h-10 border-0 bg-card px-4" />
         }
       >
-        Products of project
+        <PackagePlusIcon data-icon="inline-start" />
+        Manage products
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Products of project</DialogTitle>
+          <DialogTitle>Project products</DialogTitle>
           <DialogDescription>
             {projectName
-              ? `Products used in ${projectName}.`
-              : "Products used in a project."}
+              ? `Add, edit or remove the products used in ${projectName}. The inventory is built from this list.`
+              : "Add, edit or remove the products used in a project."}
           </DialogDescription>
         </DialogHeader>
         <ProjectProductsContent />

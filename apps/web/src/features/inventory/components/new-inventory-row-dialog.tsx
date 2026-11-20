@@ -52,7 +52,7 @@ const EMPTY_NUMBERS: Record<FieldName, string> = {
 
 /**
  * Adds a row to the inventory of one report. The product is chosen from the products of the
- * project ("Products of project"). Its initial stock continues from the previous report.
+ * project ("Manage products"). Its initial stock continues from the previous report.
  */
 export function NewInventoryRowDialog({
   reportId,
@@ -119,7 +119,7 @@ export function NewInventoryRowDialog({
   if (projectProducts.isPending) emptyMessage = "Loading products…";
   else if (all.length === 0) {
     emptyMessage =
-      "This project has no products yet. Add them in “Products of project”.";
+      "This project has no products yet. Add them with “Manage products”.";
   }
 
   return (

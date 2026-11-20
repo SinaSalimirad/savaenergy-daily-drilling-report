@@ -2,7 +2,12 @@
 
 import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { SimpleSelect } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { ProjectProductsDialog } from "@/features/project-products/components/project-products-dialog";
 import { ProjectFilterSelect } from "@/features/projects/components/project-filter-select";
 import { useProjectFilter } from "@/features/projects/project-filter";
@@ -22,10 +27,11 @@ function Message({ children }: { children: ReactNode }) {
 
 /**
  * The sheet belongs to one daily report: its day, its section and its well decide the numbers.
- * The report is chosen from the newest reports of the selected project.
+ * The user picks a well, then one of its reports (newest first, the newest by default). Only the
+ * 100 newest reports of the project are listed, so a well with none among them is not offered.
  */
 function useSelectedReport(projectId: string | null) {
-  // The API allows at most 100 per page: the select lists the 100 newest reports.
+  // The API allows at most 100 per page.
   const reports = useDailyReports({
     page: 1,
     pageSize: 100,
@@ -34,19 +40,72 @@ function useSelectedReport(projectId: string | null) {
   });
   const list = reports.data?.data ?? [];
 
-  // The chosen report, or the newest one while none is chosen or it left the list (another
-  // project was selected, or the report was deleted).
-  const [chosenId, setChosenId] = useState<string | null>(null);
-  const report = list.find((item) => item.id === chosenId) ?? list[0];
+  // A choice that is no longer in the list (another project, a deleted report) is ignored.
+  const [chosenWellId, setChosenWellId] = useState<string | null>(null);
+  const [chosenReportId, setChosenReportId] = useState<string | null>(null);
+
+  const wells = [
+    ...new Map(list.map((item) => [item.well_id, item.well_name])),
+  ].map(([id, name]) => ({ id, name }));
+  const well = wells.find((item) => item.id === chosenWellId) ?? wells[0];
+  const wellReports = list.filter((item) => item.well_id === well?.id);
+  const report =
+    wellReports.find((item) => item.id === chosenReportId) ?? wellReports[0];
 
   return {
     reports,
-    list,
+    wells,
+    well,
+    wellReports,
     report,
-    select: setChosenId,
+    selectWell: (id: string) => {
+      setChosenWellId(id);
+      setChosenReportId(null); // the old report belongs to the old well
+    },
+    selectReport: setChosenReportId,
     // While the previous project's list is still shown, it is not this project's.
     isLoading: reports.isPending || reports.isPlaceholderData,
   };
+}
+
+// A button that opens a list, like "Well: SP14". It looks like the buttons beside the title.
+function PickerButton({
+  label,
+  shown,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  shown: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Select
+      items={options}
+      value={value}
+      onValueChange={(next) => next && onChange(next)}
+    >
+      <SelectTrigger
+        aria-label={label}
+        className="h-10 w-auto gap-3 border-0 bg-card px-4 font-medium"
+      >
+        <span>
+          <span className="text-muted-foreground">{label}: </span>
+          {shown}
+        </span>
+      </SelectTrigger>
+      <SelectContent className="min-w-40">
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 }
 
 function InventorySheet({ reportId }: { reportId: string }) {
@@ -82,7 +141,7 @@ function InventoryBody({
   projectId: string | null;
   selection: ReturnType<typeof useSelectedReport>;
 }) {
-  const { reports, list, report, select, isLoading } = selection;
+  const { reports, wells, well, wellReports, report, isLoading } = selection;
 
   if (projectId === null) {
     return <Message>Select a project to see its inventory.</Message>;
@@ -109,15 +168,23 @@ function InventoryBody({
 
   return (
     <>
-      <div className="mt-4 max-w-md">
-        <SimpleSelect
-          options={list.map((item) => ({
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+        <PickerButton
+          label="Well"
+          shown={well?.name ?? ""}
+          options={wells.map((item) => ({ value: item.id, label: item.name }))}
+          value={well?.id ?? ""}
+          onChange={selection.selectWell}
+        />
+        <PickerButton
+          label="Report"
+          shown={`#${report.report_no}`}
+          options={wellReports.map((item) => ({
             value: item.id,
-            label: `${item.well_name} · Report #${item.report_no} · ${item.report_date}`,
+            label: `#${item.report_no} · ${item.report_date}`,
           }))}
           value={report.id}
-          onValueChange={(value) => value && select(value)}
-          aria-label="Daily report"
+          onChange={selection.selectReport}
         />
       </div>
       <div className="mt-6 rounded-xl bg-card px-3 py-5">
