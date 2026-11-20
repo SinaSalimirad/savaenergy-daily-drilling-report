@@ -185,3 +185,32 @@ describe("DELETE /projects/:id with products", () => {
     expect(body.code).toBe("PROJECT_HAS_PRODUCTS");
   });
 });
+
+describe("GET /project-products paging", () => {
+  test("pages the products of a project with the right total", async () => {
+    const project = await createProject();
+    for (const name of ["A", "B", "C"]) {
+      const product = await createProduct(name);
+      await call("POST", "/project-products", link(project.id, product.id));
+    }
+
+    const { body } = await call(
+      "GET",
+      `/project-products?project_id=${project.id}&page=2&pageSize=2`,
+    );
+
+    expect(body.data).toHaveLength(1);
+    expect(body.meta).toEqual({ page: 2, pageSize: 2, total: 3 });
+  });
+
+  test("an unknown project has no products, and a bad id is a 422", async () => {
+    const empty = await call(
+      "GET",
+      `/project-products?project_id=${MISSING_ID}`,
+    );
+    const bad = await call("GET", "/project-products?project_id=abc");
+
+    expect(empty.body.data).toEqual([]);
+    expect(bad.status).toBe(422);
+  });
+});
