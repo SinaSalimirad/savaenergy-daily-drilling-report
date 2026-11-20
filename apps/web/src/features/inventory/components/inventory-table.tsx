@@ -23,11 +23,6 @@ const GROUP_START = "border-l-2 border-foreground/40";
 // Daily received/used are the cells the user will type into, so they are tinted like the sheet.
 const INPUT_TINT = "bg-amber-100/70 dark:bg-amber-400/10";
 
-// A movement (received, used, returned) of 0 is left blank so the real changes stand out.
-function movement(value: number) {
-  return value === 0 ? "" : value;
-}
-
 function money(value: number | null) {
   return value === null ? EMPTY_VALUE : value.toLocaleString("en-US");
 }
@@ -56,28 +51,26 @@ function InventoryRowCells({
       </TableCell>
 
       <TableCell className={cn(numeric, GROUP_START, INPUT_TINT)}>
-        {movement(row.daily_received)}
+        {row.daily_received}
       </TableCell>
       <TableCell className={cn(numeric, INPUT_TINT)}>
-        {movement(row.daily_used)}
+        {row.daily_used}
       </TableCell>
 
       <TableCell className={cn(numeric, GROUP_START)}>
-        {movement(row.section_used)}
+        {row.section_used}
       </TableCell>
 
       <TableCell className={cn(numeric, GROUP_START)}>
         {row.monthly_received}
       </TableCell>
-      <TableCell className={numeric}>{movement(row.monthly_used)}</TableCell>
+      <TableCell className={numeric}>{row.monthly_used}</TableCell>
 
       <TableCell className={cn(numeric, GROUP_START)}>
         {row.cumulative_received}
       </TableCell>
-      <TableCell className={numeric}>{movement(row.cumulative_used)}</TableCell>
-      <TableCell className={numeric}>
-        {movement(row.cumulative_returned)}
-      </TableCell>
+      <TableCell className={numeric}>{row.cumulative_used}</TableCell>
+      <TableCell className={numeric}>{row.cumulative_returned}</TableCell>
 
       <TableCell className={cn(numeric, GROUP_START, "font-medium")}>
         {row.final_stock}

@@ -102,15 +102,15 @@ describe("InventoryTable", () => {
     expect(within(barite).getAllByRole("cell")[0]?.textContent).toBe("1");
   });
 
-  it("leaves a movement of zero blank but always shows the stock", () => {
+  it("shows a zero instead of leaving a number blank", () => {
     render(<InventoryTable rows={ROWS} emptyMessage="Nothing here." />);
 
-    // Barite: nothing was used, so the used cells are blank; stock is 164 in every stock cell.
+    // Barite: nothing was used, so the used cells show 0; stock is 164 in every stock cell.
     const cells = within(screen.getByRole("row", { name: /Barite/ }))
       .getAllByRole("cell")
       .map((cell) => cell.textContent);
-    expect(cells[6]).toBe(""); // daily used
-    expect(cells[7]).toBe(""); // section used
+    expect(cells[6]).toBe("0"); // daily used
+    expect(cells[7]).toBe("0"); // section used
     expect(cells[4]).toBe("164"); // initial stock
     expect(cells[13]).toBe("164"); // final stock
   });

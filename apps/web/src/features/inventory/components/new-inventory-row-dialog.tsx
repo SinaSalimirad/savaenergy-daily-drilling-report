@@ -1,7 +1,7 @@
 "use client";
 
 import { PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Combobox,
@@ -21,12 +21,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { useProjectProducts } from "@/features/project-products/api";
 import { useProjectFilter } from "@/features/projects/project-filter";
+import { ApiError } from "@/lib/api-error";
 import { useCreateInventoryRow } from "../api";
 
 type ProductOption = { value: string; label: string };
+
+// Whole numbers, kept as text while typing. An empty field is left out of the request:
+// the initial stock then continues from the previous report, the others start at 0.
+const FIELDS = [
+  {
+    name: "initial",
+    label: "Initial stock",
+    placeholder: "From the previous report",
+  },
+  { name: "received", label: "Received", placeholder: "0" },
+  { name: "used", label: "Used", placeholder: "0" },
+  { name: "returned", label: "Returned", placeholder: "0" },
+] as const;
+type FieldName = (typeof FIELDS)[number]["name"];
+const EMPTY_NUMBERS: Record<FieldName, string> = {
+  initial: "",
+  received: "",
+  used: "",
+  returned: "",
+};
 
 /**
  * Adds a row to the inventory of one report. The product is chosen from the products of the
@@ -42,9 +64,19 @@ export function NewInventoryRowDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<ProductOption | null>(null);
+  const [numbers, setNumbers] = useState(EMPTY_NUMBERS);
+  const id = useId();
   const { projectId } = useProjectFilter();
   const projectProducts = useProjectProducts(projectId);
   const create = useCreateInventoryRow();
+
+  // The API names the wrong field; any other error (a duplicate, say) goes under the form.
+  const fieldErrors =
+    create.error instanceof ApiError ? create.error.fieldErrors : {};
+  const formError =
+    create.error && Object.keys(fieldErrors).length === 0
+      ? create.error.message
+      : undefined;
 
   const all = projectProducts.data?.data ?? [];
   const options: ProductOption[] = all
@@ -56,6 +88,7 @@ export function NewInventoryRowDialog({
     setOpen(next);
     if (!next) {
       setSelected(null);
+      setNumbers(EMPTY_NUMBERS);
       create.reset();
     }
   }
@@ -63,7 +96,16 @@ export function NewInventoryRowDialog({
   function handleCreate() {
     if (!selected) return;
     create.mutate(
-      { report_id: reportId, project_product_id: selected.value },
+      {
+        report_id: reportId,
+        project_product_id: selected.value,
+        ...Object.fromEntries(
+          FIELDS.filter(({ name }) => numbers[name] !== "").map(({ name }) => [
+            name,
+            Number(numbers[name]),
+          ]),
+        ),
+      },
       {
         onSuccess: () => {
           toast.add({ type: "success", title: "Inventory row added" });
@@ -88,11 +130,12 @@ export function NewInventoryRowDialog({
         <PlusIcon data-icon="inline-start" />
         New row
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>New row</DialogTitle>
           <DialogDescription>
-            Choose a product from the products of the project.
+            Choose a product from the products of the project, and enter its
+            stock and movements for this report.
           </DialogDescription>
         </DialogHeader>
 
@@ -126,8 +169,39 @@ export function NewInventoryRowDialog({
               </ComboboxList>
             </ComboboxContent>
           </Combobox>
-          {create.error && (
-            <p className="text-destructive text-sm">{create.error.message}</p>
+        </div>
+
+        <div className="grid gap-4 px-4 sm:grid-cols-2">
+          {FIELDS.map(({ name, label, placeholder }) => (
+            <div key={name} className="flex flex-col gap-1.5">
+              <label htmlFor={`${id}-${name}`} className="font-medium text-sm">
+                {label}
+              </label>
+              <Input
+                id={`${id}-${name}`}
+                type="number"
+                min={0}
+                step={1}
+                inputMode="numeric"
+                placeholder={placeholder}
+                value={numbers[name]}
+                onChange={(event) =>
+                  setNumbers((current) => ({
+                    ...current,
+                    [name]: event.target.value,
+                  }))
+                }
+                aria-invalid={Boolean(fieldErrors[name])}
+              />
+              {fieldErrors[name] && (
+                <p className="text-destructive text-sm">{fieldErrors[name]}</p>
+              )}
+            </div>
+          ))}
+          {formError && (
+            <p className="text-destructive text-sm sm:col-span-2">
+              {formError}
+            </p>
           )}
         </div>
 
