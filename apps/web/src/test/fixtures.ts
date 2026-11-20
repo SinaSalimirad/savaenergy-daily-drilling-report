@@ -78,6 +78,7 @@ export function makePump(overrides: Partial<Pump> = {}): Pump {
     model: "FH 1500",
     type: "triplex",
     liner_diameter: 6,
+    rod_diameter: null,
     stroke_length: 12,
     efficiency: 95,
     gal_per_stroke: 4.19,

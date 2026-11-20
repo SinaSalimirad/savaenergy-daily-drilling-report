@@ -8,6 +8,8 @@ export type PumpType = z.infer<typeof pumpTypeSchema>;
 const CUBIC_INCHES_PER_GALLON = 231;
 // A triplex pump has three single-acting pistons: every stroke empties three liners.
 const TRIPLEX_PISTONS = 3;
+// A duplex pump has two double-acting cylinders.
+const DUPLEX_CYLINDERS = 2;
 
 /**
  * Pump output in gallons per stroke, with the efficiency already applied.
@@ -15,21 +17,33 @@ const TRIPLEX_PISTONS = 3;
  * Triplex: 3 x (pi / 4 x liner² x stroke) / 231 x efficiency. A 6" liner with a 12" stroke at
  * 95 % gives 4.19 gal/stroke, which is what the rig's sheet shows.
  *
- * Returns `null` for a duplex pump: its output depends on the rod diameter, which a pump
- * does not store yet, so a number here would be a guess.
+ * Duplex: two double-acting cylinders, and the rod takes room on the back stroke:
+ * 2 x (pi / 4 x stroke x (2 x liner² - rod²)) / 231 x efficiency.
+ *
+ * Returns `null` for a duplex without a rod diameter: a number would be a guess.
  */
 export function galPerStroke(pump: {
   type: PumpType;
   liner_diameter: number;
   stroke_length: number;
   efficiency: number;
+  rod_diameter?: number | null;
 }): number | null {
-  if (pump.type !== "triplex") return null;
-  const linerVolume =
-    (Math.PI / 4) * pump.liner_diameter ** 2 * pump.stroke_length;
+  const efficiency = pump.efficiency / 100;
+  const area = Math.PI / 4;
+  if (pump.type === "triplex") {
+    const linerVolume = area * pump.liner_diameter ** 2 * pump.stroke_length;
+    return (
+      ((TRIPLEX_PISTONS * linerVolume) / CUBIC_INCHES_PER_GALLON) * efficiency
+    );
+  }
+  if (pump.rod_diameter == null) return null;
+  const cylinderVolume =
+    area *
+    pump.stroke_length *
+    (2 * pump.liner_diameter ** 2 - pump.rod_diameter ** 2);
   return (
-    ((TRIPLEX_PISTONS * linerVolume) / CUBIC_INCHES_PER_GALLON) *
-    (pump.efficiency / 100)
+    ((DUPLEX_CYLINDERS * cylinderVolume) / CUBIC_INCHES_PER_GALLON) * efficiency
   );
 }
 
@@ -58,6 +72,8 @@ const pumpFields = z.object({
     .min(1, "Enter the pump model.")
     .max(100, "The model must be 100 characters or fewer."),
   type: pumpTypeSchema,
+  // Only a duplex pump uses it (the rod takes room in the cylinder). `null` clears it.
+  rod_diameter: inches("rod diameter", 10).nullable().optional(),
   liner_diameter: inches("liner diameter", 20),
   stroke_length: inches("stroke length", 30),
   // A percentage, 97.5 means 97.5 %. Stored as numeric(5, 2).
@@ -70,7 +86,20 @@ const pumpFields = z.object({
     }),
 });
 
-export const pumpCreateSchema = pumpFields.partial({ order: true });
+export const pumpCreateSchema = pumpFields
+  .partial({ order: true })
+  .refine((pump) => pump.type !== "duplex" || pump.rod_diameter != null, {
+    path: ["rod_diameter"],
+    error: "A duplex pump needs a rod diameter.",
+  })
+  .refine(
+    (pump) =>
+      pump.rod_diameter == null || pump.rod_diameter < pump.liner_diameter,
+    {
+      path: ["rod_diameter"],
+      error: "The rod must be thinner than the liner.",
+    },
+  );
 export type PumpCreate = z.infer<typeof pumpCreateSchema>;
 
 // No `.default()` anywhere: inside `.partial()` it would fill missing fields in a patch and

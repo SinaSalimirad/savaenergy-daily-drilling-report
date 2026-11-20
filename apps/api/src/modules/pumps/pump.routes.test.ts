@@ -44,10 +44,30 @@ describe("POST /pumps", () => {
     expect(pump.gal_per_stroke).toBeCloseTo(4.91, 2);
   });
 
-  test("a duplex has no output per stroke", async () => {
-    const pump = await createPump(projectId, { type: "duplex" });
+  test("a duplex needs a rod diameter and gives its output with it", async () => {
+    const pump = await createPump(projectId, {
+      type: "duplex",
+      rod_diameter: 2,
+    });
 
-    expect(pump.gal_per_stroke).toBeNull();
+    expect(pump.rod_diameter).toBe(2);
+    expect(pump.gal_per_stroke).toBeCloseTo(5.27, 2);
+  });
+
+  test("a triplex has no rod diameter", async () => {
+    const pump = await createPump(projectId);
+
+    expect(pump.rod_diameter).toBeNull();
+  });
+
+  test("rejects a duplex without a rod diameter with 422", async () => {
+    const { status } = await call(
+      "POST",
+      "/pumps",
+      pumpPayload(projectId, { type: "duplex" }),
+    );
+
+    expect(status).toBe(422);
   });
 
   test("without an order, the pump goes after the last one", async () => {
@@ -272,6 +292,43 @@ describe("PATCH /pumps/:id", () => {
     });
 
     expect(status).toBe(404);
+  });
+});
+
+describe("PATCH /pumps/:id and the rod", () => {
+  test("turning a triplex into a duplex without a rod is refused with 400", async () => {
+    const pump = await createPump(projectId);
+
+    const { status, body } = await call("PATCH", `/pumps/${pump.id}`, {
+      type: "duplex",
+    });
+
+    expect(status).toBe(400);
+    expect(body.code).toBe("PUMP_ROD_DIAMETER_INVALID");
+  });
+
+  test("turning a triplex into a duplex works with a rod", async () => {
+    const pump = await createPump(projectId);
+
+    const { body } = await call("PATCH", `/pumps/${pump.id}`, {
+      type: "duplex",
+      rod_diameter: 2,
+    });
+
+    expect(body.data.gal_per_stroke).toBeCloseTo(5.27, 2);
+  });
+
+  test("a rod as thick as the liner is refused with 400", async () => {
+    const pump = await createPump(projectId, {
+      type: "duplex",
+      rod_diameter: 2,
+    });
+
+    const { status } = await call("PATCH", `/pumps/${pump.id}`, {
+      rod_diameter: 6,
+    });
+
+    expect(status).toBe(400);
   });
 });
 

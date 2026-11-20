@@ -14,9 +14,10 @@ export type PumpDto = {
   model: string;
   type: PumpRow["type"];
   liner_diameter: number;
+  rod_diameter: number | null;
   stroke_length: number;
   efficiency: number;
-  // Computed from the fields above, never stored. `null` when the type has no formula yet.
+  // Computed from the fields above, never stored. `null` for a duplex without a rod diameter.
   gal_per_stroke: number | null;
   created_at: string;
   updated_at: string;
@@ -31,6 +32,7 @@ export function toPumpDto(row: PumpRow): PumpDto {
     model: row.model,
     type: row.type,
     liner_diameter: row.liner_diameter,
+    rod_diameter: row.rod_diameter,
     stroke_length: row.stroke_length,
     efficiency: row.efficiency,
     gal_per_stroke: galPerStroke(row),

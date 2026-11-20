@@ -1,5 +1,6 @@
 import {
   AppError,
+  isCheckViolation,
   isForeignKeyViolation,
   isUniqueViolation,
   notFound,
@@ -36,6 +37,14 @@ async function writePump(
         409,
         "PUMP_ORDER_TAKEN",
         "This project already has a pump with this order.",
+      );
+    }
+    // A patch can break the duplex/rod rule only in combination with the stored values.
+    if (isCheckViolation(error)) {
+      throw new AppError(
+        400,
+        "PUMP_ROD_DIAMETER_INVALID",
+        "A duplex pump needs a rod diameter thinner than its liner.",
       );
     }
     if (isForeignKeyViolation(error)) throw notFound("Project");

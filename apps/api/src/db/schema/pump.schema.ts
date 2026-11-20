@@ -39,6 +39,8 @@ export const pumps = pgTable(
       scale: 3,
       mode: "number",
     }).notNull(),
+    // Inches. Only a duplex pump has one; it is what makes its output computable.
+    rod_diameter: numeric({ precision: 5, scale: 3, mode: "number" }),
     // A percentage: 97.50 means 97.5 %, so the value is above 0 and at most 100.
     efficiency: numeric({ precision: 5, scale: 2, mode: "number" }).notNull(),
     ...timestamps,
@@ -49,6 +51,10 @@ export const pumps = pgTable(
     check("pumps_order_positive", sql`${table.order} >= 1`),
     check("pumps_liner_diameter_positive", sql`${table.liner_diameter} > 0`),
     check("pumps_stroke_length_positive", sql`${table.stroke_length} > 0`),
+    check(
+      "pumps_duplex_rod_diameter",
+      sql`(${table.type} <> 'duplex' or ${table.rod_diameter} is not null) and (${table.rod_diameter} is null or (${table.rod_diameter} > 0 and ${table.rod_diameter} < ${table.liner_diameter}))`,
+    ),
     check(
       "pumps_efficiency_percentage",
       sql`${table.efficiency} > 0 and ${table.efficiency} <= 100`,

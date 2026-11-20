@@ -57,6 +57,13 @@
       "when": 1795202131099,
       "tag": "0007_add_pumps",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795203501043,
+      "tag": "0008_add_pump_rod_diameter",
+      "breakpoints": true
     }
   ]
 }

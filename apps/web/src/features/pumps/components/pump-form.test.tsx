@@ -88,9 +88,26 @@ describe("PumpForm", () => {
       model: "FH 1500",
       type: "triplex",
       liner_diameter: 6.5,
+      rod_diameter: null,
       stroke_length: 12,
       efficiency: 95,
     });
+  });
+
+  it("asks for a rod diameter only for a duplex pump", () => {
+    const { rerender } = renderForm(makePump({ type: "triplex" }));
+    expect(screen.queryByLabelText("Rod diameter (in)")).toBeNull();
+
+    rerender(
+      <Dialog open>
+        <PumpForm
+          pump={makePump({ type: "duplex", rod_diameter: 2 })}
+          onSaved={noop}
+        />
+      </Dialog>,
+    );
+
+    expect(field("Rod diameter (in)").value).toBe("2");
   });
 
   it("shows the message of the API next to the field", async () => {

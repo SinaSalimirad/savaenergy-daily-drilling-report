@@ -1,0 +1,2 @@
+ALTER TABLE "pumps" ADD COLUMN "rod_diameter" numeric(5, 3);--> statement-breakpoint
+ALTER TABLE "pumps" ADD CONSTRAINT "pumps_duplex_rod_diameter" CHECK (("pumps"."type" <> 'duplex' or "pumps"."rod_diameter" is not null) and ("pumps"."rod_diameter" is null or ("pumps"."rod_diameter" > 0 and "pumps"."rod_diameter" < "pumps"."liner_diameter")));

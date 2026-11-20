@@ -39,8 +39,31 @@ describe("galPerStroke", () => {
     expect(half).toBeCloseTo((full ?? 0) / 2, 10);
   });
 
-  test("a duplex has no output yet, because the rod size is unknown", () => {
+  test("a duplex with a 2 inch rod gives 5.27 gal/stroke", () => {
+    const result = galPerStroke({
+      ...valid,
+      type: "duplex",
+      rod_diameter: 2,
+    } as Parameters<typeof galPerStroke>[0]);
+
+    expect(result).toBeCloseTo(5.27, 2);
+  });
+
+  test("a duplex gives less when the rod is thicker", () => {
+    const pump = { ...valid, type: "duplex" } as Parameters<
+      typeof galPerStroke
+    >[0];
+
+    expect(galPerStroke({ ...pump, rod_diameter: 3 }) ?? 0).toBeLessThan(
+      galPerStroke({ ...pump, rod_diameter: 2 }) ?? 0,
+    );
+  });
+
+  test("a duplex without a rod diameter has no output", () => {
     expect(galPerStroke({ ...valid, type: "duplex" })).toBeNull();
+    expect(
+      galPerStroke({ ...valid, type: "duplex", rod_diameter: null }),
+    ).toBeNull();
   });
 });
 
@@ -53,6 +76,28 @@ describe("pumpCreateSchema", () => {
     expect(
       pumpCreateSchema.safeParse({ ...valid, efficiency: 97.5 }).success,
     ).toBe(true);
+  });
+
+  test("accepts a duplex with a rod thinner than the liner", () => {
+    const result = pumpCreateSchema.safeParse({
+      ...valid,
+      type: "duplex",
+      rod_diameter: 2,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test.each([
+    { type: "duplex" },
+    { type: "duplex", rod_diameter: null },
+    { type: "duplex", rod_diameter: 6 },
+    { type: "duplex", rod_diameter: 7 },
+    { type: "triplex", rod_diameter: 0 },
+  ])("rejects the rod of %o", (bad) => {
+    expect(pumpCreateSchema.safeParse({ ...valid, ...bad }).success).toBe(
+      false,
+    );
   });
 
   test("trims the model", () => {

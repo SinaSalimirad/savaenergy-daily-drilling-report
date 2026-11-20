@@ -30,6 +30,8 @@ const emptyValues = {
   model: "",
   type: "triplex" as PumpType,
   liner_diameter: "",
+  // Only a duplex pump has one.
+  rod_diameter: "",
   stroke_length: "",
   efficiency: "",
 };
@@ -41,6 +43,7 @@ function valuesFrom(pump: Pump): typeof emptyValues {
     model: pump.model,
     type: pump.type,
     liner_diameter: String(pump.liner_diameter),
+    rod_diameter: pump.rod_diameter === null ? "" : String(pump.rod_diameter),
     stroke_length: String(pump.stroke_length),
     efficiency: String(pump.efficiency),
   };
@@ -90,11 +93,16 @@ function toServerErrors(error: unknown) {
 const firstError = (errors: unknown[]) =>
   errors.find((error): error is string => typeof error === "string");
 
-type NumberFieldName = "liner_diameter" | "stroke_length" | "efficiency";
+type NumberFieldName =
+  | "liner_diameter"
+  | "rod_diameter"
+  | "stroke_length"
+  | "efficiency";
 
 const NUMBER_FIELDS: { name: NumberFieldName; label: string; step: string }[] =
   [
     { name: "liner_diameter", label: "Liner diameter (in)", step: "0.001" },
+    { name: "rod_diameter", label: "Rod diameter (in)", step: "0.001" },
     { name: "stroke_length", label: "Stroke length (in)", step: "0.001" },
     { name: "efficiency", label: "Efficiency (%)", step: "0.01" },
   ];
@@ -133,6 +141,9 @@ export function PumpForm({
           model: value.model,
           type: value.type,
           liner_diameter: toNumber(value.liner_diameter),
+          // Cleared on a triplex, so changing the type back does not keep a stale rod.
+          rod_diameter:
+            value.type === "duplex" ? toNumber(value.rod_diameter) : null,
           stroke_length: toNumber(value.stroke_length),
           efficiency: toNumber(value.efficiency),
         };
@@ -268,26 +279,40 @@ export function PumpForm({
         </form.Field>
 
         {NUMBER_FIELDS.map(({ name, label, step }) => (
-          <form.Field key={name} name={name}>
-            {(field) => (
-              <Field label={label} error={firstError(field.state.meta.errors)}>
-                {({ id, invalid }) => (
-                  <Input
-                    id={id}
-                    name={field.name}
-                    type="number"
-                    min={0}
-                    step={step}
-                    inputMode="decimal"
-                    value={field.state.value}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    onBlur={field.handleBlur}
-                    aria-invalid={invalid}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
+          <form.Subscribe
+            key={name}
+            selector={(state) => state.values.type === "duplex"}
+          >
+            {(isDuplex) =>
+              (name !== "rod_diameter" || isDuplex) && (
+                <form.Field name={name}>
+                  {(field) => (
+                    <Field
+                      label={label}
+                      error={firstError(field.state.meta.errors)}
+                    >
+                      {({ id, invalid }) => (
+                        <Input
+                          id={id}
+                          name={field.name}
+                          type="number"
+                          min={0}
+                          step={step}
+                          inputMode="decimal"
+                          value={field.state.value}
+                          onChange={(event) =>
+                            field.handleChange(event.target.value)
+                          }
+                          onBlur={field.handleBlur}
+                          aria-invalid={invalid}
+                        />
+                      )}
+                    </Field>
+                  )}
+                </form.Field>
+              )
+            }
+          </form.Subscribe>
         ))}
 
         <form.Subscribe selector={(state) => firstError(state.errors)}>
