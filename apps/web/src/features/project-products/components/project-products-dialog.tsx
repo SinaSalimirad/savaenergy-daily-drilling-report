@@ -1,7 +1,8 @@
 "use client";
 
-import { Trash2Icon } from "lucide-react";
+import { CheckIcon, PencilIcon, Trash2Icon, XIcon } from "lucide-react";
 import { useState } from "react";
+import type { ProjectProductOrigin } from "schema";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { SimpleSelect } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -22,12 +25,18 @@ import {
 import { toast } from "@/components/ui/toast";
 import { useProjects } from "@/features/projects/api";
 import { useProjectFilter } from "@/features/projects/project-filter";
+import { ApiError } from "@/lib/api-error";
 import {
   type ProjectProduct,
   useProjectProducts,
   useRemoveProjectProduct,
+  useUpdateProjectProduct,
 } from "../api";
-import { packageText, projectProductOriginLabel } from "../labels";
+import {
+  ORIGIN_OPTIONS,
+  packageText,
+  projectProductOriginLabel,
+} from "../labels";
 import { AddProjectProductForm } from "./add-project-product-form";
 
 const EMPTY_VALUE = "—";
@@ -55,6 +64,131 @@ function RemoveButton({ item }: { item: ProjectProduct }) {
   );
 }
 
+function ProjectProductRow({ item }: { item: ProjectProduct }) {
+  const [editing, setEditing] = useState(false);
+  const [origin, setOrigin] = useState<ProjectProductOrigin>(item.origin);
+  // Kept as text while typing; empty means "no price".
+  const [price, setPrice] = useState(
+    item.price === null ? "" : String(item.price),
+  );
+  const update = useUpdateProjectProduct();
+
+  function startEditing() {
+    setOrigin(item.origin);
+    setPrice(item.price === null ? "" : String(item.price));
+    update.reset();
+    setEditing(true);
+  }
+
+  function save() {
+    update.mutate(
+      {
+        id: item.id,
+        body: { origin, price: price === "" ? null : Number(price) },
+      },
+      {
+        onSuccess: () => {
+          toast.add({ type: "success", title: "Product updated" });
+          setEditing(false);
+        },
+      },
+    );
+  }
+
+  const priceError =
+    update.error instanceof ApiError
+      ? update.error.fieldErrors.price
+      : undefined;
+  const otherError =
+    update.error && !priceError ? update.error.message : undefined;
+
+  return (
+    <TableRow>
+      <TableCell className="font-medium">{item.product.name}</TableCell>
+      <TableCell className="text-center">
+        {packageText(item.product) ?? EMPTY_VALUE}
+      </TableCell>
+      <TableCell className="text-center">
+        {editing ? (
+          <SimpleSelect
+            options={ORIGIN_OPTIONS}
+            value={origin}
+            onValueChange={(value) =>
+              value && setOrigin(value as ProjectProductOrigin)
+            }
+          />
+        ) : (
+          projectProductOriginLabel(item.origin)
+        )}
+      </TableCell>
+      <TableCell className="text-center tabular-nums">
+        {editing ? (
+          <div className="flex flex-col gap-1">
+            <Input
+              type="number"
+              min={0}
+              step="any"
+              inputMode="decimal"
+              placeholder="No price"
+              aria-label={`Price of ${item.product.name}`}
+              value={price}
+              onChange={(event) => setPrice(event.target.value)}
+              aria-invalid={Boolean(priceError)}
+            />
+            {(priceError ?? otherError) && (
+              <p className="text-destructive text-xs">
+                {priceError ?? otherError}
+              </p>
+            )}
+          </div>
+        ) : item.price === null ? (
+          EMPTY_VALUE
+        ) : (
+          item.price.toLocaleString("en-US")
+        )}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center justify-end gap-1">
+          {editing ? (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={`Save ${item.product.name}`}
+                disabled={update.isPending}
+                onClick={save}
+              >
+                <CheckIcon />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Cancel editing"
+                disabled={update.isPending}
+                onClick={() => setEditing(false)}
+              >
+                <XIcon />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={`Edit ${item.product.name}`}
+                onClick={startEditing}
+              >
+                <PencilIcon />
+              </Button>
+              <RemoveButton item={item} />
+            </>
+          )}
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 function ProjectProductsTable({
   items,
   currency,
@@ -73,7 +207,7 @@ function ProjectProductsTable({
             <TableHead className="text-center">
               Price{currency ? ` (${currency})` : ""}
             </TableHead>
-            <TableHead className="w-12" />
+            <TableHead className="w-28" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -87,27 +221,7 @@ function ProjectProductsTable({
               </TableCell>
             </TableRow>
           ) : (
-            items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">
-                  {item.product.name}
-                </TableCell>
-                <TableCell className="text-center">
-                  {packageText(item.product) ?? EMPTY_VALUE}
-                </TableCell>
-                <TableCell className="text-center">
-                  {projectProductOriginLabel(item.origin)}
-                </TableCell>
-                <TableCell className="text-center tabular-nums">
-                  {item.price === null
-                    ? EMPTY_VALUE
-                    : item.price.toLocaleString("en-US")}
-                </TableCell>
-                <TableCell>
-                  <RemoveButton item={item} />
-                </TableCell>
-              </TableRow>
-            ))
+            items.map((item) => <ProjectProductRow key={item.id} item={item} />)
           )}
         </TableBody>
       </Table>

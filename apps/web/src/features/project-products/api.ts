@@ -5,6 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { inventoryKeys } from "@/features/inventory/query-keys";
 import { api } from "@/lib/api-client";
 import { ensureOk, unwrap } from "@/lib/api-error";
 import {
@@ -57,14 +58,29 @@ function useProjectProductMutation<TVariables>(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
+    // The inventory sheet shows the product's price (and its daily cost), so it refreshes too.
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: projectProductKeys.all }),
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: projectProductKeys.all }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.all }),
+      ]),
   });
 }
 
 export function useAddProjectProduct() {
   return useProjectProductMutation(async (body: ProjectProductBody) =>
     unwrap(await api["project-products"].post(body)),
+  );
+}
+
+export type UpdateProjectProductBody = NonNullable<
+  Parameters<ReturnType<(typeof api)["project-products"]>["patch"]>[0]
+>;
+
+export function useUpdateProjectProduct() {
+  return useProjectProductMutation(
+    async ({ id, body }: { id: string; body: UpdateProjectProductBody }) =>
+      unwrap(await api["project-products"]({ id }).patch(body)),
   );
 }
 

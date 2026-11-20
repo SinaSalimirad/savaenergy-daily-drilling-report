@@ -11,7 +11,7 @@ export type ProjectProductOrigin = z.infer<typeof projectProductOriginSchema>;
  * Adds a product to a project. The product itself lives in the product catalog; this only says
  * "this project uses it", with the price the project pays for it.
  */
-export const projectProductCreateSchema = z.object({
+const projectProductFields = z.object({
   project_id: z.uuid("Choose a project."),
   product_id: z.uuid("Choose a product."),
   origin: projectProductOriginSchema,
@@ -25,4 +25,16 @@ export const projectProductCreateSchema = z.object({
     .nullable()
     .optional(),
 });
+
+export const projectProductCreateSchema = projectProductFields;
 export type ProjectProductCreate = z.infer<typeof projectProductCreateSchema>;
+
+// Only the origin and the price can change. The project and the product are what the link
+// is, so changing them means removing the link and adding another one.
+export const projectProductUpdateSchema = projectProductFields
+  .pick({ origin: true, price: true })
+  .partial()
+  .refine((patch) => Object.keys(patch).length > 0, {
+    message: "Send at least one field to update",
+  });
+export type ProjectProductUpdate = z.infer<typeof projectProductUpdateSchema>;

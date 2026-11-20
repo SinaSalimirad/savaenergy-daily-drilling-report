@@ -1,7 +1,10 @@
 import { asc, count, eq } from "drizzle-orm";
 import { type DB, db, type Transaction } from "../../db";
 import { products, projectProducts } from "../../db/schema";
-import type { CreateProjectProductInput } from "./project-product.schemas";
+import type {
+  CreateProjectProductInput,
+  UpdateProjectProductInput,
+} from "./project-product.schemas";
 
 type Executor = DB | Transaction;
 
@@ -58,6 +61,19 @@ export async function insertProjectProduct(
     .values({ ...input, price: input.price ?? null })
     .returning({ id: projectProducts.id });
   return created && findProjectProductById(created.id, executor);
+}
+
+export async function updateProjectProductById(
+  id: string,
+  patch: UpdateProjectProductInput,
+  executor: Executor = db,
+) {
+  const [row] = await executor
+    .update(projectProducts)
+    .set(patch)
+    .where(eq(projectProducts.id, id))
+    .returning({ id: projectProducts.id });
+  return row && findProjectProductById(row.id, executor);
 }
 
 export async function deleteProjectProductById(

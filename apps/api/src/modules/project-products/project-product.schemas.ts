@@ -1,10 +1,15 @@
-import { projectProductCreateSchema } from "schema";
+import { projectProductCreateSchema, projectProductUpdateSchema } from "schema";
 import * as z from "zod";
 
 // What a client may send comes from packages/schema, shared with the web.
 export const createProjectProductSchema = projectProductCreateSchema;
 export type CreateProjectProductInput = z.infer<
   typeof createProjectProductSchema
+>;
+
+export const updateProjectProductSchema = projectProductUpdateSchema;
+export type UpdateProjectProductInput = z.infer<
+  typeof updateProjectProductSchema
 >;
 
 export const projectProductIdParamsSchema = z.object({ id: z.uuid() });

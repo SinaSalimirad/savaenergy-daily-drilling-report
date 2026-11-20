@@ -13,10 +13,12 @@ import {
   deleteProjectProductById,
   findProjectProducts,
   insertProjectProduct,
+  updateProjectProductById,
 } from "./project-product.repository";
 import type {
   CreateProjectProductInput,
   ListProjectProductsQuery,
+  UpdateProjectProductInput,
 } from "./project-product.schemas";
 
 const PROJECT_PRODUCT = "Project product";
@@ -60,6 +62,15 @@ export async function createProjectProduct(
     }
     throw error;
   }
+}
+
+export async function updateProjectProduct(
+  id: string,
+  patch: UpdateProjectProductInput,
+): Promise<ProjectProductDto> {
+  const row = await updateProjectProductById(id, patch);
+  if (!row) throw notFound(PROJECT_PRODUCT);
+  return toProjectProductDto(row);
 }
 
 export async function deleteProjectProduct(id: string): Promise<void> {
