@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { type ReactNode, useId } from "react";
+import { type ReactNode, useId, useState } from "react";
 import { DatePicker } from "@/components/forms/date-picker";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,8 @@ import {
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
+import { useProjects } from "@/features/projects/api";
+import { useProjectFilter } from "@/features/projects/project-filter";
 import { useWells } from "@/features/wells/api";
 import { ApiError } from "@/lib/api-error";
 import {
@@ -194,10 +196,25 @@ export function DailyReportForm({
   const form = useDailyReportForm(report, onSaved);
   // The API allows at most 100 per page; the select lists the wells.
   const wells = useWells({ page: 1, pageSize: 100 });
-  const wellOptions = (wells.data?.data ?? []).map((well) => ({
-    value: well.id,
-    label: `${well.name} (${well.project_name})`,
+  const projects = useProjects({ page: 1, pageSize: 100, archived: false });
+  const projectOptions = (projects.data?.data ?? []).map((project) => ({
+    value: project.id,
+    label: project.name,
   }));
+
+  // The project only narrows the wells, it is not sent. A new report starts with the project
+  // chosen in the header; an existing one shows the project of its well.
+  const { projectId: headerProjectId } = useProjectFilter();
+  const [chosenProjectId, setChosenProjectId] = useState<string | null>(null);
+  const projectId =
+    chosenProjectId ??
+    (report
+      ? wells.data?.data.find((well) => well.id === report.well_id)?.project_id
+      : headerProjectId) ??
+    "";
+  const wellOptions = (wells.data?.data ?? [])
+    .filter((well) => well.project_id === projectId)
+    .map((well) => ({ value: well.id, label: well.name }));
   // The well of an existing report may be beyond the first 100: keep it in the list so it shows.
   if (
     report &&
@@ -217,6 +234,42 @@ export function DailyReportForm({
       className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto"
     >
       <div className="grid gap-4 px-4 sm:grid-cols-2">
+        <Field label="Project">
+          {({ id }) => (
+            <Combobox
+              items={projectOptions}
+              value={
+                projectOptions.find((option) => option.value === projectId) ??
+                null
+              }
+              onValueChange={(option) => {
+                setChosenProjectId(option?.value ?? "");
+                // The chosen well and its section may belong to another project.
+                form.setFieldValue("well_id", "");
+                form.setFieldValue("section_id", "");
+              }}
+            >
+              <ComboboxInput
+                id={id}
+                className="h-9 w-full rounded-md bg-transparent shadow-xs"
+                placeholder="Search for a project"
+                // A report stays with its well, and so with its project.
+                disabled={Boolean(report)}
+              />
+              <ComboboxContent>
+                <ComboboxEmpty>No projects found.</ComboboxEmpty>
+                <ComboboxList>
+                  {(option: { value: string; label: string }) => (
+                    <ComboboxItem key={option.value} value={option}>
+                      {option.label}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+          )}
+        </Field>
+
         <form.Field name="well_id">
           {(field) => (
             <Field label="Well" error={firstError(field.state.meta.errors)}>
@@ -238,13 +291,19 @@ export function DailyReportForm({
                     id={id}
                     // Same height, radius and shadow as the other inputs.
                     className="h-9 w-full rounded-md bg-transparent shadow-xs"
-                    placeholder="Search for a well"
+                    placeholder={
+                      projectId ? "Search for a well" : "Select a project first"
+                    }
                     // A report stays with its well.
                     disabled={Boolean(report)}
                     aria-invalid={invalid}
                   />
                   <ComboboxContent>
-                    <ComboboxEmpty>No wells found.</ComboboxEmpty>
+                    <ComboboxEmpty>
+                      {projectId
+                        ? "No wells in this project."
+                        : "Select a project first."}
+                    </ComboboxEmpty>
                     <ComboboxList>
                       {(option: { value: string; label: string }) => (
                         <ComboboxItem key={option.value} value={option}>
