@@ -32,7 +32,7 @@ export async function call(
 /** Empties every table. Call it in `beforeEach` so tests do not depend on each other. */
 export async function resetDb(): Promise<void> {
   await db.execute(
-    sql`truncate table sections, pumps, wells, projects, product restart identity cascade`,
+    sql`truncate table sections, pumps, solid_control_equipment, wells, projects, product restart identity cascade`,
   );
 }
 
@@ -124,6 +124,26 @@ export async function createPump(
     pumpPayload(projectId, overrides),
   );
   if (status !== 201) throw new Error(`Could not create a pump: ${status}`);
+  return body.data;
+}
+
+export const scePayload = (
+  projectId: string,
+  overrides: Record<string, unknown> = {},
+) => ({ project_id: projectId, type: "shale_shaker", ...overrides });
+
+export async function createSce(
+  projectId: string,
+  overrides: Record<string, unknown> = {},
+) {
+  const { status, body } = await call(
+    "POST",
+    "/solid-control",
+    scePayload(projectId, overrides),
+  );
+  if (status !== 201) {
+    throw new Error(`Could not create solid control equipment: ${status}`);
+  }
   return body.data;
 }
 

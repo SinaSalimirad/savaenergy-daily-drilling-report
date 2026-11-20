@@ -64,6 +64,13 @@
       "when": 1795203501043,
       "tag": "0008_add_pump_rod_diameter",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795205438981,
+      "tag": "0009_add_solid_control_equipment",
+      "breakpoints": true
     }
   ]
 }

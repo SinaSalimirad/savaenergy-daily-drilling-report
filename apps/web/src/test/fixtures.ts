@@ -3,6 +3,7 @@ import type { Product } from "@/features/products/api";
 import type { ProjectProduct } from "@/features/project-products/api";
 import type { Pump } from "@/features/pumps/api";
 import type { DailyReport } from "@/features/reports/api";
+import type { Sce } from "@/features/solids-control/api";
 import type { Well } from "@/features/wells/api";
 
 // Valid objects with every field. Tests override only what they care about. The shapes come from
@@ -82,6 +83,23 @@ export function makePump(overrides: Partial<Pump> = {}): Pump {
     stroke_length: 12,
     efficiency: 95,
     gal_per_stroke: 4.19,
+    created_at: DATE,
+    updated_at: DATE,
+    ...overrides,
+  };
+}
+
+export function makeSce(overrides: Partial<Sce> = {}): Sce {
+  return {
+    id: "sce-1",
+    project_id: "p1",
+    project_name: "North Sea",
+    order: 1,
+    type: "shale_shaker",
+    unit_no: 1,
+    manufacturer: "Swaco",
+    model: null,
+    screen_size: "140/140/140/140",
     created_at: DATE,
     updated_at: DATE,
     ...overrides,

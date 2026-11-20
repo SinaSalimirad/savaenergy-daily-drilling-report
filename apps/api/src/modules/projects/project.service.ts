@@ -25,6 +25,7 @@ import type {
 const PROJECT = "Project";
 const PROJECT_PRODUCT_FK = "project_product_project_id_projects_id_fk";
 const PUMP_FK = "pumps_project_id_projects_id_fk";
+const SCE_FK = "solid_control_equipment_project_id_projects_id_fk";
 
 const nameTaken = () =>
   new AppError(
@@ -108,7 +109,7 @@ export async function deleteProject(id: string): Promise<void> {
     if (!deleted) throw notFound(PROJECT);
   } catch (error) {
     if (isForeignKeyViolation(error)) {
-      // Wells, products and pumps of the project all hold a foreign key to it.
+      // Wells, products, pumps and solid control equipment of the project all hold a foreign key to it.
       if (violatedConstraint(error) === PROJECT_PRODUCT_FK) {
         throw new AppError(
           409,
@@ -121,6 +122,13 @@ export async function deleteProject(id: string): Promise<void> {
           409,
           "PROJECT_HAS_PUMPS",
           "This project still has pumps. Delete them first.",
+        );
+      }
+      if (violatedConstraint(error) === SCE_FK) {
+        throw new AppError(
+          409,
+          "PROJECT_HAS_SOLID_CONTROL",
+          "This project still has solid control equipment. Delete it first.",
         );
       }
       throw new AppError(

@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { SolidsControlView } from "@/features/solids-control/components/solids-control-view";
 
-export default function Page() {
-  return <PagePlaceholder title="Solids control" />;
+export default function SolidsControlPage() {
+  return <SolidsControlView />;
 }

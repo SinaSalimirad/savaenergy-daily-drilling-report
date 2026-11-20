@@ -9,5 +9,6 @@ export * from "./project.schema";
 export * from "./project_product.schema";
 export * from "./pump.schema";
 export * from "./section.schema";
+export * from "./solid_control.schema";
 export * from "./user.schema";
 export * from "./well.schema";
