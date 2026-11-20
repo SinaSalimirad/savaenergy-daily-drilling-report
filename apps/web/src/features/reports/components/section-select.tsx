@@ -23,7 +23,7 @@ export function SectionSelect({
   const options = (sections.data?.data ?? []).map((section) => ({
     value: section.id,
     label: [
-      `${section.order} · ${formatHoleSize(section.hole_size)}`,
+      formatHoleSize(section.hole_size),
       section.hole_type ? holeTypeLabel(section.hole_type) : null,
     ]
       .filter(Boolean)
