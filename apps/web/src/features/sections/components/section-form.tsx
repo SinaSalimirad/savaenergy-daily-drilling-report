@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { SimpleSelect } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { useProjects } from "@/features/projects/api";
+import { useProjectFilter } from "@/features/projects/project-filter";
 import { useWells } from "@/features/wells/api";
 import { ApiError } from "@/lib/api-error";
 import { type Section, useCreateSection, useUpdateSection } from "../api";
@@ -97,12 +98,15 @@ export function SectionForm({
     label: project.name,
   }));
 
-  // The project only narrows the wells, it is not sent. Until one is chosen, an edited
-  // section shows the project of its well.
+  // The project only narrows the wells, it is not sent. Until one is chosen, an edited section
+  // shows the project of its well, and a new one starts in the project chosen in the header.
+  const { projectId: headerProjectId } = useProjectFilter();
   const [chosenProjectId, setChosenProjectId] = useState<string | null>(null);
   const projectId =
     chosenProjectId ??
-    wells.data?.data.find((well) => well.id === section?.well_id)?.project_id ??
+    (section
+      ? wells.data?.data.find((well) => well.id === section.well_id)?.project_id
+      : headerProjectId) ??
     "";
   const wellOptions = (wells.data?.data ?? [])
     .filter((well) => well.project_id === projectId)
@@ -152,7 +156,7 @@ export function SectionForm({
       className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto"
     >
       <div className="grid gap-4 px-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
+        <div>
           <Field label="Project">
             {({ id }) => (
               <Combobox
@@ -189,7 +193,7 @@ export function SectionForm({
 
         <form.Field name="well_id">
           {(field) => (
-            <div className="sm:col-span-2">
+            <div>
               <Field label="Well" error={firstError(field.state.meta.errors)}>
                 {({ id, invalid }) => (
                   <Combobox

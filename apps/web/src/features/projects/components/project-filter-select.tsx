@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "cn";
+import { FolderIcon } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,10 +21,14 @@ type ProjectOption = { value: string; label: string };
 // The way back to "no filter": picking it clears the project.
 const ALL_PROJECTS: ProjectOption = { value: "", label: "All projects" };
 
-// "header": plain text button in the page header. "page": same look as the other buttons next to
-// a page title (the old Archive button), for use beside "New ..." buttons.
+// "header": looks like a text field, with the size of the old search box. "page": same look as the
+// other buttons next to a page title (the old Archive button), for use beside "New ..." buttons.
 const TRIGGER_STYLES = {
-  header: { variant: "ghost", className: "text-base" },
+  header: {
+    variant: "outline",
+    className:
+      "h-10 w-48 justify-start gap-2 bg-transparent px-3 font-normal shadow-xs hover:bg-transparent sm:w-64 dark:bg-input/30",
+  },
   page: { variant: "outline", className: "h-10 border-0 bg-card" },
 } as const;
 
@@ -67,16 +73,42 @@ export function ProjectFilterSelect({
         disabled={projects.isError}
         className={style.className}
       >
-        {selected?.value ? selected.label : "Select Project"}
+        {appearance === "header" && (
+          <FolderIcon className="text-muted-foreground" />
+        )}
+        <span
+          className={cn(
+            "flex-1 truncate text-left",
+            appearance === "header" &&
+              !selected?.value &&
+              "text-muted-foreground",
+          )}
+        >
+          {selected?.value ? selected.label : "Select Project"}
+        </span>
       </ComboboxTrigger>
-      <ComboboxContent align="end" className="w-64">
+      <ComboboxContent
+        align={appearance === "header" ? "start" : "end"}
+        // The header list is exactly as wide as its button; beside a page title it keeps a fixed
+        // width. The search box and the items are taller than the default, so they are easy to hit.
+        className={cn(
+          appearance === "header"
+            ? "w-(--anchor-width) min-w-(--anchor-width)"
+            : "w-64",
+          "*:data-[slot=input-group]:h-10",
+        )}
+      >
         <ComboboxInput showTrigger={false} placeholder="Search projects" />
         <ComboboxEmpty>
           {projects.isPending ? "Loading projects…" : "No projects found."}
         </ComboboxEmpty>
         <ComboboxList>
           {(option: ProjectOption) => (
-            <ComboboxItem key={option.value || "all"} value={option}>
+            <ComboboxItem
+              key={option.value || "all"}
+              value={option}
+              className="py-2.5"
+            >
               {option.label}
             </ComboboxItem>
           )}

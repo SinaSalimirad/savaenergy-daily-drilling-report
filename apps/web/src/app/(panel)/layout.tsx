@@ -1,9 +1,8 @@
-import { BellIcon, SearchIcon } from "lucide-react";
+import { BellIcon } from "lucide-react";
 import { PanelBreadcrumb } from "@/components/layout/panel-breadcrumb";
 import { PanelNavbar } from "@/components/layout/panel-navbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ThemeButton } from "@/components/ui/theme-button";
 import { ProjectFilterSelect } from "@/features/projects/components/project-filter-select";
@@ -23,21 +22,6 @@ export default function PanelLayout({
 
         <div className="flex flex-wrap items-center gap-x-6 ">
           <ProjectFilterSelect />
-
-          <Separator
-            orientation="vertical"
-            className="h-8 data-vertical:self-center max-md:hidden"
-          />
-
-          <div className="relative">
-            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              aria-label="Search"
-              className="h-10 w-48 pl-9 sm:w-64"
-            />
-          </div>
 
           <Separator
             orientation="vertical"

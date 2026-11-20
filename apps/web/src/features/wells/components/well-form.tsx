@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { SimpleSelect } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { useProjects } from "@/features/projects/api";
+import { useProjectFilter } from "@/features/projects/project-filter";
 import { ApiError } from "@/lib/api-error";
 import { useCreateWell, useUpdateWell, type Well } from "../api";
 import {
@@ -103,6 +104,7 @@ export function WellForm({
   well?: Well;
   onSaved: () => void;
 }) {
+  const { projectId: headerProjectId } = useProjectFilter();
   const createWell = useCreateWell();
   const updateWell = useUpdateWell();
   // The API allows at most 100 per page; the select lists the active projects.
@@ -113,7 +115,10 @@ export function WellForm({
   }));
 
   const form = useForm({
-    defaultValues: well ? valuesFrom(well) : emptyValues,
+    // A new well starts in the project chosen in the header; the user can still change it.
+    defaultValues: well
+      ? valuesFrom(well)
+      : { ...emptyValues, project_id: headerProjectId ?? "" },
     validators: {
       // Server-side validation: the API is the only place the rules live.
       onSubmitAsync: async ({ value }) => {
