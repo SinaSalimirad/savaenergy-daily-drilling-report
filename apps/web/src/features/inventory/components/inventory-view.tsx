@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,13 +42,21 @@ function useSelectedReport(projectId: string | null) {
   const list = reports.data?.data ?? [];
 
   // A choice that is no longer in the list (another project, a deleted report) is ignored.
+  // A link from the daily reports page names the report to open (`?report=`).
   const [chosenWellId, setChosenWellId] = useState<string | null>(null);
-  const [chosenReportId, setChosenReportId] = useState<string | null>(null);
+  const [chosenReportId, setChosenReportId] = useState<string | null>(
+    useSearchParams()?.get("report") ?? null,
+  );
 
   const wells = [
     ...new Map(list.map((item) => [item.well_id, item.well_name])),
   ].map(([id, name]) => ({ id, name }));
-  const well = wells.find((item) => item.id === chosenWellId) ?? wells[0];
+  // A chosen report brings its own well, until the user picks another well.
+  const chosenReport = list.find((item) => item.id === chosenReportId);
+  const well =
+    wells.find((item) => item.id === chosenWellId) ??
+    wells.find((item) => item.id === chosenReport?.well_id) ??
+    wells[0];
   const wellReports = list.filter((item) => item.well_id === well?.id);
   const report =
     wellReports.find((item) => item.id === chosenReportId) ?? wellReports[0];

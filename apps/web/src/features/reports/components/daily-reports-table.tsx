@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/table";
 import type { DailyReport } from "../api";
 import { DailyReportActionsMenu } from "./daily-report-actions-menu";
+import { ReportInventoryLink } from "./report-inventory-link";
+import { ReportProjectName } from "./report-project-name";
 
 // No optional features (sorting, filtering, pagination): the server owns those.
 const features = tableFeatures({});
@@ -33,6 +35,7 @@ const CENTERED_COLUMN_IDS = new Set([
   "bit_depth_m",
   "bit_td_m",
   "bit_tvd_m",
+  "inventory",
 ]);
 
 function alignClass(columnId: string) {
@@ -41,7 +44,11 @@ function alignClass(columnId: string) {
 
 const columns = columnHelper.columns([
   columnHelper.accessor("report_no", { header: "No." }),
-  columnHelper.accessor("report_date", { header: "Date" }),
+  columnHelper.display({
+    id: "project",
+    header: "Project",
+    cell: ({ row }) => <ReportProjectName report={row.original} />,
+  }),
   columnHelper.accessor("well_name", { header: "Well" }),
   columnHelper.display({
     id: "section",
@@ -49,6 +56,7 @@ const columns = columnHelper.columns([
     cell: ({ row }) =>
       `${row.original.section_order} · ${formatHoleSize(row.original.section_hole_size)}`,
   }),
+  columnHelper.accessor("report_date", { header: "Date" }),
   columnHelper.accessor("bit_depth_m", {
     header: "Bit depth (m)",
     cell: (info) => info.getValue() ?? EMPTY_VALUE,
@@ -60,6 +68,11 @@ const columns = columnHelper.columns([
   columnHelper.accessor("bit_tvd_m", {
     header: "Bit TVD (m)",
     cell: (info) => info.getValue() ?? EMPTY_VALUE,
+  }),
+  columnHelper.display({
+    id: "inventory",
+    header: "Inventory",
+    cell: ({ row }) => <ReportInventoryLink report={row.original} />,
   }),
   columnHelper.display({
     id: "actions",
