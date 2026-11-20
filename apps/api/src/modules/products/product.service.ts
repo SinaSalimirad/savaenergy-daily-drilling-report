@@ -1,10 +1,16 @@
-import { AppError, isForeignKeyViolation, notFound } from "../../lib/errors";
+import {
+  AppError,
+  isForeignKeyViolation,
+  isUniqueViolation,
+  notFound,
+} from "../../lib/errors";
 import { type ProductDto, toProductDto } from "./product.mapper";
 import {
   deleteProductById,
   findProductById,
   findProducts,
   insertProduct,
+  type ProductRow,
   updateProductById,
 } from "./product.repository";
 import type { ListProductsQuery, ProductInputBody } from "./product.schemas";
@@ -28,21 +34,32 @@ export async function getProduct(id: string): Promise<ProductDto> {
   return toProductDto(row);
 }
 
-export async function createProduct(
-  input: ProductInputBody,
+// The unique indexes are the guarantee. Checking "does it exist?" first would race with a
+// parallel request, so we run the write and translate the violation.
+async function writeProduct(
+  write: () => Promise<ProductRow | undefined>,
 ): Promise<ProductDto> {
-  const row = await insertProduct(input);
-  if (!row) throw notFound(PRODUCT);
-  return toProductDto(row);
+  try {
+    const row = await write();
+    if (!row) throw notFound(PRODUCT);
+    return toProductDto(row);
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      throw new AppError(409, "PRODUCT_EXISTS", "This product already exists.");
+    }
+    throw error;
+  }
 }
 
-export async function updateProduct(
+export function createProduct(input: ProductInputBody): Promise<ProductDto> {
+  return writeProduct(() => insertProduct(input));
+}
+
+export function updateProduct(
   id: string,
   input: ProductInputBody,
 ): Promise<ProductDto> {
-  const row = await updateProductById(id, input);
-  if (!row) throw notFound(PRODUCT);
-  return toProductDto(row);
+  return writeProduct(() => updateProductById(id, input));
 }
 
 export async function deleteProduct(id: string): Promise<void> {

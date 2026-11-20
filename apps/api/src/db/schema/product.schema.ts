@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm";
-import { check, numeric, pgEnum, pgTable, text } from "drizzle-orm/pg-core";
+import {
+  check,
+  numeric,
+  pgEnum,
+  pgTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { PRODUCT_KINDS, PRODUCT_PACKAGE_UNITS } from "schema";
 import { id, timestamps } from "./_shared/columns";
 
@@ -13,6 +20,13 @@ export const productPackageUnit = pgEnum(
 // dimensional = sheet/fabric items such as a tarpaulin (needs length x width)
 // equipment   = items with only a name (e.g. mud skid), every other field must be empty
 export const productKind = pgEnum("product_kind", PRODUCT_KINDS);
+
+// Index names in one place, so tests and the service can refer to them.
+export const PRODUCT_CONSTRAINTS = {
+  uniqueBulk: "product_bulk_unique",
+  uniqueDimensional: "product_dimensional_unique",
+  uniqueEquipment: "product_equipment_unique",
+} as const;
 
 export const products = pgTable(
   "product",
@@ -33,6 +47,25 @@ export const products = pgTable(
     ...timestamps,
   },
   (table) => [
+    // The same product cannot be saved twice. What makes two products "the same" depends on the
+    // kind, and the name ignores upper/lower case. One partial index per kind:
+    //   bulk        = name + package size + package unit + specific gravity
+    //   dimensional = name + length + width
+    //   equipment   = name
+    uniqueIndex(PRODUCT_CONSTRAINTS.uniqueBulk)
+      .on(
+        sql`lower(${table.name})`,
+        table.package_size,
+        table.package_unit,
+        table.specific_gravity,
+      )
+      .where(sql`${table.kind} = 'bulk'`),
+    uniqueIndex(PRODUCT_CONSTRAINTS.uniqueDimensional)
+      .on(sql`lower(${table.name})`, table.length_m, table.width_m)
+      .where(sql`${table.kind} = 'dimensional'`),
+    uniqueIndex(PRODUCT_CONSTRAINTS.uniqueEquipment)
+      .on(sql`lower(${table.name})`)
+      .where(sql`${table.kind} = 'equipment'`),
     check(
       "product_kind_fields",
       sql`(

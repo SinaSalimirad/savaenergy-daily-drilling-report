@@ -16,7 +16,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Product } from "../api";
-import { packageUnitLabel, productKindLabel } from "../labels";
+import { packageUnitLabel } from "../labels";
+import { KindBadge } from "./kind-badge";
 import { ProductActionsMenu } from "./product-actions-menu";
 
 // No optional features (sorting, filtering, pagination): the server owns those.
@@ -41,10 +42,6 @@ function alignClass(columnId: string) {
 
 const columns = columnHelper.columns([
   columnHelper.accessor("name", { header: "Name" }),
-  columnHelper.accessor("kind", {
-    header: "Kind",
-    cell: (info) => productKindLabel(info.getValue()),
-  }),
   // Every column is always shown; a value that does not apply to the kind is a dash.
   columnHelper.accessor("package_size", {
     header: "Package size",
@@ -68,6 +65,10 @@ const columns = columnHelper.columns([
   columnHelper.accessor("width_m", {
     header: "Width (m)",
     cell: (info) => info.getValue() ?? EMPTY_VALUE,
+  }),
+  columnHelper.accessor("kind", {
+    header: "Kind",
+    cell: (info) => <KindBadge kind={info.getValue()} />,
   }),
   columnHelper.display({
     id: "actions",

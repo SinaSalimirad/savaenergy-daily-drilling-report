@@ -32,7 +32,7 @@ export async function call(
 /** Empties every table. Call it in `beforeEach` so tests do not depend on each other. */
 export async function resetDb(): Promise<void> {
   await db.execute(
-    sql`truncate table sections, wells, projects restart identity cascade`,
+    sql`truncate table sections, wells, projects, product restart identity cascade`,
   );
 }
 

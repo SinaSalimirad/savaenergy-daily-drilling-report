@@ -43,6 +43,13 @@
       "when": 1795121658379,
       "tag": "0005_drop_well_archive",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795161091721,
+      "tag": "0006_warm_red_wolf",
+      "breakpoints": true
     }
   ]
 }
