@@ -36,7 +36,7 @@ const sectionFields = z.object({
   well_id: z.uuid("Choose a well."),
   // The position of the section in the well, starting at 1. A well cannot have two sections
   // with the same order. Left out on create, the API uses the next free number.
-  order: z
+  sort_order: z
     .number({ error: "Enter a whole number, for example 1." })
     .int("Enter a whole number, for example 1.")
     .min(1, "Order must be at least 1.")
@@ -47,7 +47,9 @@ const sectionFields = z.object({
   hole_type: holeTypeSchema.nullable().optional(),
 });
 
-export const sectionCreateSchema = sectionFields.partial({ order: true });
+export const sectionCreateSchema = sectionFields.partial({
+  sort_order: true,
+});
 export type SectionCreate = z.infer<typeof sectionCreateSchema>;
 
 export const sectionUpdateSchema = sectionFields

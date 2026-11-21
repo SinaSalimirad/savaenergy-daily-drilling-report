@@ -13,6 +13,23 @@ export const SCE_TYPES = [
 export const sceTypeSchema = z.enum(SCE_TYPES);
 export type SceType = z.infer<typeof sceTypeSchema>;
 
+export const SCE_MANUFACTURED_BY = [
+  "Oiltools",
+  "Derrick",
+  "Scomi",
+  "National Oilwell",
+  "Varco",
+  "Roxio",
+  "Brandt",
+  "Swaco",
+  "Sweco",
+  "Pionner",
+  "Unknown",
+  "Chinese",
+] as const;
+export const sceManufacturedBySchema = z.enum(SCE_MANUFACTURED_BY);
+export type SceManufacturedBy = z.infer<typeof sceManufacturedBySchema>;
+
 // Optional text fields accept `null` too, so an edit can clear them. No `.default()`: inside
 // `.partial()` it would fill missing fields in a patch and overwrite stored values.
 const optionalText = (label: string, max: number) =>
@@ -28,7 +45,7 @@ const sceFields = z.object({
   project_id: z.uuid("Choose a project."),
   // The row of the unit on the rig's sheet. A project cannot have two units with the same
   // order. Left out on create, the API uses the next free number.
-  order: z
+  sort_order: z
     .number({ error: "Enter a whole number, for example 1." })
     .int("Enter a whole number, for example 1.")
     .min(1, "Row must be at least 1.")
@@ -48,7 +65,7 @@ const sceFields = z.object({
 });
 
 export const sceCreateSchema = sceFields.partial({
-  order: true,
+  sort_order: true,
   unit_no: true,
 });
 export type SceCreate = z.infer<typeof sceCreateSchema>;

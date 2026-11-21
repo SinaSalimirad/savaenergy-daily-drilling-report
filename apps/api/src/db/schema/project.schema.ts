@@ -19,11 +19,13 @@ export const projects = pgTable(
     operator: text().notNull(),
     contractor: text().notNull(),
     field: text().notNull(),
-    wells: integer().notNull(),
+    well_count: integer().notNull(),
     currency: projectCurrency().notNull(),
     ...archive,
     ...timestamps,
     ...authorship,
   },
-  (table) => [check("projects_wells_positive", sql`${table.wells} > 0`)],
+  (table) => [
+    check("projects_well_count_positive", sql`${table.well_count} > 0`),
+  ],
 );

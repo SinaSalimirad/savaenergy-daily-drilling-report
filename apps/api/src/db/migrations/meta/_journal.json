@@ -71,6 +71,13 @@
       "when": 1795205438981,
       "tag": "0009_add_solid_control_equipment",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795220000000,
+      "tag": "0010_rename_for_consistency",
+      "breakpoints": true
     }
   ]
 }

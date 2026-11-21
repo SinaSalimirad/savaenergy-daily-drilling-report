@@ -26,7 +26,7 @@ import { SCE_TYPE_OPTIONS } from "../labels";
 const emptyValues = {
   project_id: "",
   // Empty means "next free".
-  order: "",
+  sort_order: "",
   type: "shale_shaker" as SceType,
   // Empty means "next free number of this type".
   unit_no: "",
@@ -38,7 +38,7 @@ const emptyValues = {
 function valuesFrom(sce: Sce): typeof emptyValues {
   return {
     project_id: sce.project_id,
-    order: String(sce.order),
+    sort_order: String(sce.sort_order),
     type: sce.type,
     unit_no: String(sce.unit_no),
     manufacturer: sce.manufacturer ?? "",
@@ -52,7 +52,7 @@ const toNullable = (text: string) => (text.trim() === "" ? null : text);
 
 // The two uniqueness rules each point at their own field.
 const TAKEN_CODE_FIELDS: Record<string, string> = {
-  SCE_ORDER_TAKEN: "order",
+  SCE_SORT_ORDER_TAKEN: "sort_order",
   SCE_UNIT_NO_TAKEN: "unit_no",
 };
 
@@ -119,7 +119,9 @@ export function SceForm({ sce, onSaved }: { sce?: Sce; onSaved: () => void }) {
         const body = {
           project_id: value.project_id,
           // Left out on create, the API puts the unit last. On edit they are always filled.
-          ...(value.order === "" ? {} : { order: Number(value.order) }),
+          ...(value.sort_order === ""
+            ? {}
+            : { sort_order: Number(value.sort_order) }),
           type: value.type,
           ...(value.unit_no === "" ? {} : { unit_no: Number(value.unit_no) }),
           manufacturer: toNullable(value.manufacturer),
@@ -198,7 +200,7 @@ export function SceForm({ sce, onSaved }: { sce?: Sce; onSaved: () => void }) {
           )}
         </form.Field>
 
-        <form.Field name="order">
+        <form.Field name="sort_order">
           {(field) => (
             <Field label="Row" error={firstError(field.state.meta.errors)}>
               {({ id, invalid }) => (

@@ -25,7 +25,7 @@ export const pumps = pgTable(
     project_id: uuid()
       .notNull()
       .references(() => projects.id),
-    order: integer().notNull(), // the row of the pump on the rig's sheet
+    sort_order: integer().notNull(), // the row of the pump on the rig's sheet
     model: text().notNull(),
     type: pumpType().notNull(),
     // Inches. The output in gallons per stroke is computed from these, never stored.
@@ -47,13 +47,16 @@ export const pumps = pgTable(
     ...authorship,
   },
   (table) => [
-    unique("pumps_project_id_order_unique").on(table.project_id, table.order),
-    check("pumps_order_positive", sql`${table.order} >= 1`),
+    unique("pumps_project_id_sort_order_unique").on(
+      table.project_id,
+      table.sort_order,
+    ),
+    check("pumps_sort_order_positive", sql`${table.sort_order} >= 1`),
     check("pumps_liner_diameter_positive", sql`${table.liner_diameter} > 0`),
     check("pumps_stroke_length_positive", sql`${table.stroke_length} > 0`),
     check(
       "pumps_duplex_rod_diameter",
-      sql`(${table.type} <> 'duplex' or ${table.rod_diameter} is not null) and (${table.rod_diameter} is null or (${table.rod_diameter} > 0 and ${table.rod_diameter} < ${table.liner_diameter}))`,
+      sql`(${table.type} <> 'duplex' or ${table.rod_diameter} is not null) and (${table.rod_diameter} is null or (${table.rod_diameter} > 0 and ${table.rod_diameter} <= ${table.liner_diameter}))`,
     ),
     check(
       "pumps_efficiency_percentage",

@@ -29,7 +29,7 @@ const EMPTY_VALUE = "—";
 
 // The columns of the rig's sheet, with the numbers centered so they line up.
 const CENTERED_COLUMN_IDS = new Set([
-  "order",
+  "sort_order",
   "stroke_length",
   "efficiency",
   "liner_diameter",
@@ -42,7 +42,7 @@ function alignClass(columnId: string) {
 }
 
 const columns = columnHelper.columns([
-  columnHelper.accessor("order", { header: "Row" }),
+  columnHelper.accessor("sort_order", { header: "Row" }),
   columnHelper.accessor("model", { header: "Model" }),
   columnHelper.accessor("project_name", { header: "Project" }),
   columnHelper.accessor("stroke_length", {

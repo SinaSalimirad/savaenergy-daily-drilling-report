@@ -33,7 +33,7 @@ describe("formatHoleSize", () => {
 const WELL_ID = "00000000-0000-4000-8000-000000000000";
 
 describe("sectionCreateSchema", () => {
-  test("accepts a section without an order", () => {
+  test("accepts a section without a sort order", () => {
     const result = sectionCreateSchema.safeParse({
       well_id: WELL_ID,
       hole_size: 12.25,
@@ -42,20 +42,20 @@ describe("sectionCreateSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  test("accepts a hole type and an order", () => {
+  test("accepts a hole type and a sort order", () => {
     const result = sectionCreateSchema.safeParse({
       well_id: WELL_ID,
       hole_size: 8.5,
       hole_type: "open_hole",
-      order: 2,
+      sort_order: 2,
     });
 
     expect(result.success).toBe(true);
   });
 
   test.each([
-    { order: 0 },
-    { order: 1.5 },
+    { sort_order: 0 },
+    { sort_order: 1.5 },
     { hole_size: 18.5 },
     { hole_type: "tubing" },
     { well_id: "not-a-uuid" },

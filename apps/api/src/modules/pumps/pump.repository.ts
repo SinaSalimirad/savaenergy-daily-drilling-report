@@ -28,7 +28,7 @@ export async function findPumps(
       .from(pumps)
       .innerJoin(projects, eq(projects.id, pumps.project_id))
       .where(where)
-      .orderBy(asc(projects.name), asc(pumps.order), asc(pumps.id))
+      .orderBy(asc(projects.name), asc(pumps.sort_order), asc(pumps.id))
       .limit(limit)
       .offset(offset),
     executor.select({ total: count() }).from(pumps).where(where),
@@ -52,11 +52,11 @@ export async function insertPump(
   // Without an order, the pump goes last. Two parallel requests can pick the same number;
   // the unique constraint rejects the second one and the service answers 409.
   const nextOrder = sql<number>`(
-    select coalesce(max(p."order"), 0) + 1 from ${pumps} p where p.project_id = ${input.project_id}
+    select coalesce(max(p."sort_order"), 0) + 1 from ${pumps} p where p.project_id = ${input.project_id}
   )`;
   const [created] = await executor
     .insert(pumps)
-    .values({ ...input, order: input.order ?? nextOrder })
+    .values({ ...input, sort_order: input.sort_order ?? nextOrder })
     .returning({ id: pumps.id });
   return created && findPumpById(created.id, executor);
 }

@@ -32,7 +32,7 @@ export async function call(
 /** Empties every table. Call it in `beforeEach` so tests do not depend on each other. */
 export async function resetDb(): Promise<void> {
   await db.execute(
-    sql`truncate table sections, pumps, solid_control_equipment, wells, projects, product restart identity cascade`,
+    sql`truncate table sections, pumps, solid_control_equipment, wells, projects, products restart identity cascade`,
   );
 }
 
@@ -43,7 +43,7 @@ export const projectPayload = (overrides: Record<string, unknown> = {}) => ({
   operator: "Operator Co",
   contractor: "Contractor Co",
   field: "South Field",
-  wells: 3,
+  well_count: 3,
   currency: "USD",
   ...overrides,
 });

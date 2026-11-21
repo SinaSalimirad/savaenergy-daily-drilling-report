@@ -68,7 +68,7 @@ describe("galPerStroke", () => {
 });
 
 describe("pumpCreateSchema", () => {
-  test("accepts a pump without an order", () => {
+  test("accepts a pump without a sort order", () => {
     expect(pumpCreateSchema.safeParse(valid).success).toBe(true);
   });
 
@@ -88,10 +88,19 @@ describe("pumpCreateSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  test("accepts a duplex with a rod as thick as the liner", () => {
+    const result = pumpCreateSchema.safeParse({
+      ...valid,
+      type: "duplex",
+      rod_diameter: 6,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   test.each([
     { type: "duplex" },
     { type: "duplex", rod_diameter: null },
-    { type: "duplex", rod_diameter: 6 },
     { type: "duplex", rod_diameter: 7 },
     { type: "triplex", rod_diameter: 0 },
   ])("rejects the rod of %o", (bad) => {
@@ -116,8 +125,8 @@ describe("pumpCreateSchema", () => {
     { efficiency: 0 },
     { efficiency: 100.5 },
     { efficiency: 95.123 },
-    { order: 0 },
-    { order: 1.5 },
+    { sort_order: 0 },
+    { sort_order: 1.5 },
     { project_id: "not-a-uuid" },
   ])("rejects %o", (bad) => {
     expect(pumpCreateSchema.safeParse({ ...valid, ...bad }).success).toBe(

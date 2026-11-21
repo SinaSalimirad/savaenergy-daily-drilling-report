@@ -38,7 +38,7 @@ export function DeletePumpDialog({
           <DialogTitle>Delete pump</DialogTitle>
           <DialogDescription>
             Delete pump{" "}
-            <strong className="text-foreground">{pump.order}</strong> of{" "}
+            <strong className="text-foreground">{pump.sort_order}</strong> of{" "}
             <strong className="text-foreground">{pump.project_name}</strong>{" "}
             permanently? This cannot be undone.
           </DialogDescription>

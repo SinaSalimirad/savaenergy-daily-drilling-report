@@ -27,7 +27,7 @@ export function EditSceDialog({
         <DialogHeader>
           <DialogTitle>Edit unit</DialogTitle>
           <DialogDescription>
-            Change row {sce.order} of {sce.project_name}.
+            Change row {sce.sort_order} of {sce.project_name}.
           </DialogDescription>
         </DialogHeader>
         <SceForm sce={sce} onSaved={() => onOpenChange(false)} />

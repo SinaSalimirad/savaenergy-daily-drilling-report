@@ -10,7 +10,7 @@ export type SectionDto = {
   well_id: string;
   well_name: string;
   project_name: string;
-  order: number;
+  sort_order: number;
   hole_size: number;
   hole_type: SectionRow["hole_type"];
   created_at: string;
@@ -23,7 +23,7 @@ export function toSectionDto(row: SectionRow): SectionDto {
     well_id: row.well_id,
     well_name: row.well_name,
     project_name: row.project_name,
-    order: row.order,
+    sort_order: row.sort_order,
     hole_size: row.hole_size,
     hole_type: row.hole_type,
     created_at: row.created_at.toISOString(),

@@ -17,14 +17,14 @@ import { wells } from "./well.schema";
 // Constraint names in one place: the table below creates them, the service reads them to tell
 // which rule a write broke.
 export const DAILY_REPORT_CONSTRAINTS = {
-  uniqueDate: "daily_report_well_id_report_date_unique",
-  uniqueNumber: "daily_report_well_id_report_no_unique",
-  sectionBelongsToWell: "daily_report_section_belongs_to_well_fk",
+  uniqueDate: "daily_reports_well_id_report_date_unique",
+  uniqueNumber: "daily_reports_well_id_report_no_unique",
+  sectionBelongsToWell: "daily_reports_section_belongs_to_well_fk",
 } as const;
 
 // One report per well per day.
 export const dailyReports = pgTable(
-  "daily_report",
+  "daily_reports",
   {
     ...id,
     well_id: uuid()
@@ -61,9 +61,9 @@ export const dailyReports = pgTable(
       table.well_id,
       table.report_no,
     ),
-    check("daily_report_report_no_positive", sql`${table.report_no} > 0`),
+    check("daily_reports_report_no_positive", sql`${table.report_no} > 0`),
     check(
-      "daily_report_depths_non_negative",
+      "daily_reports_depths_non_negative",
       sql`${table.bit_depth_m} >= 0 AND ${table.bit_td_m} >= 0 AND ${table.bit_tvd_m} >= 0`,
     ),
   ],

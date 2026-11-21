@@ -28,14 +28,14 @@ const columnHelper = createColumnHelper<typeof features, Sce>();
 const EMPTY_VALUE = "—";
 
 // The columns of the rig's sheet. The row and the number are short, so they are centered.
-const CENTERED_COLUMN_IDS = new Set(["order", "unit_no"]);
+const CENTERED_COLUMN_IDS = new Set(["sort_order", "unit_no"]);
 
 function alignClass(columnId: string) {
   return CENTERED_COLUMN_IDS.has(columnId) ? "text-center" : undefined;
 }
 
 const columns = columnHelper.columns([
-  columnHelper.accessor("order", { header: "Row" }),
+  columnHelper.accessor("sort_order", { header: "Row" }),
   columnHelper.accessor("type", {
     header: "Type",
     cell: (info) => sceTypeLabel(info.getValue()),

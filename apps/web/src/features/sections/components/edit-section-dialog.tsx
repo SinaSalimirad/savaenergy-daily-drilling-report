@@ -27,7 +27,7 @@ export function EditSectionDialog({
         <DialogHeader>
           <DialogTitle>Edit section</DialogTitle>
           <DialogDescription>
-            Change section {section.order} of {section.well_name}.
+            Change section {section.sort_order} of {section.well_name}.
           </DialogDescription>
         </DialogHeader>
         <SectionForm section={section} onSaved={() => onOpenChange(false)} />

@@ -38,7 +38,8 @@ export function DeleteSectionDialog({
           <DialogTitle>Delete section</DialogTitle>
           <DialogDescription>
             Delete section{" "}
-            <strong className="text-foreground">{section.order}</strong> of{" "}
+            <strong className="text-foreground">{section.sort_order}</strong>{" "}
+            of{" "}
             <strong className="text-foreground">{section.well_name}</strong>{" "}
             permanently? This cannot be undone.
           </DialogDescription>

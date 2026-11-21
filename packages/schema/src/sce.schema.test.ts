@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { sceCreateSchema, sceUpdateSchema } from "./solid-control.schema";
+import { sceCreateSchema, sceUpdateSchema } from "./sce.schema";
 
 const PROJECT_ID = "00000000-0000-4000-8000-000000000000";
 const valid = { project_id: PROJECT_ID, type: "shale_shaker" };
@@ -12,7 +12,7 @@ describe("sceCreateSchema", () => {
   test("accepts a full row of the sheet", () => {
     const result = sceCreateSchema.safeParse({
       ...valid,
-      order: 1,
+      sort_order: 1,
       unit_no: 2,
       manufacturer: "Swaco",
       model: "Mongoose",
@@ -35,8 +35,8 @@ describe("sceCreateSchema", () => {
 
   test.each([
     { type: "shaker" },
-    { order: 0 },
-    { order: 1.5 },
+    { sort_order: 0 },
+    { sort_order: 1.5 },
     { unit_no: 0 },
     { unit_no: 100 },
     { manufacturer: "   " },

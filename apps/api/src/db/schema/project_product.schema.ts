@@ -18,7 +18,7 @@ export const projectProductOrigin = pgEnum("project_product_origin", [
 ]);
 
 export const projectProducts = pgTable(
-  "project_product",
+  "project_products",
   {
     ...id,
     project_id: uuid()
@@ -35,10 +35,10 @@ export const projectProducts = pgTable(
     ...authorship,
   },
   (table) => [
-    unique("project_product_project_id_product_id_unique").on(
+    unique("project_products_project_id_product_id_unique").on(
       table.project_id,
       table.product_id,
     ),
-    check("project_product_price_positive", sql`${table.price} > 0`),
+    check("project_products_price_positive", sql`${table.price} > 0`),
   ],
 );

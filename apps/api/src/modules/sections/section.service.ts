@@ -36,7 +36,7 @@ async function writeSection(
     if (isUniqueViolation(error)) {
       throw new AppError(
         409,
-        "SECTION_ORDER_TAKEN",
+        "SECTION_SORT_ORDER_TAKEN",
         "This well already has a section with this order.",
       );
     }
@@ -79,7 +79,7 @@ export async function moveSection(
   const section = await findSectionById(id);
   if (!section) throw notFound(SECTION);
   // Moving onto its own place changes nothing.
-  if (section.order === to_order) return toSectionDto(section);
+  if (section.sort_order === to_order) return toSectionDto(section);
 
   return writeSection(() => moveSectionToOrder(section, to_order));
 }

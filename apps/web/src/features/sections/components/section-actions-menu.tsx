@@ -31,7 +31,7 @@ export function SectionActionsMenu({ section }: { section: Section }) {
             <Button
               variant="ghost"
               size="icon-sm"
-              aria-label={`Actions for section ${section.order} of ${section.well_name}`}
+              aria-label={`Actions for section ${section.sort_order} of ${section.well_name}`}
             />
           }
         >

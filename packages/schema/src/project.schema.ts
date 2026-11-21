@@ -30,7 +30,7 @@ export const projectCreateSchema = z.object({
   field: requiredText("Field"),
   // A whole number sent as a JSON number. No `z.coerce`: it would make the input type
   // `unknown` and the web would lose the type of this field.
-  wells: z
+  well_count: z
     .number({ error: "Enter the number of wells." })
     .int("Enter a whole number, for example 12.")
     .positive("Number of wells must be at least 1."),

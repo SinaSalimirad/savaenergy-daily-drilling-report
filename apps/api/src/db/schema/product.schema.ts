@@ -23,13 +23,13 @@ export const productKind = pgEnum("product_kind", PRODUCT_KINDS);
 
 // Index names in one place, so tests and the service can refer to them.
 export const PRODUCT_CONSTRAINTS = {
-  uniqueBulk: "product_bulk_unique",
-  uniqueDimensional: "product_dimensional_unique",
-  uniqueEquipment: "product_equipment_unique",
+  uniqueBulk: "products_bulk_unique",
+  uniqueDimensional: "products_dimensional_unique",
+  uniqueEquipment: "products_equipment_unique",
 } as const;
 
 export const products = pgTable(
-  "product",
+  "products",
   {
     ...id,
     name: text().notNull(),
@@ -67,7 +67,7 @@ export const products = pgTable(
       .on(sql`lower(${table.name})`)
       .where(sql`${table.kind} = 'equipment'`),
     check(
-      "product_kind_fields",
+      "products_kind_fields",
       sql`(
         ${table.kind} = 'bulk'
         AND ${table.package_size} IS NOT NULL
@@ -92,7 +92,7 @@ export const products = pgTable(
       )`,
     ),
     check(
-      "product_dimensions_positive",
+      "products_dimensions_positive",
       sql`${table.length_m} > 0 AND ${table.width_m} > 0`,
     ),
   ],

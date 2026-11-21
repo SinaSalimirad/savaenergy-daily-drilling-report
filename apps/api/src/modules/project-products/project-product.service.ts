@@ -22,9 +22,9 @@ import type {
 } from "./project-product.schemas";
 
 const PROJECT_PRODUCT = "Project product";
-const PROJECT_FK = "project_product_project_id_projects_id_fk";
+const PROJECT_FK = "project_products_project_id_projects_id_fk";
 const INVENTORY_FK =
-  "product_inventory_project_product_id_project_product_id_fk";
+  "product_inventories_project_product_id_project_products_id_fk";
 
 export async function listProjectProducts(query: ListProjectProductsQuery) {
   const { rows, total } = await findProjectProducts({

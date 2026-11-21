@@ -1,7 +1,7 @@
 import { pgTable, text } from "drizzle-orm/pg-core";
 import { id, timestamps } from "./_shared/columns";
 
-export const user = pgTable("user", {
+export const users = pgTable("users", {
   ...id,
   name: text().notNull(),
   username: text().notNull().unique(),

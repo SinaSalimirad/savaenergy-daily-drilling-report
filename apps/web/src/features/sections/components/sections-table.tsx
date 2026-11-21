@@ -60,7 +60,7 @@ const CENTERED_COLUMN_IDS = new Set<string>();
 
 const NARROW_COLUMN_WIDTHS: Record<string, string> = {
   drag: "w-10",
-  order: "w-20",
+  sort_order: "w-20",
   actions: "w-24",
 };
 
@@ -80,7 +80,7 @@ function DragHandle({ section }: { section: Section }) {
       variant="ghost"
       size="icon-sm"
       className="cursor-grab text-muted-foreground hover:bg-transparent active:cursor-grabbing"
-      aria-label={`Drag to reorder section ${section.order} of ${section.well_name}`}
+      aria-label={`Drag to reorder section ${section.sort_order} of ${section.well_name}`}
     >
       <GripVerticalIcon />
     </Button>
@@ -93,7 +93,7 @@ const columns = columnHelper.columns([
     header: () => <span className="sr-only">Reorder</span>,
     cell: ({ row }) => <DragHandle section={row.original} />,
   }),
-  columnHelper.accessor("order", { header: "Order" }),
+  columnHelper.accessor("sort_order", { header: "Order" }),
   columnHelper.accessor("well_name", { header: "Well" }),
   columnHelper.accessor("project_name", { header: "Project" }),
   columnHelper.accessor("hole_size", {
@@ -199,18 +199,18 @@ export function SectionsTable({
     // The rows of this well keep the same set of order numbers, only in a new sequence.
     const orders = rows
       .filter((section) => section.well_id === moved.well_id)
-      .map((section) => section.order);
+      .map((section) => section.sort_order);
     let next = 0;
     setDropped(
       arrayMove(rows, from, to).map((section) =>
         section.well_id === moved.well_id
-          ? { ...section, order: orders[next++] ?? section.order }
+          ? { ...section, sort_order: orders[next++] ?? section.sort_order }
           : section,
       ),
     );
 
     moveSection.mutate(
-      { id: moved.id, toOrder: target.order },
+      { id: moved.id, toOrder: target.sort_order },
       {
         onError: (error) => {
           setDropped(null);

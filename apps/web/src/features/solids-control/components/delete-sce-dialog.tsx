@@ -37,7 +37,8 @@ export function DeleteSceDialog({
         <DialogHeader>
           <DialogTitle>Delete unit</DialogTitle>
           <DialogDescription>
-            Delete unit <strong className="text-foreground">{sce.order}</strong>{" "}
+            Delete unit{" "}
+            <strong className="text-foreground">{sce.sort_order}</strong>{" "}
             of <strong className="text-foreground">{sce.project_name}</strong>{" "}
             permanently? This cannot be undone.
           </DialogDescription>

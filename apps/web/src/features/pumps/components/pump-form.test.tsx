@@ -117,7 +117,7 @@ describe("PumpForm", () => {
       error: {
         status: 409,
         value: {
-          code: "PUMP_ORDER_TAKEN",
+          code: "PUMP_SORT_ORDER_TAKEN",
           message: "This project already has a pump with this order.",
         },
       },

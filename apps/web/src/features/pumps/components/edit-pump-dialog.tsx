@@ -27,7 +27,7 @@ export function EditPumpDialog({
         <DialogHeader>
           <DialogTitle>Edit pump</DialogTitle>
           <DialogDescription>
-            Change pump {pump.order} of {pump.project_name}.
+            Change pump {pump.sort_order} of {pump.project_name}.
           </DialogDescription>
         </DialogHeader>
         <PumpForm pump={pump} onSaved={() => onOpenChange(false)} />

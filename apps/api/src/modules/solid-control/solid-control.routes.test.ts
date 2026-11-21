@@ -21,7 +21,7 @@ describe("POST /solid-control", () => {
       "POST",
       "/solid-control",
       scePayload(projectId, {
-        order: 2,
+        sort_order: 2,
         unit_no: 3,
         manufacturer: "Swaco",
         model: "Mongoose",
@@ -33,7 +33,7 @@ describe("POST /solid-control", () => {
     expect(body.data).toMatchObject({
       project_id: projectId,
       project_name: "Alpha",
-      order: 2,
+      sort_order: 2,
       type: "shale_shaker",
       unit_no: 3,
       manufacturer: "Swaco",
@@ -56,10 +56,12 @@ describe("POST /solid-control", () => {
   test("without a row or a number, the unit goes last", async () => {
     const first = await createSce(projectId);
     const second = await createSce(projectId);
-    await createSce(projectId, { order: 10 });
+    await createSce(projectId, { sort_order: 10 });
     const last = await createSce(projectId);
 
-    expect([first.order, second.order, last.order]).toEqual([1, 2, 11]);
+    expect([first.sort_order, second.sort_order, last.sort_order]).toEqual([
+      1, 2, 11,
+    ]);
   });
 
   test("numbers the units of each type on their own", async () => {
@@ -78,20 +80,20 @@ describe("POST /solid-control", () => {
 
     const unit = await createSce(other.id);
 
-    expect([unit.order, unit.unit_no]).toEqual([1, 1]);
+    expect([unit.sort_order, unit.unit_no]).toEqual([1, 1]);
   });
 
   test("rejects a row that the project already uses with 409", async () => {
-    await createSce(projectId, { order: 1 });
+    await createSce(projectId, { sort_order: 1 });
 
     const { status, body } = await call(
       "POST",
       "/solid-control",
-      scePayload(projectId, { type: "desander", order: 1 }),
+      scePayload(projectId, { type: "desander", sort_order: 1 }),
     );
 
     expect(status).toBe(409);
-    expect(body.code).toBe("SCE_ORDER_TAKEN");
+    expect(body.code).toBe("SCE_SORT_ORDER_TAKEN");
   });
 
   test("rejects a number that the type already uses with 409", async () => {
@@ -120,7 +122,7 @@ describe("POST /solid-control", () => {
 
   test.each([
     { type: "shaker" },
-    { order: 0 },
+    { sort_order: 0 },
     { unit_no: 0 },
     { unit_no: 1.5 },
     { manufacturer: "" },
@@ -155,13 +157,15 @@ describe("GET /solid-control", () => {
   });
 
   test("lists the units in the order of the sheet", async () => {
-    await createSce(projectId, { order: 3 });
-    await createSce(projectId, { order: 1, type: "desander" });
-    await createSce(projectId, { order: 2, type: "desilter" });
+    await createSce(projectId, { sort_order: 3 });
+    await createSce(projectId, { sort_order: 1, type: "desander" });
+    await createSce(projectId, { sort_order: 2, type: "desilter" });
 
     const { body } = await call("GET", "/solid-control");
 
-    expect(body.data.map((u: { order: number }) => u.order)).toEqual([1, 2, 3]);
+    expect(
+      body.data.map((u: { sort_order: number }) => u.sort_order),
+    ).toEqual([1, 2, 3]);
   });
 
   test("filters by project and counts only that project's units", async () => {
@@ -230,7 +234,7 @@ describe("PATCH /solid-control/:id", () => {
     expect(body.data).toMatchObject({
       model: "Mongoose",
       manufacturer: "Swaco",
-      order: unit.order,
+      sort_order: unit.sort_order,
     });
   });
 
@@ -245,25 +249,25 @@ describe("PATCH /solid-control/:id", () => {
   });
 
   test("rejects a row or a number that another unit uses with 409", async () => {
-    await createSce(projectId, { order: 1, unit_no: 1 });
-    const second = await createSce(projectId, { order: 2, unit_no: 2 });
+    await createSce(projectId, { sort_order: 1, unit_no: 1 });
+    const second = await createSce(projectId, { sort_order: 2, unit_no: 2 });
 
     const byOrder = await call("PATCH", `/solid-control/${second.id}`, {
-      order: 1,
+      sort_order: 1,
     });
     const byNumber = await call("PATCH", `/solid-control/${second.id}`, {
       unit_no: 1,
     });
 
-    expect(byOrder.body.code).toBe("SCE_ORDER_TAKEN");
+    expect(byOrder.body.code).toBe("SCE_SORT_ORDER_TAKEN");
     expect(byNumber.body.code).toBe("SCE_UNIT_NO_TAKEN");
   });
 
   test("lets a unit keep its own row and number", async () => {
-    const unit = await createSce(projectId, { order: 1, unit_no: 1 });
+    const unit = await createSce(projectId, { sort_order: 1, unit_no: 1 });
 
     const { status } = await call("PATCH", `/solid-control/${unit.id}`, {
-      order: 1,
+      sort_order: 1,
       unit_no: 1,
     });
 

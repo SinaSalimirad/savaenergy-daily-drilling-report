@@ -246,7 +246,7 @@ describe("GET, PATCH and DELETE /products/:id", () => {
       operator: "Op",
       contractor: "Co",
       field: "F",
-      wells: 1,
+      well_count: 1,
       currency: "USD",
     });
     await call("POST", "/project-products", {

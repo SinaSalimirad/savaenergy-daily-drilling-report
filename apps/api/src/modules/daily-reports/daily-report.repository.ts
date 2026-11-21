@@ -12,7 +12,7 @@ type Executor = DB | Transaction;
 const reportColumns = {
   ...getTableColumns(dailyReports),
   well_name: wells.name,
-  section_order: sections.order,
+  section_order: sections.sort_order,
   section_hole_size: sections.hole_size,
 };
 

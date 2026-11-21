@@ -21,7 +21,7 @@ const emptyValues = {
   operator: "",
   contractor: "",
   // Kept as text while typing; converted to a number on submit.
-  wells: "",
+  well_count: "",
   currency: DEFAULT_CURRENCY as Currency,
 };
 
@@ -31,7 +31,7 @@ function valuesFrom(project: Project): typeof emptyValues {
     field: project.field ?? "",
     operator: project.operator,
     contractor: project.contractor,
-    wells: String(project.wells),
+    well_count: String(project.well_count),
     currency: project.currency as Currency,
   };
 }
@@ -120,7 +120,7 @@ export function ProjectForm({
           operator: normalizeNames(value.operator),
           contractor: normalizeNames(value.contractor),
           // An empty box becomes NaN-free 0 here, and the API rejects it as "not positive".
-          wells: Number(value.wells),
+          well_count: Number(value.well_count),
         };
         try {
           if (project) {
@@ -239,7 +239,7 @@ export function ProjectForm({
           )}
         </form.Field>
 
-        <form.Field name="wells">
+        <form.Field name="well_count">
           {(field) => (
             <Field
               label="Number of wells"

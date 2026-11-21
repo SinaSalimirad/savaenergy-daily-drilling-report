@@ -26,7 +26,7 @@ import { PUMP_TYPE_OPTIONS } from "../labels";
 const emptyValues = {
   project_id: "",
   // Empty means "next free".
-  order: "",
+  sort_order: "",
   model: "",
   type: "triplex" as PumpType,
   liner_diameter: "",
@@ -39,7 +39,7 @@ const emptyValues = {
 function valuesFrom(pump: Pump): typeof emptyValues {
   return {
     project_id: pump.project_id,
-    order: String(pump.order),
+    sort_order: String(pump.sort_order),
     model: pump.model,
     type: pump.type,
     liner_diameter: String(pump.liner_diameter),
@@ -53,7 +53,7 @@ function valuesFrom(pump: Pump): typeof emptyValues {
 const toNumber = (text: string) =>
   text.trim() === "" ? Number.NaN : Number(text);
 
-const ORDER_TAKEN_CODE = "PUMP_ORDER_TAKEN";
+const ORDER_TAKEN_CODE = "PUMP_SORT_ORDER_TAKEN";
 
 type FieldProps = {
   label: string;
@@ -80,7 +80,7 @@ function toServerErrors(error: unknown) {
     return { form: "Something went wrong.", fields: {} };
   }
   if (error.code === ORDER_TAKEN_CODE) {
-    return { form: undefined, fields: { order: error.message } };
+    return { form: undefined, fields: { sort_order: error.message } };
   }
   const hasFieldErrors = Object.keys(error.fieldErrors).length > 0;
   return {
@@ -137,7 +137,9 @@ export function PumpForm({
         const body = {
           project_id: value.project_id,
           // Left out on create, the API puts the pump last. On edit it is always filled.
-          ...(value.order === "" ? {} : { order: Number(value.order) }),
+          ...(value.sort_order === ""
+            ? {}
+            : { sort_order: Number(value.sort_order) }),
           model: value.model,
           type: value.type,
           liner_diameter: toNumber(value.liner_diameter),
@@ -219,7 +221,7 @@ export function PumpForm({
           )}
         </form.Field>
 
-        <form.Field name="order">
+        <form.Field name="sort_order">
           {(field) => (
             <Field label="Row" error={firstError(field.state.meta.errors)}>
               {({ id, invalid }) => (

@@ -1,11 +1,14 @@
-import { inventoryCreateSchema, inventoryUpdateSchema } from "schema";
+import {
+  productInventoryCreateSchema,
+  productInventoryUpdateSchema,
+} from "schema";
 import * as z from "zod";
 
 // What a client may send comes from packages/schema, shared with the web.
-export const createInventorySchema = inventoryCreateSchema;
+export const createInventorySchema = productInventoryCreateSchema;
 export type CreateInventoryInput = z.infer<typeof createInventorySchema>;
 
-export const updateInventorySchema = inventoryUpdateSchema;
+export const updateInventorySchema = productInventoryUpdateSchema;
 export type UpdateInventoryInput = z.infer<typeof updateInventorySchema>;
 
 export const inventoryIdParamsSchema = z.object({ id: z.uuid() });

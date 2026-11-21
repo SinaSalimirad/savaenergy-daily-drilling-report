@@ -12,9 +12,24 @@ beforeEach(() => {
 
 // The rows of the rig's sheet.
 const units = [
-  makeSce({ id: "a", order: 1, unit_no: 1, screen_size: "140/140/140/140" }),
-  makeSce({ id: "b", order: 2, unit_no: 2, screen_size: "170/170/170/170" }),
-  makeSce({ id: "c", order: 3, unit_no: 3, screen_size: "200/200/200/200" }),
+  makeSce({
+    id: "a",
+    sort_order: 1,
+    unit_no: 1,
+    screen_size: "140/140/140/140",
+  }),
+  makeSce({
+    id: "b",
+    sort_order: 2,
+    unit_no: 2,
+    screen_size: "170/170/170/170",
+  }),
+  makeSce({
+    id: "c",
+    sort_order: 3,
+    unit_no: 3,
+    screen_size: "200/200/200/200",
+  }),
 ];
 
 const rowCells = (index: number) =>

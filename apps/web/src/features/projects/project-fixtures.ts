@@ -8,7 +8,7 @@ export function makeProject(overrides: Partial<Project> = {}): Project {
     operator: "Sava Energy",
     contractor: "Drill Co",
     field: "Alpha",
-    wells: 4,
+    well_count: 4,
     status: "active",
     currency: "USD",
     archived_at: null,

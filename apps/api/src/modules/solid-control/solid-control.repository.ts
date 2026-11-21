@@ -1,6 +1,6 @@
 import { asc, count, eq, getTableColumns, sql } from "drizzle-orm";
 import { type DB, db, type Transaction } from "../../db";
-import { projects, solidControlEquipment as sce } from "../../db/schema";
+import { projects, sce } from "../../db/schema";
 import type { CreateSceInput, UpdateSceInput } from "./solid-control.schemas";
 
 type Executor = DB | Transaction;
@@ -25,7 +25,7 @@ export async function findSce(
       .from(sce)
       .innerJoin(projects, eq(projects.id, sce.project_id))
       .where(where)
-      .orderBy(asc(projects.name), asc(sce.order), asc(sce.id))
+      .orderBy(asc(projects.name), asc(sce.sort_order), asc(sce.id))
       .limit(limit)
       .offset(offset),
     executor.select({ total: count() }).from(sce).where(where),
@@ -50,7 +50,7 @@ export async function insertSce(
   // number among the units of its type). Two parallel requests can pick the same number; the
   // unique constraints reject the second one and the service answers 409.
   const nextOrder = sql<number>`(
-    select coalesce(max(s."order"), 0) + 1 from ${sce} s where s.project_id = ${input.project_id}
+    select coalesce(max(s."sort_order"), 0) + 1 from ${sce} s where s.project_id = ${input.project_id}
   )`;
   const nextUnitNo = sql<number>`(
     select coalesce(max(s.unit_no), 0) + 1 from ${sce} s
@@ -60,7 +60,7 @@ export async function insertSce(
     .insert(sce)
     .values({
       ...input,
-      order: input.order ?? nextOrder,
+      sort_order: input.sort_order ?? nextOrder,
       unit_no: input.unit_no ?? nextUnitNo,
     })
     .returning({ id: sce.id });

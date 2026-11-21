@@ -31,7 +31,7 @@ const EMPTY_VALUE = "—";
 const CENTERED_COLUMN_IDS = new Set([
   "field",
   "currency",
-  "wells",
+  "well_count",
   "active_well",
   "last_report",
   "status",
@@ -50,7 +50,7 @@ const columns = columnHelper.columns([
     cell: (info) => info.getValue() ?? EMPTY_VALUE,
   }),
   columnHelper.accessor("currency", { header: "Currency" }),
-  columnHelper.accessor("wells", { header: "Wells" }),
+  columnHelper.accessor("well_count", { header: "Wells" }),
   // TODO: WE WILL HAVE THESE PART BUT in Future and when Implementing `WELL SCHEMA`, Skip for now
   // columnHelper.accessor("active_well", {
   //   header: "Active wells",

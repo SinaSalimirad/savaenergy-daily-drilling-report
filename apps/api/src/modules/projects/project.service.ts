@@ -23,7 +23,7 @@ import type {
 } from "./project.schemas";
 
 const PROJECT = "Project";
-const PROJECT_PRODUCT_FK = "project_product_project_id_projects_id_fk";
+const PROJECT_PRODUCT_FK = "project_products_project_id_projects_id_fk";
 const PUMP_FK = "pumps_project_id_projects_id_fk";
 const SCE_FK = "solid_control_equipment_project_id_projects_id_fk";
 

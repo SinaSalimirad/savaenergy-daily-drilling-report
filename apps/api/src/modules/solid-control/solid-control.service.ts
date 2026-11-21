@@ -44,7 +44,7 @@ async function writeSce(
       }
       throw new AppError(
         409,
-        "SCE_ORDER_TAKEN",
+        "SCE_SORT_ORDER_TAKEN",
         "This project already has a unit with this row.",
       );
     }

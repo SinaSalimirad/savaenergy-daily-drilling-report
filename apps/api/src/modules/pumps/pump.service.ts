@@ -35,7 +35,7 @@ async function writePump(
     if (isUniqueViolation(error)) {
       throw new AppError(
         409,
-        "PUMP_ORDER_TAKEN",
+        "PUMP_SORT_ORDER_TAKEN",
         "This project already has a pump with this order.",
       );
     }

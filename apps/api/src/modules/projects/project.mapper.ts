@@ -11,7 +11,7 @@ export type ProjectDto = {
   operator: string;
   contractor: string;
   field: string;
-  wells: number;
+  well_count: number;
   status: ProjectRow["status"]; // derived, see project.repository.ts
   currency: ProjectRow["currency"];
   archived_at: string | null;
@@ -26,7 +26,7 @@ export function toProjectDto(row: ProjectRow): ProjectDto {
     operator: row.operator,
     contractor: row.contractor,
     field: row.field,
-    wells: row.wells,
+    well_count: row.well_count,
     status: row.status,
     currency: row.currency,
     archived_at: row.archived_at?.toISOString() ?? null,

@@ -10,7 +10,7 @@ export type PumpDto = {
   id: string;
   project_id: string;
   project_name: string;
-  order: number;
+  sort_order: number;
   model: string;
   type: PumpRow["type"];
   liner_diameter: number;
@@ -28,7 +28,7 @@ export function toPumpDto(row: PumpRow): PumpDto {
     id: row.id,
     project_id: row.project_id,
     project_name: row.project_name,
-    order: row.order,
+    sort_order: row.sort_order,
     model: row.model,
     type: row.type,
     liner_diameter: row.liner_diameter,

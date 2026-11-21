@@ -10,7 +10,7 @@ const makeSection = (overrides: Partial<Section>): Section => ({
   well_id: "w1",
   well_name: "A-1",
   project_name: "Alpha",
-  order: 1,
+  sort_order: 1,
   hole_size: 12.25,
   hole_type: null,
   created_at: "2026-01-01T00:00:00.000Z",
@@ -78,8 +78,8 @@ describe("SectionsTable", () => {
   it("dragging the second row above the first swaps their order", async () => {
     moveSection.mockResolvedValue({ data: {}, error: null });
     const sections = [
-      makeSection({ id: "s1", order: 1, hole_size: 12.25 }),
-      makeSection({ id: "s2", order: 2, hole_size: 8.5 }),
+      makeSection({ id: "s1", sort_order: 1, hole_size: 12.25 }),
+      makeSection({ id: "s2", sort_order: 2, hole_size: 8.5 }),
     ];
     render(<SectionsTable data={sections} emptyMessage="None." />, {
       wrapper: QueryWrapper,
@@ -99,8 +99,8 @@ describe("SectionsTable", () => {
 
   it("a section cannot be dropped on another well", async () => {
     const sections = [
-      makeSection({ id: "s1", well_id: "w1", order: 1 }),
-      makeSection({ id: "s2", well_id: "w2", well_name: "B-1", order: 1 }),
+      makeSection({ id: "s1", well_id: "w1", sort_order: 1 }),
+      makeSection({ id: "s2", well_id: "w2", well_name: "B-1", sort_order: 1 }),
     ];
     render(<SectionsTable data={sections} emptyMessage="None." />, {
       wrapper: QueryWrapper,

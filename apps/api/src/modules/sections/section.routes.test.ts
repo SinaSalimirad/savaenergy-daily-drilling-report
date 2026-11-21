@@ -23,7 +23,7 @@ describe("POST /sections", () => {
       "POST",
       "/sections",
       sectionPayload(wellId, {
-        order: 2,
+        sort_order: 2,
         hole_size: 8.5,
         hole_type: "open_hole",
       }),
@@ -34,7 +34,7 @@ describe("POST /sections", () => {
       well_id: wellId,
       well_name: "A-1",
       project_name: "Alpha",
-      order: 2,
+      sort_order: 2,
       hole_size: 8.5,
       hole_type: "open_hole",
     });
@@ -50,10 +50,12 @@ describe("POST /sections", () => {
   test("without an order, the section goes after the last one", async () => {
     const first = await createSection(wellId);
     const second = await createSection(wellId);
-    await createSection(wellId, { order: 10 });
+    await createSection(wellId, { sort_order: 10 });
     const last = await createSection(wellId);
 
-    expect([first.order, second.order, last.order]).toEqual([1, 2, 11]);
+    expect([first.sort_order, second.sort_order, last.sort_order]).toEqual([
+      1, 2, 11,
+    ]);
   });
 
   test("numbers the sections of each well on their own", async () => {
@@ -64,31 +66,31 @@ describe("POST /sections", () => {
 
     const section = await createSection(other.id);
 
-    expect(section.order).toBe(1);
+    expect(section.sort_order).toBe(1);
   });
 
   test("rejects an order that the well already uses with 409", async () => {
-    await createSection(wellId, { order: 1 });
+    await createSection(wellId, { sort_order: 1 });
 
     const { status, body } = await call(
       "POST",
       "/sections",
-      sectionPayload(wellId, { order: 1 }),
+      sectionPayload(wellId, { sort_order: 1 }),
     );
 
     expect(status).toBe(409);
-    expect(body.code).toBe("SECTION_ORDER_TAKEN");
+    expect(body.code).toBe("SECTION_SORT_ORDER_TAKEN");
   });
 
   test("allows the same order in another well", async () => {
     const project = await createProject({ name: "Beta" });
     const other = await createWell(project.id, { name: "B-1" });
-    await createSection(wellId, { order: 1 });
+    await createSection(wellId, { sort_order: 1 });
 
     const { status } = await call(
       "POST",
       "/sections",
-      sectionPayload(other.id, { order: 1 }),
+      sectionPayload(other.id, { sort_order: 1 }),
     );
 
     expect(status).toBe(201);
@@ -109,8 +111,8 @@ describe("POST /sections", () => {
     { hole_size: 18.5 },
     { hole_size: "12.25" },
     { hole_type: "tubing" },
-    { order: 0 },
-    { order: 1.5 },
+    { sort_order: 0 },
+    { sort_order: 1.5 },
     { well_id: "not-a-uuid" },
   ])("rejects %o with 422", async (bad) => {
     const { status, body } = await call(
@@ -140,20 +142,22 @@ describe("GET /sections", () => {
   });
 
   test("lists the sections of a well in their order", async () => {
-    await createSection(wellId, { order: 3 });
-    await createSection(wellId, { order: 1 });
-    await createSection(wellId, { order: 2 });
+    await createSection(wellId, { sort_order: 3 });
+    await createSection(wellId, { sort_order: 1 });
+    await createSection(wellId, { sort_order: 2 });
 
     const { body } = await call("GET", "/sections");
 
-    expect(body.data.map((s: { order: number }) => s.order)).toEqual([1, 2, 3]);
+    expect(
+      body.data.map((s: { sort_order: number }) => s.sort_order),
+    ).toEqual([1, 2, 3]);
   });
 
   test("groups the sections by well name", async () => {
     const project = await createProject({ name: "Beta" });
     const other = await createWell(project.id, { name: "A-0" });
-    await createSection(wellId, { order: 1 });
-    await createSection(other.id, { order: 1 });
+    await createSection(wellId, { sort_order: 1 });
+    await createSection(other.id, { sort_order: 1 });
 
     const { body } = await call("GET", "/sections");
 
@@ -261,7 +265,7 @@ describe("PATCH /sections/:id", () => {
     expect(status).toBe(200);
     expect(body.data).toMatchObject({
       hole_size: 8.5,
-      order: section.order,
+      sort_order: section.sort_order,
     });
   });
 
@@ -276,22 +280,22 @@ describe("PATCH /sections/:id", () => {
   });
 
   test("rejects an order that another section of the well uses with 409", async () => {
-    await createSection(wellId, { order: 1 });
-    const second = await createSection(wellId, { order: 2 });
+    await createSection(wellId, { sort_order: 1 });
+    const second = await createSection(wellId, { sort_order: 2 });
 
     const { status, body } = await call("PATCH", `/sections/${second.id}`, {
-      order: 1,
+      sort_order: 1,
     });
 
     expect(status).toBe(409);
-    expect(body.code).toBe("SECTION_ORDER_TAKEN");
+    expect(body.code).toBe("SECTION_SORT_ORDER_TAKEN");
   });
 
   test("lets a section keep its own order", async () => {
-    const section = await createSection(wellId, { order: 1 });
+    const section = await createSection(wellId, { sort_order: 1 });
 
     const { status } = await call("PATCH", `/sections/${section.id}`, {
-      order: 1,
+      sort_order: 1,
     });
 
     expect(status).toBe(200);
@@ -338,7 +342,7 @@ describe("PATCH /sections/:id", () => {
 
 const orders = async (wellId: string) =>
   (await call("GET", `/sections?well_id=${wellId}`)).body.data.map(
-    (s: { id: string; order: number }) => [s.id, s.order],
+    (s: { id: string; sort_order: number }) => [s.id, s.sort_order],
   );
 
 describe("POST /sections/:id/move", () => {
@@ -355,7 +359,7 @@ describe("POST /sections/:id/move", () => {
     });
 
     expect(status).toBe(200);
-    expect(body.data.order).toBe(3);
+    expect(body.data.sort_order).toBe(3);
     expect(await orders(wellId)).toEqual([
       [b.id, 1],
       [c.id, 2],
@@ -403,7 +407,7 @@ describe("POST /sections/:id/move", () => {
     });
 
     expect(status).toBe(200);
-    expect(body.data.order).toBe(1);
+    expect(body.data.sort_order).toBe(1);
   });
 
   test("leaves the sections of other wells alone", async () => {
@@ -419,8 +423,8 @@ describe("POST /sections/:id/move", () => {
   });
 
   test("keeps gaps in the orders unique", async () => {
-    const a = await createSection(wellId, { order: 1 });
-    const b = await createSection(wellId, { order: 5 });
+    const a = await createSection(wellId, { sort_order: 1 });
+    const b = await createSection(wellId, { sort_order: 5 });
 
     await call("POST", `/sections/${a.id}/move`, { to_order: 5 });
 

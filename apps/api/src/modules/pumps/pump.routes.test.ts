@@ -20,14 +20,14 @@ describe("POST /pumps", () => {
     const { status, body } = await call(
       "POST",
       "/pumps",
-      pumpPayload(projectId, { order: 2, efficiency: 97.5 }),
+      pumpPayload(projectId, { sort_order: 2, efficiency: 97.5 }),
     );
 
     expect(status).toBe(201);
     expect(body.data).toMatchObject({
       project_id: projectId,
       project_name: "Alpha",
-      order: 2,
+      sort_order: 2,
       model: "FH 1500",
       type: "triplex",
       liner_diameter: 6,
@@ -73,10 +73,12 @@ describe("POST /pumps", () => {
   test("without an order, the pump goes after the last one", async () => {
     const first = await createPump(projectId);
     const second = await createPump(projectId);
-    await createPump(projectId, { order: 10 });
+    await createPump(projectId, { sort_order: 10 });
     const last = await createPump(projectId);
 
-    expect([first.order, second.order, last.order]).toEqual([1, 2, 11]);
+    expect([first.sort_order, second.sort_order, last.sort_order]).toEqual([
+      1, 2, 11,
+    ]);
   });
 
   test("numbers the pumps of each project on their own", async () => {
@@ -86,30 +88,30 @@ describe("POST /pumps", () => {
 
     const pump = await createPump(other.id);
 
-    expect(pump.order).toBe(1);
+    expect(pump.sort_order).toBe(1);
   });
 
   test("rejects an order that the project already uses with 409", async () => {
-    await createPump(projectId, { order: 1 });
+    await createPump(projectId, { sort_order: 1 });
 
     const { status, body } = await call(
       "POST",
       "/pumps",
-      pumpPayload(projectId, { order: 1 }),
+      pumpPayload(projectId, { sort_order: 1 }),
     );
 
     expect(status).toBe(409);
-    expect(body.code).toBe("PUMP_ORDER_TAKEN");
+    expect(body.code).toBe("PUMP_SORT_ORDER_TAKEN");
   });
 
   test("allows the same order in another project", async () => {
     const other = await createProject({ name: "Beta" });
-    await createPump(projectId, { order: 1 });
+    await createPump(projectId, { sort_order: 1 });
 
     const { status } = await call(
       "POST",
       "/pumps",
-      pumpPayload(other.id, { order: 1 }),
+      pumpPayload(other.id, { sort_order: 1 }),
     );
 
     expect(status).toBe(201);
@@ -135,8 +137,8 @@ describe("POST /pumps", () => {
     { efficiency: 0 },
     { efficiency: 101 },
     { efficiency: 95.123 },
-    { order: 0 },
-    { order: 1.5 },
+    { sort_order: 0 },
+    { sort_order: 1.5 },
     { project_id: "not-a-uuid" },
   ])("rejects %o with 422", async (bad) => {
     const { status, body } = await call(
@@ -168,13 +170,15 @@ describe("GET /pumps", () => {
   });
 
   test("lists the pumps of a project in their order", async () => {
-    await createPump(projectId, { order: 3 });
-    await createPump(projectId, { order: 1 });
-    await createPump(projectId, { order: 2 });
+    await createPump(projectId, { sort_order: 3 });
+    await createPump(projectId, { sort_order: 1 });
+    await createPump(projectId, { sort_order: 2 });
 
     const { body } = await call("GET", "/pumps");
 
-    expect(body.data.map((p: { order: number }) => p.order)).toEqual([1, 2, 3]);
+    expect(
+      body.data.map((p: { sort_order: number }) => p.sort_order),
+    ).toEqual([1, 2, 3]);
   });
 
   test("filters by project and counts only that project's pumps", async () => {
@@ -243,27 +247,29 @@ describe("PATCH /pumps/:id", () => {
     expect(body.data).toMatchObject({
       liner_diameter: 6.5,
       model: "FH 1500",
-      order: pump.order,
+      sort_order: pump.sort_order,
     });
     expect(body.data.gal_per_stroke).toBeCloseTo(4.91, 2);
   });
 
   test("rejects an order that another pump of the project uses with 409", async () => {
-    await createPump(projectId, { order: 1 });
-    const second = await createPump(projectId, { order: 2 });
+    await createPump(projectId, { sort_order: 1 });
+    const second = await createPump(projectId, { sort_order: 2 });
 
     const { status, body } = await call("PATCH", `/pumps/${second.id}`, {
-      order: 1,
+      sort_order: 1,
     });
 
     expect(status).toBe(409);
-    expect(body.code).toBe("PUMP_ORDER_TAKEN");
+    expect(body.code).toBe("PUMP_SORT_ORDER_TAKEN");
   });
 
   test("lets a pump keep its own order", async () => {
-    const pump = await createPump(projectId, { order: 1 });
+    const pump = await createPump(projectId, { sort_order: 1 });
 
-    const { status } = await call("PATCH", `/pumps/${pump.id}`, { order: 1 });
+    const { status } = await call("PATCH", `/pumps/${pump.id}`, {
+      sort_order: 1,
+    });
 
     expect(status).toBe(200);
   });
@@ -318,13 +324,27 @@ describe("PATCH /pumps/:id and the rod", () => {
     expect(body.data.gal_per_stroke).toBeCloseTo(5.27, 2);
   });
 
-  test("a rod as thick as the liner is refused with 400", async () => {
+  test("a rod as thick as the liner is allowed", async () => {
     const pump = await createPump(projectId, {
       type: "duplex",
       rod_diameter: 2,
     });
 
     const { status } = await call("PATCH", `/pumps/${pump.id}`, {
+      rod_diameter: 6,
+    });
+
+    expect(status).toBe(200);
+  });
+
+  test("a rod thicker than the liner is refused with 400", async () => {
+    const pump = await createPump(projectId, {
+      type: "duplex",
+      rod_diameter: 2,
+    });
+
+    const { status } = await call("PATCH", `/pumps/${pump.id}`, {
+      liner_diameter: 5,
       rod_diameter: 6,
     });
 

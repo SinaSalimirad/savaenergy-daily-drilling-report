@@ -31,7 +31,7 @@ export function SceActionsMenu({ sce }: { sce: Sce }) {
             <Button
               variant="ghost"
               size="icon-sm"
-              aria-label={`Actions for row ${sce.order} of ${sce.project_name}`}
+              aria-label={`Actions for row ${sce.sort_order} of ${sce.project_name}`}
             />
           }
         >

@@ -9,7 +9,7 @@ export type SceDto = {
   id: string;
   project_id: string;
   project_name: string;
-  order: number;
+  sort_order: number;
   type: SceRow["type"];
   unit_no: number;
   manufacturer: string | null;
@@ -24,7 +24,7 @@ export function toSceDto(row: SceRow): SceDto {
     id: row.id,
     project_id: row.project_id,
     project_name: row.project_name,
-    order: row.order,
+    sort_order: row.sort_order,
     type: row.type,
     unit_no: row.unit_no,
     manufacturer: row.manufacturer,

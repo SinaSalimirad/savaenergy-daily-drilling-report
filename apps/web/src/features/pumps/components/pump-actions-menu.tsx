@@ -31,7 +31,7 @@ export function PumpActionsMenu({ pump }: { pump: Pump }) {
             <Button
               variant="ghost"
               size="icon-sm"
-              aria-label={`Actions for pump ${pump.order} of ${pump.project_name}`}
+              aria-label={`Actions for pump ${pump.sort_order} of ${pump.project_name}`}
             />
           }
         >

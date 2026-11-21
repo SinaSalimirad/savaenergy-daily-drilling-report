@@ -53,7 +53,7 @@ export async function findSections(
       .innerJoin(wells, eq(wells.id, sections.well_id))
       .innerJoin(projects, eq(projects.id, wells.project_id))
       .where(where)
-      .orderBy(asc(wells.name), asc(sections.order), asc(sections.id))
+      .orderBy(asc(wells.name), asc(sections.sort_order), asc(sections.id))
       .limit(limit)
       .offset(offset),
     executor
@@ -82,11 +82,11 @@ export async function insertSection(
   // Without an order, the section goes last. Two parallel requests can pick the same number;
   // the unique constraint rejects the second one and the service answers 409.
   const nextOrder = sql<number>`(
-    select coalesce(max(s."order"), 0) + 1 from ${sections} s where s.well_id = ${input.well_id}
+    select coalesce(max(s."sort_order"), 0) + 1 from ${sections} s where s.well_id = ${input.well_id}
   )`;
   const [created] = await executor
     .insert(sections)
-    .values({ ...input, order: input.order ?? nextOrder })
+    .values({ ...input, sort_order: input.sort_order ?? nextOrder })
     .returning({ id: sections.id });
   return created && findSectionById(created.id, executor);
 }
@@ -120,43 +120,49 @@ const MOVED_PARKING_ORDER = 2 * PARK_OFFSET;
 
 /** Moves a section to `toOrder` and shifts the sections in between by one. */
 export async function moveSectionToOrder(
-  section: { id: string; well_id: string; order: number },
+  section: { id: string; well_id: string; sort_order: number },
   toOrder: number,
 ) {
   await db.transaction(async (tx) => {
-    const movingDown = toOrder > section.order;
+    const movingDown = toOrder > section.sort_order;
     // The sections whose order changes: the moved one and everything between it and the target.
     const range = movingDown
-      ? and(gt(sections.order, section.order), lte(sections.order, toOrder))
-      : and(gte(sections.order, toOrder), lt(sections.order, section.order));
+      ? and(
+          gt(sections.sort_order, section.sort_order),
+          lte(sections.sort_order, toOrder),
+        )
+      : and(
+          gte(sections.sort_order, toOrder),
+          lt(sections.sort_order, section.sort_order),
+        );
     const sameWell = eq(sections.well_id, section.well_id);
 
     await tx
       .update(sections)
-      .set({ order: sql`${sections.order} + ${PARK_OFFSET}` })
+      .set({ sort_order: sql`${sections.sort_order} + ${PARK_OFFSET}` })
       .where(and(sameWell, range));
     await tx
       .update(sections)
       // Its own spot, so it cannot meet a parked section.
-      .set({ order: MOVED_PARKING_ORDER })
+      .set({ sort_order: MOVED_PARKING_ORDER })
       .where(eq(sections.id, section.id));
 
     // The moved section takes the target; the others step toward the place it left.
     await tx
       .update(sections)
       .set({
-        order: sql`${sections.order} - ${PARK_OFFSET} + ${movingDown ? -1 : 1}`,
+        sort_order: sql`${sections.sort_order} - ${PARK_OFFSET} + ${movingDown ? -1 : 1}`,
       })
       .where(
         and(
           sameWell,
-          gte(sections.order, PARK_OFFSET),
+          gte(sections.sort_order, PARK_OFFSET),
           sql`${sections.id} <> ${section.id}`,
         ),
       );
     await tx
       .update(sections)
-      .set({ order: toOrder })
+      .set({ sort_order: toOrder })
       .where(eq(sections.id, section.id));
   });
   return findSectionById(section.id);

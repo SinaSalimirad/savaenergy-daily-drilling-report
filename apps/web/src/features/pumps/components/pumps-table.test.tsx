@@ -12,9 +12,24 @@ beforeEach(() => {
 
 // The rows of the rig's sheet.
 const pumps = [
-  makePump({ id: "a", order: 1, liner_diameter: 6, gal_per_stroke: 4.1861 }),
-  makePump({ id: "b", order: 2, liner_diameter: 6, gal_per_stroke: 4.1861 }),
-  makePump({ id: "c", order: 3, liner_diameter: 6.5, gal_per_stroke: 4.9129 }),
+  makePump({
+    id: "a",
+    sort_order: 1,
+    liner_diameter: 6,
+    gal_per_stroke: 4.1861,
+  }),
+  makePump({
+    id: "b",
+    sort_order: 2,
+    liner_diameter: 6,
+    gal_per_stroke: 4.1861,
+  }),
+  makePump({
+    id: "c",
+    sort_order: 3,
+    liner_diameter: 6.5,
+    gal_per_stroke: 4.9129,
+  }),
 ];
 
 const rowCells = (index: number) =>

@@ -33,7 +33,7 @@ describe("ProjectsTable", () => {
   it("shows the number of wells of each project", () => {
     render(
       <ProjectsTable
-        data={[makeProject({ wells: 12 })]}
+        data={[makeProject({ well_count: 12 })]}
         emptyMessage="Nothing here."
       />,
       { wrapper: QueryWrapper },

@@ -5,7 +5,7 @@ import { dailyReports } from "./daily_report.schema";
 import { projectProducts } from "./project_product.schema";
 
 export const productInventories = pgTable(
-  "product_inventory",
+  "product_inventories",
   {
     ...id,
     report_id: uuid()
@@ -22,18 +22,21 @@ export const productInventories = pgTable(
     ...timestamps,
   },
   (table) => [
-    unique("product_inventory_report_id_project_product_id_unique").on(
+    unique("product_inventories_report_id_project_product_id_unique").on(
       table.report_id,
       table.project_product_id,
     ),
-    check("product_inventory_initial_nonnegative", sql`${table.initial} >= 0`),
-    check("product_inventory_used_nonnegative", sql`${table.used} >= 0`),
     check(
-      "product_inventory_received_nonnegative",
+      "product_inventories_initial_nonnegative",
+      sql`${table.initial} >= 0`,
+    ),
+    check("product_inventories_used_nonnegative", sql`${table.used} >= 0`),
+    check(
+      "product_inventories_received_nonnegative",
       sql`${table.received} >= 0`,
     ),
     check(
-      "product_inventory_returned_nonnegative",
+      "product_inventories_returned_nonnegative",
       sql`${table.returned} >= 0`,
     ),
   ],

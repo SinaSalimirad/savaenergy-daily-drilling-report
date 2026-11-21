@@ -61,7 +61,7 @@ const pumpFields = z.object({
   project_id: z.uuid("Choose a project."),
   // The position of the pump in the project, starting at 1. A project cannot have two pumps
   // with the same order. Left out on create, the API uses the next free number.
-  order: z
+  sort_order: z
     .number({ error: "Enter a whole number, for example 1." })
     .int("Enter a whole number, for example 1.")
     .min(1, "Order must be at least 1.")
@@ -87,17 +87,17 @@ const pumpFields = z.object({
 });
 
 export const pumpCreateSchema = pumpFields
-  .partial({ order: true })
+  .partial({ sort_order: true })
   .refine((pump) => pump.type !== "duplex" || pump.rod_diameter != null, {
     path: ["rod_diameter"],
     error: "A duplex pump needs a rod diameter.",
   })
   .refine(
     (pump) =>
-      pump.rod_diameter == null || pump.rod_diameter < pump.liner_diameter,
+      pump.rod_diameter == null || pump.rod_diameter <= pump.liner_diameter,
     {
       path: ["rod_diameter"],
-      error: "The rod must be thinner than the liner.",
+      error: "The rod diameter cannot be larger than the liner diameter.",
     },
   );
 export type PumpCreate = z.infer<typeof pumpCreateSchema>;

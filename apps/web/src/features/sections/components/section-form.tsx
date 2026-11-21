@@ -26,7 +26,7 @@ import { HOLE_SIZE_OPTIONS, HOLE_TYPE_OPTIONS, NONE } from "../labels";
 const emptyValues = {
   well_id: "",
   // Kept as text while typing; converted to a number on submit. Empty means "next free".
-  order: "",
+  sort_order: "",
   hole_size: "",
   hole_type: NONE as HoleType | typeof NONE,
 };
@@ -34,13 +34,13 @@ const emptyValues = {
 function valuesFrom(section: Section): typeof emptyValues {
   return {
     well_id: section.well_id,
-    order: String(section.order),
+    sort_order: String(section.sort_order),
     hole_size: String(section.hole_size),
     hole_type: section.hole_type ?? NONE,
   };
 }
 
-const ORDER_TAKEN_CODE = "SECTION_ORDER_TAKEN";
+const ORDER_TAKEN_CODE = "SECTION_SORT_ORDER_TAKEN";
 
 type FieldProps = {
   label: string;
@@ -67,7 +67,7 @@ function toServerErrors(error: unknown) {
     return { form: "Something went wrong.", fields: {} };
   }
   if (error.code === ORDER_TAKEN_CODE) {
-    return { form: undefined, fields: { order: error.message } };
+    return { form: undefined, fields: { sort_order: error.message } };
   }
   const hasFieldErrors = Object.keys(error.fieldErrors).length > 0;
   return {
@@ -120,7 +120,9 @@ export function SectionForm({
         const body = {
           well_id: value.well_id,
           // Left out on create, the API puts the section last. On edit it is always filled.
-          ...(value.order === "" ? {} : { order: Number(value.order) }),
+          ...(value.sort_order === ""
+            ? {}
+            : { sort_order: Number(value.sort_order) }),
           // An empty size becomes NaN, which JSON sends as null: the API answers "Choose a hole size."
           hole_size:
             value.hole_size === "" ? Number.NaN : Number(value.hole_size),
@@ -239,7 +241,7 @@ export function SectionForm({
           )}
         </form.Field>
 
-        <form.Field name="order">
+        <form.Field name="sort_order">
           {(field) => (
             <Field label="Order" error={firstError(field.state.meta.errors)}>
               {({ id, invalid }) => (

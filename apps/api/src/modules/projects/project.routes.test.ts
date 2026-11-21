@@ -56,7 +56,7 @@ describe("POST /projects", () => {
     const { status, body } = await call(
       "POST",
       "/projects",
-      projectPayload({ name: "", wells: 0, currency: "GBP" }),
+      projectPayload({ name: "", well_count: 0, currency: "GBP" }),
     );
 
     expect(status).toBe(422);

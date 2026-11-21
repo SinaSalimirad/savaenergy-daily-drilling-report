@@ -10,7 +10,7 @@ const validProject = {
   operator: "Shell",
   contractor: "Halliburton",
   field: "South Pars",
-  wells: 12,
+  well_count: 12,
   currency: "USD",
 };
 
@@ -28,16 +28,22 @@ describe("projectCreateSchema", () => {
     expect(result.name).toBe("South Pars");
   });
 
-  it.each([0, -1, 1.5, "12"])("rejects %p as the number of wells", (wells) => {
-    expect(
-      projectCreateSchema.safeParse({ ...validProject, wells }).success,
-    ).toBe(false);
-  });
+  it.each([0, -1, 1.5, "12"])(
+    "rejects %p as the number of wells",
+    (well_count) => {
+      expect(
+        projectCreateSchema.safeParse({ ...validProject, well_count })
+          .success,
+      ).toBe(false);
+    },
+  );
 
   it("rejects a missing number of wells", () => {
-    const { wells: _wells, ...withoutWells } = validProject;
+    const { well_count: _wellCount, ...withoutWellCount } = validProject;
 
-    expect(projectCreateSchema.safeParse(withoutWells).success).toBe(false);
+    expect(projectCreateSchema.safeParse(withoutWellCount).success).toBe(
+      false,
+    );
   });
 
   it("ignores a status sent by a client, because the API derives it", () => {
@@ -52,7 +58,9 @@ describe("projectCreateSchema", () => {
 
 describe("projectUpdateSchema", () => {
   it("accepts a patch with only the number of wells", () => {
-    expect(projectUpdateSchema.safeParse({ wells: 3 }).success).toBe(true);
+    expect(projectUpdateSchema.safeParse({ well_count: 3 }).success).toBe(
+      true,
+    );
   });
 
   it("rejects an empty patch", () => {
