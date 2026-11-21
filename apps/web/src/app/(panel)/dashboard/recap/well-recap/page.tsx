@@ -1,5 +1,11 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { Suspense } from "react";
+import { WellRecapView } from "@/features/recap/components/well-recap-view";
 
 export default function Page() {
-  return <PagePlaceholder title="Well recap" />;
+  // The view reads `?report=` from the URL, which needs a Suspense boundary.
+  return (
+    <Suspense>
+      <WellRecapView />
+    </Suspense>
+  );
 }
