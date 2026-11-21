@@ -1,3 +1,0 @@
-CREATE UNIQUE INDEX "product_bulk_unique" ON "product" USING btree (lower("name"),"package_size","package_unit","specific_gravity") WHERE "product"."kind" = 'bulk';--> statement-breakpoint
-CREATE UNIQUE INDEX "product_dimensional_unique" ON "product" USING btree (lower("name"),"length_m","width_m") WHERE "product"."kind" = 'dimensional';--> statement-breakpoint
-CREATE UNIQUE INDEX "product_equipment_unique" ON "product" USING btree (lower("name")) WHERE "product"."kind" = 'equipment';

@@ -5,71 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1795067061092,
-      "tag": "0000_lumpy_selene",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1795070985620,
-      "tag": "0001_dizzy_jackal",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1795075490649,
-      "tag": "0002_well_archive_is_not_a_status",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1795076349938,
-      "tag": "0003_add_sections",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1795107387781,
-      "tag": "0004_clean_sleepwalker",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1795121658379,
-      "tag": "0005_drop_well_archive",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1795161091721,
-      "tag": "0006_warm_red_wolf",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1795202131099,
-      "tag": "0007_add_pumps",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1795203501043,
-      "tag": "0008_add_pump_rod_diameter",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1795205438981,
-      "tag": "0009_add_solid_control_equipment",
+      "when": 1795259178977,
+      "tag": "0000_dry_skaar",
       "breakpoints": true
     }
   ]
