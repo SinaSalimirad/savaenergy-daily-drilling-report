@@ -12,9 +12,8 @@ services:
       POSTGRES_DB: sava_drilling
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    # Bound to 5433, not 5432: another local project already uses 5432.
     ports:
-      - "127.0.0.1:5433:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql
     healthcheck:

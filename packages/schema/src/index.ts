@@ -1,5 +1,6 @@
 export * from "./daily-report.schema";
 export * from "./inventory.schema";
+export * from "./pit.schema";
 export * from "./product.schema";
 export * from "./project.schema";
 export * from "./project-product.schema";

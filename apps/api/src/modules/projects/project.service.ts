@@ -25,7 +25,28 @@ import type {
 const PROJECT = "Project";
 const PROJECT_PRODUCT_FK = "project_product_project_id_projects_id_fk";
 const PUMP_FK = "pumps_project_id_projects_id_fk";
+const PIT_FK = "pits_project_id_projects_id_fk";
 const SCE_FK = "solid_control_equipment_project_id_projects_id_fk";
+
+// The foreign key that stopped the delete -> the answer for the client.
+const BLOCKING_CHILDREN: Record<string, { code: string; message: string }> = {
+  [PROJECT_PRODUCT_FK]: {
+    code: "PROJECT_HAS_PRODUCTS",
+    message: "This project still has products. Remove them first.",
+  },
+  [PUMP_FK]: {
+    code: "PROJECT_HAS_PUMPS",
+    message: "This project still has pumps. Delete them first.",
+  },
+  [PIT_FK]: {
+    code: "PROJECT_HAS_PITS",
+    message: "This project still has pits. Delete them first.",
+  },
+  [SCE_FK]: {
+    code: "PROJECT_HAS_SOLID_CONTROL",
+    message: "This project still has solid control equipment. Delete it first.",
+  },
+};
 
 const nameTaken = () =>
   new AppError(
@@ -109,28 +130,10 @@ export async function deleteProject(id: string): Promise<void> {
     if (!deleted) throw notFound(PROJECT);
   } catch (error) {
     if (isForeignKeyViolation(error)) {
-      // Wells, products, pumps and solid control equipment of the project all hold a foreign key to it.
-      if (violatedConstraint(error) === PROJECT_PRODUCT_FK) {
-        throw new AppError(
-          409,
-          "PROJECT_HAS_PRODUCTS",
-          "This project still has products. Remove them first.",
-        );
-      }
-      if (violatedConstraint(error) === PUMP_FK) {
-        throw new AppError(
-          409,
-          "PROJECT_HAS_PUMPS",
-          "This project still has pumps. Delete them first.",
-        );
-      }
-      if (violatedConstraint(error) === SCE_FK) {
-        throw new AppError(
-          409,
-          "PROJECT_HAS_SOLID_CONTROL",
-          "This project still has solid control equipment. Delete it first.",
-        );
-      }
+      // Wells, products, pumps, pits and solid control equipment of the project all hold a
+      // foreign key to it. Wells are the fallback.
+      const blocker = BLOCKING_CHILDREN[violatedConstraint(error) ?? ""];
+      if (blocker) throw new AppError(409, blocker.code, blocker.message);
       throw new AppError(
         409,
         "PROJECT_HAS_WELLS",

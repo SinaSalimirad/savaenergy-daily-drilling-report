@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { check, integer, pgTable, unique, uuid } from "drizzle-orm/pg-core";
 import { id, timestamps } from "./_shared/columns";
 import { dailyReports } from "./daily_report.schema";
-import { projectProducts } from "./project_product.schema";
+import { projectProducts } from "./project-product.schema";
 
 export const productInventories = pgTable(
   "product_inventory",
