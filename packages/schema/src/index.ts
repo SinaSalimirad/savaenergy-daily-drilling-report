@@ -1,5 +1,6 @@
 export * from "./daily-report.schema";
 export * from "./fluid-sample.schema";
+export * from "./hydraulics.schema";
 export * from "./inventory.schema";
 export * from "./mud-sample.schema";
 export * from "./pit.schema";
