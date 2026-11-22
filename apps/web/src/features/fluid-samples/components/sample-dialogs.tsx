@@ -57,15 +57,20 @@ export function NewSampleDialog({
   what,
   defs,
   create,
-  reportId,
-  full,
+  parent,
+  full = false,
+  triggerLabel = "New sample",
+  toBody = bodyFromValues,
 }: {
   what: string;
   defs: FieldDef[];
   create: SampleMutation<SampleBody>;
-  reportId: string;
+  // The id the row belongs to: `{ report_id }`, or `{ well_id }`.
+  parent: Record<string, string>;
   // A report has at most 3 samples: with 3 already, the button is off.
-  full: boolean;
+  full?: boolean;
+  triggerLabel?: string;
+  toBody?: (defs: FieldDef[], values: FormValues) => SampleBody;
 }) {
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState<FormValues>(emptyValues(defs));
@@ -83,7 +88,7 @@ export function NewSampleDialog({
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     create.mutate(
-      { report_id: reportId, ...bodyFromValues(defs, values) },
+      { ...parent, ...toBody(defs, values) },
       {
         onSuccess: () => {
           toast.add({ type: "success", title: `${capitalize(what)} added` });
@@ -105,7 +110,7 @@ export function NewSampleDialog({
         }
       >
         <PlusIcon data-icon="inline-start" />
-        New sample
+        {triggerLabel}
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
@@ -151,20 +156,24 @@ function EditForm({
   defs,
   row,
   update,
+  toValues,
+  toBody,
   onSaved,
 }: {
   what: string;
   defs: FieldDef[];
   row: Record<string, unknown>;
   update: SampleMutation<SampleBody>;
+  toValues: (defs: FieldDef[], row: Record<string, unknown>) => FormValues;
+  toBody: (defs: FieldDef[], values: FormValues) => SampleBody;
   onSaved: () => void;
 }) {
-  const [values, setValues] = useState<FormValues>(valuesFromRow(defs, row));
+  const [values, setValues] = useState<FormValues>(toValues(defs, row));
   const { fieldErrors, formError } = errorsOf(update.error);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    update.mutate(bodyFromValues(defs, values), {
+    update.mutate(toBody(defs, values), {
       onSuccess: () => {
         toast.add({ type: "success", title: `${capitalize(what)} updated` });
         onSaved();
@@ -199,13 +208,13 @@ function EditForm({
 
 function DeleteConfirm({
   what,
-  sampleNo,
+  rowName,
   remove,
   onRemoved,
   onCancel,
 }: {
   what: string;
-  sampleNo: number;
+  rowName: string;
   remove: SampleMutation<void>;
   onRemoved: () => void;
   onCancel: () => void;
@@ -215,8 +224,8 @@ function DeleteConfirm({
       <DialogHeader>
         <DialogTitle>Remove {what}</DialogTitle>
         <DialogDescription>
-          Remove <strong className="text-foreground">sample {sampleNo}</strong>{" "}
-          from this report? Its measurements are deleted.
+          Remove <strong className="text-foreground">{rowName}</strong> from
+          this report? Its values are deleted.
         </DialogDescription>
       </DialogHeader>
       {remove.error && (
@@ -264,16 +273,23 @@ type OpenDialog = "edit" | "delete" | null;
 /** The "⋯" menu of one sample, with its edit and remove dialogs. */
 export function SampleActions({
   what,
+  rowName,
   defs,
   row,
   update,
   remove,
+  toValues = valuesFromRow,
+  toBody = bodyFromValues,
 }: {
   what: string;
+  // How the row is called in the texts, for example "sample 2" or "row 3".
+  rowName: string;
   defs: FieldDef[];
-  row: { sample_no: number } & Record<string, unknown>;
+  row: Record<string, unknown>;
   update: SampleMutation<SampleBody>;
   remove: SampleMutation<void>;
+  toValues?: (defs: FieldDef[], row: Record<string, unknown>) => FormValues;
+  toBody?: (defs: FieldDef[], values: FormValues) => SampleBody;
 }) {
   const [openDialog, setOpenDialog] = useState<OpenDialog>(null);
   const close = () => {
@@ -290,7 +306,7 @@ export function SampleActions({
             <Button
               variant="ghost"
               size="icon-sm"
-              aria-label={`Actions for sample ${row.sample_no}`}
+              aria-label={`Actions for ${rowName}`}
             />
           }
         >
@@ -305,7 +321,7 @@ export function SampleActions({
             onClick={() => setOpenDialog("edit")}
           >
             <PencilIcon />
-            Edit sample
+            Edit
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -314,7 +330,7 @@ export function SampleActions({
             onClick={() => setOpenDialog("delete")}
           >
             <Trash2Icon />
-            Remove sample
+            Remove
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -329,7 +345,7 @@ export function SampleActions({
           <DialogHeader>
             <DialogTitle>Edit {what}</DialogTitle>
             <DialogDescription>
-              Change the measurements of sample {row.sample_no}.
+              Change the values of {rowName}.
             </DialogDescription>
           </DialogHeader>
           <EditForm
@@ -337,6 +353,8 @@ export function SampleActions({
             defs={defs}
             row={row}
             update={update}
+            toValues={toValues}
+            toBody={toBody}
             onSaved={close}
           />
         </DialogContent>
@@ -354,7 +372,7 @@ export function SampleActions({
         <DialogContent className="max-w-md">
           <DeleteConfirm
             what={what}
-            sampleNo={row.sample_no}
+            rowName={rowName}
             remove={remove}
             onRemoved={close}
             onCancel={close}

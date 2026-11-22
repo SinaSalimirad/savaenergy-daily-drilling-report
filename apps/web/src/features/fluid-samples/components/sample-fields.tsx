@@ -35,10 +35,13 @@ function FieldControl({
     );
   }
   const isNumber = def.kind === "number";
+  let type = "time";
+  if (isNumber) type = "number";
+  else if (def.kind === "text") type = "text";
   return (
     <Input
       id={id}
-      type={isNumber ? "number" : "time"}
+      type={type}
       min={isNumber ? 0 : undefined}
       step={isNumber ? "any" : undefined}
       inputMode={isNumber ? "decimal" : undefined}

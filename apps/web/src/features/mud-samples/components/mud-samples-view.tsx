@@ -25,6 +25,7 @@ function MudSampleActions({ sample }: { sample: MudSample }) {
   return (
     <SampleActions
       what={WHAT}
+      rowName={`sample ${sample.sample_no}`}
       defs={MUD_SAMPLE_DEFS}
       row={sample}
       update={bindMutation(update, (body) => ({ id: sample.id, body }))}
@@ -41,7 +42,7 @@ function MudSampleToolbar({ reportId }: { reportId: string }) {
       what={WHAT}
       defs={MUD_SAMPLE_DEFS}
       create={create}
-      reportId={reportId}
+      parent={{ report_id: reportId }}
       full={(samples.data?.data.length ?? 0) >= 3}
     />
   );

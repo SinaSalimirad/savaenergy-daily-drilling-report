@@ -25,6 +25,7 @@ function SolidsAnalysisActions({ sample }: { sample: SolidsAnalysis }) {
   return (
     <SampleActions
       what={WHAT}
+      rowName={`sample ${sample.sample_no}`}
       defs={SOLIDS_ANALYSIS_DEFS}
       row={sample}
       update={bindMutation(update, (body) => ({ id: sample.id, body }))}
@@ -41,7 +42,7 @@ function SolidsAnalysisToolbar({ reportId }: { reportId: string }) {
       what={WHAT}
       defs={SOLIDS_ANALYSIS_DEFS}
       create={create}
-      reportId={reportId}
+      parent={{ report_id: reportId }}
       full={(samples.data?.data.length ?? 0) >= 3}
     />
   );
