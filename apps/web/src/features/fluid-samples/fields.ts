@@ -4,8 +4,12 @@ export type FieldDef = {
   name: string;
   label: string;
   unit?: string;
+  // An empty field is left out of the body (the API then fills it, or keeps the old value)
+  // instead of being sent as `null`.
+  omitEmpty?: boolean;
 } & (
   | { kind: "number" }
+  | { kind: "text" }
   | { kind: "time" }
   | { kind: "select"; options: readonly string[] }
 );
@@ -13,12 +17,15 @@ export type FieldDef = {
 /** Text values of the form: numbers are kept as text while typing. */
 export type FormValues = Record<string, string>;
 
-/** What the web sends: numbers, times and choices, with `null` for "not measured". */
-export type SampleBody = Record<string, string | number | null>;
+/** What the web sends: numbers, text and choices, with `null` for "not measured". */
+export type SampleBody = Record<string, unknown>;
 
 export function emptyValues(defs: FieldDef[]): FormValues {
   return Object.fromEntries(
-    defs.map((def) => [def.name, def.kind === "select" ? "Active" : ""]),
+    defs.map((def) => [
+      def.name,
+      def.kind === "select" ? (def.options[0] ?? "") : "",
+    ]),
   );
 }
 

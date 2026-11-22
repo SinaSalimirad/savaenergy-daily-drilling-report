@@ -4,7 +4,10 @@ import { Elysia } from "elysia";
 import { env } from "./config/env";
 import { errorHandler } from "./lib/error-handler";
 import "./lib/logger";
+import { bitRoutes } from "./modules/bits/bit.routes";
 import { dailyReportRoutes } from "./modules/daily-reports/daily-report.routes";
+import { drillStringToolRoutes } from "./modules/drill-string/drill-string-tool.routes";
+import { hydraulicsRoutes } from "./modules/hydraulics/hydraulics.routes";
 import { inventoryRoutes } from "./modules/inventory/inventory.routes";
 import { mudSampleRoutes } from "./modules/mud-samples/mud-sample.routes";
 import { pitReadingRoutes } from "./modules/pit-readings/pit-reading.routes";
@@ -18,6 +21,8 @@ import { saltTableRoutes } from "./modules/salt-tables/salt-table.routes";
 import { sectionRoutes } from "./modules/sections/section.routes";
 import { solidControlRoutes } from "./modules/solid-control/solid-control.routes";
 import { solidsAnalysisRoutes } from "./modules/solids-analysis/solids-analysis.routes";
+import { surveyRoutes } from "./modules/survey/survey.routes";
+import { wellboreIntervalRoutes } from "./modules/wellbore-intervals/wellbore-interval.routes";
 import { wellRoutes } from "./modules/wells/well.routes";
 
 // App is built separately from the server start, so it can be used without opening a port.
@@ -55,6 +60,11 @@ export const app = new Elysia()
   .use(mudSampleRoutes)
   .use(rheologyRoutes)
   .use(solidsAnalysisRoutes)
+  .use(wellboreIntervalRoutes)
+  .use(drillStringToolRoutes)
+  .use(bitRoutes)
+  .use(surveyRoutes)
+  .use(hydraulicsRoutes)
   .use(solidControlRoutes);
 
 // The web app imports only this type (never the runtime code) so Eden can infer every route.

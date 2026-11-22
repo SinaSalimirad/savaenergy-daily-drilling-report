@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ProjectFilterSelect } from "@/features/projects/components/project-filter-select";
 import { useProjectFilter } from "@/features/projects/project-filter";
+import type { DailyReport } from "@/features/reports/api";
 import { ReportPicker } from "@/features/reports/components/report-picker";
 import { useSelectedReport } from "@/features/reports/use-selected-report";
 
@@ -28,8 +29,8 @@ export function ReportSheetView({
   title: string;
   // What the page shows, for the messages: "mud samples", "rheology readings"...
   subject: string;
-  toolbar: (reportId: string) => ReactNode;
-  sheet: (reportId: string) => ReactNode;
+  toolbar: (reportId: string, report: DailyReport) => ReactNode;
+  sheet: (reportId: string, report: DailyReport) => ReactNode;
 }) {
   const { projectId } = useProjectFilter();
   const selection = useSelectedReport(projectId);
@@ -59,7 +60,7 @@ export function ReportSheetView({
   } else {
     body = (
       <div className="mt-6 rounded-xl bg-card px-3 py-5">
-        {sheet(report.id)}
+        {sheet(report.id, report)}
       </div>
     );
   }
@@ -70,7 +71,7 @@ export function ReportSheetView({
         <h2 className="text-3xl font-bold">{title}</h2>
         <div className="flex flex-wrap items-center gap-2">
           <ProjectFilterSelect appearance="page" />
-          {!isLoading && report && toolbar(report.id)}
+          {!isLoading && report && toolbar(report.id, report)}
           <ReportPicker selection={selection} showSection />
         </div>
       </div>

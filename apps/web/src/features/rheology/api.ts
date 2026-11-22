@@ -46,8 +46,12 @@ function useRheologyReadingMutation<TVariables>(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
+    // The pressure loss and the hole cleaning read these samples: they must be fetched again.
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: rheologyReadingKeys.all }),
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: rheologyReadingKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ["hydraulics"] }),
+      ]),
   });
 }
 

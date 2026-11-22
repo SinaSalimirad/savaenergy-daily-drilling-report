@@ -44,8 +44,12 @@ function useMudSampleMutation<TVariables>(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
+    // The pressure loss and the hole cleaning read these samples: they must be fetched again.
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: mudSampleKeys.all }),
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: mudSampleKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ["hydraulics"] }),
+      ]),
   });
 }
 

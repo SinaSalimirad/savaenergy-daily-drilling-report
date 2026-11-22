@@ -25,6 +25,7 @@ function RheologyReadingActions({ sample }: { sample: RheologyReading }) {
   return (
     <SampleActions
       what={WHAT}
+      rowName={`sample ${sample.sample_no}`}
       defs={RHEOLOGY_DEFS}
       row={sample}
       update={bindMutation(update, (body) => ({ id: sample.id, body }))}
@@ -41,7 +42,7 @@ function RheologyReadingToolbar({ reportId }: { reportId: string }) {
       what={WHAT}
       defs={RHEOLOGY_DEFS}
       create={create}
-      reportId={reportId}
+      parent={{ report_id: reportId }}
       full={(samples.data?.data.length ?? 0) >= 3}
     />
   );

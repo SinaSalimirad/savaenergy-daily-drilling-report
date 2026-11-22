@@ -3,6 +3,7 @@ export * from "./_shared/archive";
 export * from "./_shared/authorship";
 export * from "./_shared/columns";
 export * from "./daily_report.schema";
+export * from "./hydraulics.schema";
 export * from "./mud-sample.schema";
 export * from "./pit.schema";
 export * from "./pit-reading.schema";
