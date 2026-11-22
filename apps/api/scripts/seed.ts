@@ -1,6 +1,9 @@
 import { Pool } from "pg";
 import {
+  bitCreateSchema,
   dailyReportCreateSchema,
+  drillStringToolCreateSchema,
+  hydraulicInputSetSchema,
   inventoryCreateSchema,
   mudSampleCreateSchema,
   pitCreateSchema,
@@ -13,6 +16,8 @@ import {
   sceCreateSchema,
   sectionCreateSchema,
   solidsAnalysisCreateSchema,
+  surveyStationCreateSchema,
+  wellboreIntervalCreateSchema,
   wellCreateSchema,
 } from "schema";
 
@@ -1220,6 +1225,170 @@ const solidsAnalyses: SeedRow[] = SOLIDS.map((analysis, index) => ({
   ...analysis,
 }));
 
+const HYDRAULICS_ID = {
+  intervals: makeIds("c", 8),
+  tools: makeIds("c1", 12),
+  bits: makeIds("c2", 4),
+  survey: makeIds("c3", 12),
+  inputs: makeIds("c4", 4),
+};
+
+// The geometry of each report: the casing to the shoe, then the open hole down to the bit.
+// Reports 0 and 1 are in well 1 (9 5/8" casing), reports 2 and 3 in well 3 (13 3/8" casing).
+const WELLBORE: [
+  number,
+  string,
+  number,
+  number,
+  number | null,
+  number,
+  number | null,
+][] = [
+  [0, "casing", 0, 2283, 9.625, 8.625, 40],
+  [0, "open_hole", 2283, 2480.5, null, 8.375, null],
+  [1, "casing", 0, 2283, 9.625, 8.625, 40],
+  [1, "open_hole", 2283, 2512.75, null, 8.375, null],
+  [2, "casing", 0, 1700, 13.375, 12.415, 68],
+  [2, "open_hole", 1700, 1860, null, 12.25, null],
+  [3, "casing", 0, 1700, 13.375, 12.415, 68],
+  [3, "open_hole", 1700, 1894.5, null, 12.25, null],
+];
+
+const wellboreIntervals: SeedRow[] = WELLBORE.map(
+  (
+    [
+      report,
+      interval_type,
+      top_md_m,
+      bottom_md_m,
+      od_in,
+      id_in,
+      linear_weight_lb_ft,
+    ],
+    index,
+  ) => ({
+    id: HYDRAULICS_ID.intervals[index] as string,
+    report_id: ID.reports[report] as string,
+    order:
+      WELLBORE.slice(0, index).filter((row) => row[0] === report).length + 1,
+    interval_type,
+    top_md_m,
+    bottom_md_m,
+    od_in,
+    id_in,
+    linear_weight_lb_ft,
+  }),
+);
+
+// The drill string of each report, from the surface to the bit. The lengths add up to the bit depth.
+const STRING: [number, string, number, number, number][] = [
+  [0, '5" DP', 2180.5, 5, 4.276],
+  [0, '5" HWDP', 150, 5, 3],
+  [0, "BHA", 150, 6.5, 2.8],
+  [1, '5" DP', 2212.75, 5, 4.276],
+  [1, '5" HWDP', 150, 5, 3],
+  [1, "BHA", 150, 6.5, 2.8],
+  [2, '5" DP', 1560, 5, 4.276],
+  [2, '5" HWDP', 150, 5, 3],
+  [2, "BHA", 150, 8, 3],
+  [3, '5" DP', 1594.5, 5, 4.276],
+  [3, '5" HWDP', 150, 5, 3],
+  [3, "BHA", 150, 8, 3],
+];
+
+const drillStringTools: SeedRow[] = STRING.map(
+  ([report, tool_type, length_m, od_in, id_in], index) => ({
+    id: HYDRAULICS_ID.tools[index] as string,
+    report_id: ID.reports[report] as string,
+    order: STRING.slice(0, index).filter((row) => row[0] === report).length + 1,
+    tool_type,
+    length_m,
+    od_in,
+    id_in,
+  }),
+);
+
+const BITS: [
+  number,
+  string,
+  number,
+  string,
+  { size_32nds: number; qty: number }[],
+][] = [
+  [
+    0,
+    "PDC",
+    8.375,
+    "Hughes Christensen",
+    [
+      { size_32nds: 12, qty: 3 },
+      { size_32nds: 13, qty: 1 },
+    ],
+  ],
+  [
+    1,
+    "PDC",
+    8.375,
+    "Hughes Christensen",
+    [
+      { size_32nds: 12, qty: 3 },
+      { size_32nds: 13, qty: 1 },
+    ],
+  ],
+  [2, "insert - roller cone", 12.25, "Smith", [{ size_32nds: 16, qty: 3 }]],
+  [3, "insert - roller cone", 12.25, "Smith", [{ size_32nds: 16, qty: 3 }]],
+];
+
+const bits: SeedRow[] = BITS.map(
+  ([report, bit_type, size_in, manufacturer, nozzles], index) => ({
+    id: HYDRAULICS_ID.bits[index] as string,
+    report_id: ID.reports[report] as string,
+    bit_type,
+    size_in,
+    manufacturer,
+    nozzles,
+  }),
+);
+
+// The survey of wells 1 and 3 (the wells of the reports): building up, then holding the angle.
+const SURVEY: [number, number, number, number][] = [
+  [0, 300, 0.5, 40],
+  [0, 800, 1.5, 48],
+  [0, 1300, 2.5, 55],
+  [0, 1800, 3.2, 60],
+  [0, 2300, 3.8, 64],
+  [0, 2512.75, 4, 65],
+  [2, 300, 0.3, 120],
+  [2, 700, 1.1, 128],
+  [2, 1100, 1.8, 135],
+  [2, 1500, 2.4, 140],
+  [2, 1700, 2.8, 142],
+  [2, 1894.5, 3, 143],
+];
+
+const surveyStations: SeedRow[] = SURVEY.map(
+  ([well, md_m, inclination_deg, azimuth_deg], index) => ({
+    id: HYDRAULICS_ID.survey[index] as string,
+    well_id: ID.wells[well] as string,
+    md_m,
+    inclination_deg,
+    azimuth_deg,
+  }),
+);
+
+// The flowrate and the ROP of each report.
+const hydraulicInputs: SeedRow[] = [
+  [0, 400, 5],
+  [1, 410, 5.5],
+  [2, 650, 12],
+  [3, 660, 11],
+].map(([report, flowrate_gpm, rop_m_hr], index) => ({
+  id: HYDRAULICS_ID.inputs[index] as string,
+  report_id: ID.reports[report as number] as string,
+  flowrate_gpm,
+  rop_m_hr,
+}));
+
 function validateSeedData() {
   const validationGroups = [
     ["projects", projectCreateSchema, projects],
@@ -1236,6 +1405,11 @@ function validateSeedData() {
     ["mud samples", mudSampleCreateSchema, mudSamples],
     ["rheology readings", rheologyCreateSchema, rheologyReadings],
     ["solids analyses", solidsAnalysisCreateSchema, solidsAnalyses],
+    ["wellbore intervals", wellboreIntervalCreateSchema, wellboreIntervals],
+    ["drill string tools", drillStringToolCreateSchema, drillStringTools],
+    ["bits", bitCreateSchema, bits],
+    ["survey stations", surveyStationCreateSchema, surveyStations],
+    ["hydraulic inputs", hydraulicInputSetSchema, hydraulicInputs],
   ] as const;
 
   for (const [groupName, schema, rows] of validationGroups) {
@@ -1312,7 +1486,22 @@ function validatePitReadings() {
   }
 }
 
+// The drill string of a report reaches the bit: its lengths add up to the bit depth.
+function validateDrillStrings() {
+  for (const report of dailyReports) {
+    const length = drillStringTools
+      .filter((tool) => tool.report_id === report.id)
+      .reduce((sum, tool) => sum + Number(tool.length_m), 0);
+    if (length > 0 && Math.abs(length - Number(report.bit_depth_m)) > 0.01) {
+      throw new Error(
+        `The drill string of report ${report.id} is ${length} m, but the bit is at ${report.bit_depth_m} m.`,
+      );
+    }
+  }
+}
+
 function validateRelationships() {
+  validateDrillStrings();
   validatePitReadings();
   validateProjectWells();
   validateSectionWells();
@@ -1475,6 +1664,27 @@ async function main() {
       key: "solids analyses",
       candidates: ["solids_analyses"],
       rows: solidsAnalyses,
+    },
+    {
+      key: "wellbore intervals",
+      candidates: ["wellbore_intervals"],
+      rows: wellboreIntervals,
+    },
+    {
+      key: "drill string tools",
+      candidates: ["drill_string_tools"],
+      rows: drillStringTools,
+    },
+    { key: "bits", candidates: ["bits"], rows: bits },
+    {
+      key: "survey stations",
+      candidates: ["survey_stations"],
+      rows: surveyStations,
+    },
+    {
+      key: "hydraulic inputs",
+      candidates: ["hydraulic_inputs"],
+      rows: hydraulicInputs,
     },
   ];
 
