@@ -32,7 +32,7 @@ export async function call(
 /** Empties every table. Call it in `beforeEach` so tests do not depend on each other. */
 export async function resetDb(): Promise<void> {
   await db.execute(
-    sql`truncate table sections, pumps, solid_control_equipment, wells, projects, product restart identity cascade`,
+    sql`truncate table sections, pumps, pits, solid_control_equipment, wells, projects, product restart identity cascade`,
   );
 }
 
@@ -124,6 +124,30 @@ export async function createPump(
     pumpPayload(projectId, overrides),
   );
   if (status !== 201) throw new Error(`Could not create a pump: ${status}`);
+  return body.data;
+}
+
+export const pitPayload = (
+  projectId: string,
+  overrides: Record<string, unknown> = {},
+) => ({
+  project_id: projectId,
+  name: `Pit ${++counter}`,
+  type: "active",
+  capacity: 250,
+  ...overrides,
+});
+
+export async function createPit(
+  projectId: string,
+  overrides: Record<string, unknown> = {},
+) {
+  const { status, body } = await call(
+    "POST",
+    "/pits",
+    pitPayload(projectId, overrides),
+  );
+  if (status !== 201) throw new Error(`Could not create a pit: ${status}`);
   return body.data;
 }
 

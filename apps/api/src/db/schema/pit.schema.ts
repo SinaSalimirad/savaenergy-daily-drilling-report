@@ -9,11 +9,12 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
+import { PIT_TYPES } from "schema";
 import { id, timestamps } from "./_shared/columns";
 import { projects } from "./project.schema";
 
-const PIT_TYPES = ["active", "reserve", "not mud"] as const;
-
+// The allowed values live in packages/schema, so the database, the API and the web cannot
+// drift apart. Changing the list there needs a new migration here.
 export const pitType = pgEnum("pit_type", PIT_TYPES);
 
 export const pits = pgTable(

@@ -6,6 +6,7 @@ import { errorHandler } from "./lib/error-handler";
 import "./lib/logger";
 import { dailyReportRoutes } from "./modules/daily-reports/daily-report.routes";
 import { inventoryRoutes } from "./modules/inventory/inventory.routes";
+import { pitRoutes } from "./modules/pits/pit.routes";
 import { productRoutes } from "./modules/products/product.routes";
 import { projectProductRoutes } from "./modules/project-products/project-product.routes";
 import { projectRoutes } from "./modules/projects/project.routes";
@@ -43,6 +44,7 @@ export const app = new Elysia()
   .use(projectProductRoutes)
   .use(inventoryRoutes)
   .use(pumpRoutes)
+  .use(pitRoutes)
   .use(solidControlRoutes);
 
 // The web app imports only this type (never the runtime code) so Eden can infer every route.

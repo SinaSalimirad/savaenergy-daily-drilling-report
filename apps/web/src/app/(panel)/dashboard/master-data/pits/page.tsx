@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { PitsView } from "@/features/pits/components/pits-view";
 
-export default function Page() {
-  return <PagePlaceholder title="Pits" />;
+export default function PitsPage() {
+  return <PitsView />;
 }

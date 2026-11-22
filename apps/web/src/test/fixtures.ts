@@ -1,4 +1,5 @@
 import type { InventoryRow } from "@/features/inventory/api";
+import type { Pit } from "@/features/pits/api";
 import type { Product } from "@/features/products/api";
 import type { ProjectProduct } from "@/features/project-products/api";
 import type { Pump } from "@/features/pumps/api";
@@ -66,6 +67,21 @@ export function makeInventoryRow(
     cumulative_returned: 0,
     final_stock: 10,
     daily_cost: 0,
+    ...overrides,
+  };
+}
+
+export function makePit(overrides: Partial<Pit> = {}): Pit {
+  return {
+    id: "pit-1",
+    project_id: "p1",
+    project_name: "North Sea",
+    order: 1,
+    name: "Active 1",
+    type: "active",
+    capacity: 250,
+    created_at: DATE,
+    updated_at: DATE,
     ...overrides,
   };
 }
