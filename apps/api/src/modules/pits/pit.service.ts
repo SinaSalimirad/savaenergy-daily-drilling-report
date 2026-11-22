@@ -70,6 +70,18 @@ export function updatePit(id: string, patch: UpdatePitInput) {
 }
 
 export async function deletePit(id: string): Promise<void> {
-  const deleted = await deletePitById(id);
-  if (!deleted) throw notFound(PIT);
+  try {
+    const deleted = await deletePitById(id);
+    if (!deleted) throw notFound(PIT);
+  } catch (error) {
+    // The pit readings of the daily reports hold a foreign key to the pit.
+    if (isForeignKeyViolation(error)) {
+      throw new AppError(
+        409,
+        "PIT_HAS_READINGS",
+        "This pit still has readings in daily reports. Remove them first.",
+      );
+    }
+    throw error;
+  }
 }

@@ -6,6 +6,7 @@ import { errorHandler } from "./lib/error-handler";
 import "./lib/logger";
 import { dailyReportRoutes } from "./modules/daily-reports/daily-report.routes";
 import { inventoryRoutes } from "./modules/inventory/inventory.routes";
+import { pitReadingRoutes } from "./modules/pit-readings/pit-reading.routes";
 import { pitRoutes } from "./modules/pits/pit.routes";
 import { productRoutes } from "./modules/products/product.routes";
 import { projectProductRoutes } from "./modules/project-products/project-product.routes";
@@ -46,6 +47,7 @@ export const app = new Elysia()
   .use(inventoryRoutes)
   .use(pumpRoutes)
   .use(pitRoutes)
+  .use(pitReadingRoutes)
   .use(saltTableRoutes)
   .use(solidControlRoutes);
 
