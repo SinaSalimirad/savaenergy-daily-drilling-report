@@ -773,7 +773,7 @@ function validateSeedData() {
   }
 }
 
-function validateRelationships() {
+function validateProjectWells() {
   for (const project of projects) {
     const projectWells = wells.filter((well) => well.project_id === project.id);
     if (projectWells.length !== Number(project.wells)) {
@@ -782,13 +782,17 @@ function validateRelationships() {
       );
     }
   }
+}
 
+function validateSectionWells() {
   for (const section of sections) {
     if (!wells.some((well) => well.id === section.well_id)) {
       throw new Error(`Section ${section.id} references an unknown well.`);
     }
   }
+}
 
+function validateReportSections() {
   for (const report of dailyReports) {
     const section = sections.find((item) => item.id === report.section_id);
     if (!section || section.well_id !== report.well_id) {
@@ -797,7 +801,9 @@ function validateRelationships() {
       );
     }
   }
+}
 
+function validateInventoryParents() {
   for (const row of inventory) {
     const report = dailyReports.find((item) => item.id === row.report_id);
     const reportWell = wells.find((well) => well.id === report?.well_id);
@@ -813,6 +819,13 @@ function validateRelationships() {
       );
     }
   }
+}
+
+function validateRelationships() {
+  validateProjectWells();
+  validateSectionWells();
+  validateReportSections();
+  validateInventoryParents();
 }
 
 function quoteIdentifier(identifier: string) {

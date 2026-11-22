@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { SaltTablesView } from "@/features/salt-tables/components/salt-tables-view";
 
-export default function Page() {
-  return <PagePlaceholder title="Salt tables" />;
+export default function SaltTablesPage() {
+  return <SaltTablesView />;
 }
