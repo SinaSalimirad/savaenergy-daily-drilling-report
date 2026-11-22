@@ -2,12 +2,17 @@ import { Pool } from "pg";
 import {
   dailyReportCreateSchema,
   inventoryCreateSchema,
+  mudSampleCreateSchema,
+  pitCreateSchema,
+  pitReadingCreateSchema,
   productInputSchema,
   projectCreateSchema,
   projectProductCreateSchema,
   pumpCreateSchema,
+  rheologyCreateSchema,
   sceCreateSchema,
   sectionCreateSchema,
+  solidsAnalysisCreateSchema,
   wellCreateSchema,
 } from "schema";
 
@@ -748,6 +753,473 @@ const inventory: SeedRow[] = [
   },
 ];
 
+/** `count` stable IDs with the same prefix, like the lists in `ID` but shorter to write. */
+const makeIds = (prefix: string, count: number) =>
+  Array.from(
+    { length: count },
+    (_, index) =>
+      `${prefix.padEnd(8, "0")}-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+  );
+
+const FLUID_ID = {
+  pits: makeIds("a", 10),
+  pitReadings: makeIds("a1", 20),
+  mudSamples: makeIds("b", 8),
+  rheology: makeIds("b1", 8),
+  solids: makeIds("b2", 8),
+};
+
+// Mud pits of the two projects: the first 6 belong to project 1, the last 4 to project 2.
+const PITS: [string, "active" | "reserve" | "not mud", number, string][] = [
+  ["Suction 1", "active", 480, PROJECT_IDS.project1],
+  ["Suction 2", "active", 480, PROJECT_IDS.project1],
+  ["Middle", "active", 480, PROJECT_IDS.project1],
+  ["Reserve 1", "reserve", 210, PROJECT_IDS.project1],
+  ["Reserve 2", "reserve", 140, PROJECT_IDS.project1],
+  ["Trip Tank", "not mud", 100, PROJECT_IDS.project1],
+  ["Active 1", "active", 400, PROJECT_IDS.project2],
+  ["Active 2", "active", 400, PROJECT_IDS.project2],
+  ["Reserve 1", "reserve", 250, PROJECT_IDS.project2],
+  ["Trip Tank", "not mud", 80, PROJECT_IDS.project2],
+];
+
+const pits: SeedRow[] = PITS.map(
+  ([name, type, capacity, project_id], index) => ({
+    id: FLUID_ID.pits[index] as string,
+    project_id,
+    // The position inside the project: the pits of project 2 start again at 1.
+    order:
+      PITS.slice(0, index).filter((pit) => pit[3] === project_id).length + 1,
+    name,
+    type,
+    capacity,
+  }),
+);
+
+// [report, pit, volume (bbl), mud weight (pcf), mud type]. Project 1 mixes salt saturated
+// mud; project 2 drills with a water-based mud.
+const PIT_READINGS: [number, number, number, number | null, string | null][] = [
+  [0, 0, 267, 130, "Salt Saturate Mud"],
+  [0, 1, 230, 130, "Salt Saturate Mud"],
+  [0, 2, 20, 130, "Salt Saturate Mud"],
+  [0, 3, 106, 102, "Salt Mud"],
+  [0, 4, 100, 75, "NaCl Brine"],
+  [0, 5, 18, null, null],
+  [1, 0, 281, 130, "Salt Saturate Mud"],
+  [1, 1, 215, 130, "Salt Saturate Mud"],
+  [1, 2, 24, 130, "Salt Saturate Mud"],
+  [1, 3, 98, 102, "Salt Mud"],
+  [1, 4, 100, 75, "NaCl Brine"],
+  [1, 5, 15, null, null],
+  [2, 6, 310, 78, "Bentonite Mud"],
+  [2, 7, 290, 78, "Bentonite Mud"],
+  [2, 8, 180, 75, "Bentonite Mud"],
+  [2, 9, 12, null, null],
+  [3, 6, 322, 79, "Bentonite Mud"],
+  [3, 7, 276, 79, "Bentonite Mud"],
+  [3, 8, 180, 75, "Bentonite Mud"],
+  [3, 9, 10, null, null],
+];
+
+const pitReadings: SeedRow[] = PIT_READINGS.map(
+  ([report, pit, volume, mud_weight, mud_type], index) => ({
+    id: FLUID_ID.pitReadings[index] as string,
+    report_id: ID.reports[report] as string,
+    pit_id: FLUID_ID.pits[pit] as string,
+    volume,
+    mud_weight,
+    mud_type,
+  }),
+);
+
+// Two samples per report, taken at 08:30 and 16:00. Project 1 (reports 0 and 1) has a salt
+// saturated mud, project 2 (reports 2 and 3) a bentonite mud.
+const SAMPLE_TIMES = ["08:30", "16:00"];
+const sampleKey = (index: number) => ({
+  report_id: ID.reports[Math.floor(index / 2)] as string,
+  sample_no: (index % 2) + 1,
+  sample_time: SAMPLE_TIMES[index % 2] as string,
+});
+
+const MUD_SAMPLES: Record<string, unknown>[] = [
+  {
+    sample_from: "Active",
+    flowline_temp_f: 118,
+    depth_m: 2480.5,
+    tvd_m: 2210.25,
+    mud_weight_pcf: 130,
+    mud_temp_f: 120,
+    funnel_viscosity: 41,
+    api_filtrate_cc: 3.2,
+    api_cake: 1,
+    oil_percent: 0,
+    water_percent: 63,
+    solids_percent: 37,
+    sand_percent: 0.25,
+    mbt_lb_bbl: 2.5,
+    ph: 9.6,
+    ph_temp_f: 120,
+    alkalinity_mud_ml: 0.5,
+    pf_ml: 0.4,
+    mf_ml: 0.9,
+    chloride_mg_l: 177000,
+    total_hardness_mg_l: 840,
+  },
+  {
+    sample_from: "Active",
+    flowline_temp_f: 121,
+    depth_m: 2491,
+    tvd_m: 2218,
+    mud_weight_pcf: 130,
+    mud_temp_f: 120,
+    funnel_viscosity: 42,
+    api_filtrate_cc: 3.1,
+    api_cake: 1,
+    oil_percent: 0,
+    water_percent: 63,
+    solids_percent: 37,
+    sand_percent: 0.25,
+    mbt_lb_bbl: 2.5,
+    ph: 9.5,
+    ph_temp_f: 120,
+    alkalinity_mud_ml: 0.5,
+    pf_ml: 0.4,
+    mf_ml: 0.9,
+    chloride_mg_l: 178000,
+    total_hardness_mg_l: 860,
+  },
+  {
+    sample_from: "Active",
+    flowline_temp_f: 119,
+    depth_m: 2512.75,
+    tvd_m: 2235.8,
+    mud_weight_pcf: 130,
+    mud_temp_f: 120,
+    funnel_viscosity: 42,
+    api_filtrate_cc: 3,
+    api_cake: 1,
+    oil_percent: 0,
+    water_percent: 62,
+    solids_percent: 38,
+    sand_percent: 0.25,
+    mbt_lb_bbl: 2.5,
+    ph: 9.4,
+    ph_temp_f: 120,
+    alkalinity_mud_ml: 0.5,
+    pf_ml: 0.3,
+    mf_ml: 0.8,
+    chloride_mg_l: 177500,
+    total_hardness_mg_l: 840,
+  },
+  {
+    sample_from: "Flow Line",
+    flowline_temp_f: 124,
+    depth_m: 2512.75,
+    tvd_m: 2235.8,
+    mud_weight_pcf: 129,
+    mud_temp_f: 124,
+    funnel_viscosity: 43,
+    api_filtrate_cc: 3,
+    api_cake: 1,
+    oil_percent: 0,
+    water_percent: 62,
+    solids_percent: 38,
+    sand_percent: 0.3,
+    mbt_lb_bbl: 2.5,
+    ph: 9.4,
+    ph_temp_f: 124,
+    alkalinity_mud_ml: 0.5,
+    pf_ml: 0.3,
+    mf_ml: 0.8,
+    chloride_mg_l: 177500,
+    total_hardness_mg_l: 840,
+  },
+  {
+    sample_from: "Active",
+    flowline_temp_f: 105,
+    depth_m: 1860,
+    tvd_m: 1642.3,
+    mud_weight_pcf: 78,
+    mud_temp_f: 100,
+    funnel_viscosity: 48,
+    api_filtrate_cc: 6.2,
+    api_cake: 1,
+    oil_percent: 0,
+    water_percent: 92,
+    solids_percent: 8,
+    sand_percent: 0.2,
+    mbt_lb_bbl: 17.5,
+    ph: 9.2,
+    ph_temp_f: 100,
+    alkalinity_mud_ml: 0.8,
+    pf_ml: 0.3,
+    mf_ml: 0.7,
+    chloride_mg_l: 1500,
+    total_hardness_mg_l: 320,
+  },
+  {
+    sample_from: "Active",
+    flowline_temp_f: 108,
+    depth_m: 1872,
+    tvd_m: 1651,
+    mud_weight_pcf: 78.5,
+    mud_temp_f: 100,
+    funnel_viscosity: 49,
+    api_filtrate_cc: 6,
+    api_cake: 1,
+    oil_percent: 0,
+    water_percent: 91.5,
+    solids_percent: 8.5,
+    sand_percent: 0.2,
+    mbt_lb_bbl: 18,
+    ph: 9.2,
+    ph_temp_f: 100,
+    alkalinity_mud_ml: 0.8,
+    pf_ml: 0.3,
+    mf_ml: 0.7,
+    chloride_mg_l: 1600,
+    total_hardness_mg_l: 340,
+  },
+  {
+    sample_from: "Active",
+    flowline_temp_f: 106,
+    depth_m: 1894.5,
+    tvd_m: 1671.6,
+    mud_weight_pcf: 79,
+    mud_temp_f: 100,
+    funnel_viscosity: 50,
+    api_filtrate_cc: 5.8,
+    api_cake: 1,
+    oil_percent: 0,
+    water_percent: 91,
+    solids_percent: 9,
+    sand_percent: 0.25,
+    mbt_lb_bbl: 18.5,
+    ph: 9.3,
+    ph_temp_f: 100,
+    alkalinity_mud_ml: 0.9,
+    pf_ml: 0.3,
+    mf_ml: 0.7,
+    chloride_mg_l: 1700,
+    total_hardness_mg_l: 360,
+  },
+  {
+    sample_from: "Reserve",
+    flowline_temp_f: 104,
+    depth_m: 1894.5,
+    tvd_m: 1671.6,
+    mud_weight_pcf: 75,
+    mud_temp_f: 98,
+    funnel_viscosity: 46,
+    api_filtrate_cc: 6.5,
+    api_cake: 1,
+    oil_percent: 0,
+    water_percent: 93,
+    solids_percent: 7,
+    sand_percent: 0.1,
+    mbt_lb_bbl: 16,
+    ph: 9.1,
+    ph_temp_f: 98,
+    alkalinity_mud_ml: 0.7,
+    pf_ml: 0.2,
+    mf_ml: 0.6,
+    chloride_mg_l: 1400,
+    total_hardness_mg_l: 300,
+  },
+];
+
+const mudSamples: SeedRow[] = MUD_SAMPLES.map((sample, index) => ({
+  id: FLUID_ID.mudSamples[index] as string,
+  ...sampleKey(index),
+  ...sample,
+}));
+
+const RHEOLOGY: Record<string, unknown>[] = [
+  {
+    temperature_f: 120,
+    r600: 84,
+    r300: 48,
+    r200: 36,
+    r100: 22,
+    r6: 3,
+    r3: 2,
+    gel_10s: 3,
+    gel_10m: 4,
+    gel_30m: 5,
+  },
+  {
+    temperature_f: 120,
+    r600: 84,
+    r300: 48,
+    r200: 35,
+    r100: 21,
+    r6: 3,
+    r3: 2,
+    gel_10s: 3,
+    gel_10m: 4,
+    gel_30m: 5,
+  },
+  {
+    temperature_f: 120,
+    r600: 88,
+    r300: 50,
+    r200: 36,
+    r100: 22,
+    r6: 3,
+    r3: 2,
+    gel_10s: 3,
+    gel_10m: 4,
+    gel_30m: 6,
+  },
+  {
+    temperature_f: 120,
+    r600: 86,
+    r300: 49,
+    r200: 36,
+    r100: 22,
+    r6: 3,
+    r3: 2,
+    gel_10s: 3,
+    gel_10m: 4,
+    gel_30m: 5,
+  },
+  {
+    temperature_f: 100,
+    r600: 52,
+    r300: 34,
+    r200: 28,
+    r100: 20,
+    r6: 8,
+    r3: 6,
+    gel_10s: 7,
+    gel_10m: 11,
+    gel_30m: 15,
+  },
+  {
+    temperature_f: 100,
+    r600: 54,
+    r300: 35,
+    r200: 29,
+    r100: 21,
+    r6: 8,
+    r3: 6,
+    gel_10s: 7,
+    gel_10m: 12,
+    gel_30m: 16,
+  },
+  {
+    temperature_f: 100,
+    r600: 55,
+    r300: 36,
+    r200: 30,
+    r100: 21,
+    r6: 9,
+    r3: 7,
+    gel_10s: 8,
+    gel_10m: 12,
+    gel_30m: 17,
+  },
+  {
+    temperature_f: 98,
+    r600: 50,
+    r300: 32,
+    r200: 26,
+    r100: 18,
+    r6: 7,
+    r3: 5,
+    gel_10s: 6,
+    gel_10m: 10,
+    gel_30m: 14,
+  },
+];
+
+const rheologyReadings: SeedRow[] = RHEOLOGY.map((reading, index) => ({
+  id: FLUID_ID.rheology[index] as string,
+  ...sampleKey(index),
+  ...reading,
+}));
+
+const SOLIDS: Record<string, unknown>[] = [
+  {
+    mud_weight_pcf: 130,
+    mbt_lb_bbl: 2.5,
+    chloride_mg_l: 177000,
+    oil_percent: 0,
+    water_percent: 63,
+    solids_percent: 37,
+    glycol_percent: 0,
+  },
+  {
+    mud_weight_pcf: 130,
+    mbt_lb_bbl: 2.5,
+    chloride_mg_l: 178000,
+    oil_percent: 0,
+    water_percent: 63,
+    solids_percent: 37,
+    glycol_percent: 0,
+  },
+  {
+    mud_weight_pcf: 130,
+    mbt_lb_bbl: 2.5,
+    chloride_mg_l: 177500,
+    oil_percent: 0,
+    water_percent: 62,
+    solids_percent: 38,
+    glycol_percent: 0,
+  },
+  {
+    mud_weight_pcf: 129,
+    mbt_lb_bbl: 2.5,
+    chloride_mg_l: 177500,
+    oil_percent: 0,
+    water_percent: 62,
+    solids_percent: 38,
+    glycol_percent: 0,
+  },
+  {
+    mud_weight_pcf: 78,
+    mbt_lb_bbl: 17.5,
+    chloride_mg_l: 1500,
+    oil_percent: 0,
+    water_percent: 92,
+    solids_percent: 8,
+    glycol_percent: 0,
+  },
+  {
+    mud_weight_pcf: 78.5,
+    mbt_lb_bbl: 18,
+    chloride_mg_l: 1600,
+    oil_percent: 0,
+    water_percent: 91.5,
+    solids_percent: 8.5,
+    glycol_percent: 0,
+  },
+  {
+    mud_weight_pcf: 79,
+    mbt_lb_bbl: 18.5,
+    chloride_mg_l: 1700,
+    oil_percent: 0,
+    water_percent: 91,
+    solids_percent: 9,
+    glycol_percent: 0,
+  },
+  {
+    mud_weight_pcf: 75,
+    mbt_lb_bbl: 16,
+    chloride_mg_l: 1400,
+    oil_percent: 0,
+    water_percent: 93,
+    solids_percent: 7,
+    glycol_percent: 0,
+  },
+];
+
+const solidsAnalyses: SeedRow[] = SOLIDS.map((analysis, index) => ({
+  id: FLUID_ID.solids[index] as string,
+  ...sampleKey(index),
+  ...analysis,
+}));
+
 function validateSeedData() {
   const validationGroups = [
     ["projects", projectCreateSchema, projects],
@@ -759,6 +1231,11 @@ function validateSeedData() {
     ["solid control equipment", sceCreateSchema, solidControl],
     ["daily reports", dailyReportCreateSchema, dailyReports],
     ["inventory", inventoryCreateSchema, inventory],
+    ["pits", pitCreateSchema, pits],
+    ["pit readings", pitReadingCreateSchema, pitReadings],
+    ["mud samples", mudSampleCreateSchema, mudSamples],
+    ["rheology readings", rheologyCreateSchema, rheologyReadings],
+    ["solids analyses", solidsAnalysisCreateSchema, solidsAnalyses],
   ] as const;
 
   for (const [groupName, schema, rows] of validationGroups) {
@@ -821,7 +1298,22 @@ function validateInventoryParents() {
   }
 }
 
+// A report can only read the pits of its own project.
+function validatePitReadings() {
+  for (const reading of pitReadings) {
+    const report = dailyReports.find((item) => item.id === reading.report_id);
+    const well = wells.find((item) => item.id === report?.well_id);
+    const pit = pits.find((item) => item.id === reading.pit_id);
+    if (!well || !pit || well.project_id !== pit.project_id) {
+      throw new Error(
+        `Pit reading ${reading.id} connects a report and a pit from different projects.`,
+      );
+    }
+  }
+}
+
 function validateRelationships() {
+  validatePitReadings();
   validateProjectWells();
   validateSectionWells();
   validateReportSections();
@@ -970,6 +1462,19 @@ async function main() {
       key: "inventory",
       candidates: ["product_inventory", "inventory"],
       rows: inventory,
+    },
+    { key: "pits", candidates: ["pits"], rows: pits },
+    { key: "pit readings", candidates: ["pit_readings"], rows: pitReadings },
+    { key: "mud samples", candidates: ["mud_samples"], rows: mudSamples },
+    {
+      key: "rheology readings",
+      candidates: ["rheology_readings"],
+      rows: rheologyReadings,
+    },
+    {
+      key: "solids analyses",
+      candidates: ["solids_analyses"],
+      rows: solidsAnalyses,
     },
   ];
 
