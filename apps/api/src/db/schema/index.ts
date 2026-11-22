@@ -4,6 +4,7 @@ export * from "./_shared/authorship";
 export * from "./_shared/columns";
 export * from "./daily_report.schema";
 export * from "./pit.schema";
+export * from "./pit-reading.schema";
 export * from "./product.schema";
 export * from "./product-inventory.schema";
 export * from "./project.schema";

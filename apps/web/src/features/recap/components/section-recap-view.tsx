@@ -1,10 +1,9 @@
 "use client";
 
-import { FileDownIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { formatHoleSize } from "schema";
 import { Button } from "@/components/ui/button";
-import { type InventoryRow, useInventory } from "@/features/inventory/api";
+import { useInventory } from "@/features/inventory/api";
 import { InventoryTable } from "@/features/inventory/components/inventory-table";
 import { ProjectFilterSelect } from "@/features/projects/components/project-filter-select";
 import { useProjectFilter } from "@/features/projects/project-filter";
@@ -14,34 +13,7 @@ import {
   type SelectedReport,
   useSelectedReport,
 } from "@/features/reports/use-selected-report";
-import { downloadSectionRecapPdf } from "../pdf/build-section-recap-pdf";
 import { ProductsUsedTable } from "./products-used-table";
-
-/** Builds the same two tables shown on screen into a PDF and downloads it. */
-function ExportPdfButton({
-  report,
-  rows,
-}: {
-  report: DailyReport;
-  rows: InventoryRow[];
-}) {
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() =>
-        downloadSectionRecapPdf({
-          report,
-          usedRows: rows.filter((row) => row.daily_used > 0),
-          allRows: rows,
-        })
-      }
-    >
-      <FileDownIcon data-icon="inline-start" />
-      Export PDF
-    </Button>
-  );
-}
 
 function Message({ children }: { children: ReactNode }) {
   return (
@@ -168,8 +140,6 @@ function RecapBody({
 export function SectionRecapView() {
   const { projectId } = useProjectFilter();
   const selection = useSelectedReport(projectId);
-  // Shared with the sheet through the query cache: no second request.
-  const inventory = useInventory(selection.report?.id ?? null);
 
   return (
     <main className="px-16">
@@ -178,12 +148,6 @@ export function SectionRecapView() {
         <div className="flex flex-wrap items-center gap-2">
           <ProjectFilterSelect appearance="page" />
           <ReportPicker selection={selection} showSection />
-          {selection.report && inventory.data && (
-            <ExportPdfButton
-              report={selection.report}
-              rows={inventory.data.data}
-            />
-          )}
         </div>
       </div>
 
