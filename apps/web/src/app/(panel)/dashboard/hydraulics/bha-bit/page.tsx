@@ -1,5 +1,11 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { Suspense } from "react";
+import { BhaBitView } from "@/features/bha-bit/components/bha-bit-view";
 
 export default function Page() {
-  return <PagePlaceholder title="BHA & bit" />;
+  // The view reads `?report=` from the URL, which needs a Suspense boundary.
+  return (
+    <Suspense>
+      <BhaBitView />
+    </Suspense>
+  );
 }
