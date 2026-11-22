@@ -22,6 +22,7 @@ import { sectionRoutes } from "./modules/sections/section.routes";
 import { solidControlRoutes } from "./modules/solid-control/solid-control.routes";
 import { solidsAnalysisRoutes } from "./modules/solids-analysis/solids-analysis.routes";
 import { surveyRoutes } from "./modules/survey/survey.routes";
+import { volumeRoutes } from "./modules/volumes/volume.routes";
 import { wellboreIntervalRoutes } from "./modules/wellbore-intervals/wellbore-interval.routes";
 import { wellRoutes } from "./modules/wells/well.routes";
 
@@ -65,6 +66,7 @@ export const app = new Elysia()
   .use(bitRoutes)
   .use(surveyRoutes)
   .use(hydraulicsRoutes)
+  .use(volumeRoutes)
   .use(solidControlRoutes);
 
 // The web app imports only this type (never the runtime code) so Eden can infer every route.
