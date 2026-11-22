@@ -1,5 +1,11 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { Suspense } from "react";
+import { VolumeAccountingView } from "@/features/volumes/components/volume-accounting-view";
 
 export default function Page() {
-  return <PagePlaceholder title="Volume accounting" />;
+  // The view reads `?report=` from the URL, which needs a Suspense boundary.
+  return (
+    <Suspense>
+      <VolumeAccountingView />
+    </Suspense>
+  );
 }

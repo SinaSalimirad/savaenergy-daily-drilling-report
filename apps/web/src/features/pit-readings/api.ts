@@ -46,8 +46,12 @@ function usePitReadingMutation<TVariables>(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
+    // The volume accounting compares its books with these readings.
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: pitReadingKeys.all }),
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: pitReadingKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ["volumes"] }),
+      ]),
   });
 }
 

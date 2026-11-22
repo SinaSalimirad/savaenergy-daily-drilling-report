@@ -5,6 +5,7 @@ import {
   drillStringToolCreateSchema,
   hydraulicInputSetSchema,
   inventoryCreateSchema,
+  mudLossSetSchema,
   mudSampleCreateSchema,
   pitCreateSchema,
   pitReadingCreateSchema,
@@ -17,6 +18,7 @@ import {
   sectionCreateSchema,
   solidsAnalysisCreateSchema,
   surveyStationCreateSchema,
+  volumeAccountingSetSchema,
   wellboreIntervalCreateSchema,
   wellCreateSchema,
 } from "schema";
@@ -1389,6 +1391,67 @@ const hydraulicInputs: SeedRow[] = [
   rop_m_hr,
 }));
 
+const VOLUME_ID = {
+  accountings: makeIds("d", 4),
+  losses: makeIds("d1", 4),
+};
+
+// The mud volume accounting of each report. The first report of a well sets its start volume;
+// the second one continues from the first one's end volume. They match the pit readings.
+const volumeAccountings: SeedRow[] = [
+  {
+    start_volume_bbl: 660,
+    water_added_bbl: 100,
+    chemical_volume_bbl: 18.5,
+    diesel_added_bbl: 0,
+    received_bbl: 0,
+    returned_bbl: 0,
+  },
+  {
+    water_added_bbl: 20,
+    chemical_volume_bbl: 4,
+    diesel_added_bbl: 0,
+    received_bbl: 0,
+    returned_bbl: 0,
+  },
+  {
+    start_volume_bbl: 700,
+    water_added_bbl: 80,
+    chemical_volume_bbl: 9,
+    diesel_added_bbl: 0,
+    received_bbl: 0,
+    returned_bbl: 0,
+  },
+  {
+    water_added_bbl: 10,
+    chemical_volume_bbl: 2,
+    diesel_added_bbl: 0,
+    received_bbl: 0,
+    returned_bbl: 0,
+  },
+].map((row, index) => ({
+  id: VOLUME_ID.accountings[index] as string,
+  report_id: ID.reports[index] as string,
+  ...row,
+}));
+
+const mudLosses: SeedRow[] = [
+  {
+    shakers_bbl: 7,
+    evaporation_bbl: 6,
+    trip_loss_bbl: 21,
+    other_bbl: 17,
+    left_in_hole_bbl: 4.47,
+  },
+  { shakers_bbl: 8, evaporation_bbl: 5, trip_loss_bbl: 11 },
+  { shakers_bbl: 6, evaporation_bbl: 3 },
+  { shakers_bbl: 8, evaporation_bbl: 4 },
+].map((row, index) => ({
+  id: VOLUME_ID.losses[index] as string,
+  report_id: ID.reports[index] as string,
+  ...row,
+}));
+
 function validateSeedData() {
   const validationGroups = [
     ["projects", projectCreateSchema, projects],
@@ -1410,6 +1473,8 @@ function validateSeedData() {
     ["bits", bitCreateSchema, bits],
     ["survey stations", surveyStationCreateSchema, surveyStations],
     ["hydraulic inputs", hydraulicInputSetSchema, hydraulicInputs],
+    ["volume accountings", volumeAccountingSetSchema, volumeAccountings],
+    ["mud losses", mudLossSetSchema, mudLosses],
   ] as const;
 
   for (const [groupName, schema, rows] of validationGroups) {
@@ -1686,6 +1751,12 @@ async function main() {
       candidates: ["hydraulic_inputs"],
       rows: hydraulicInputs,
     },
+    {
+      key: "volume accountings",
+      candidates: ["volume_accountings"],
+      rows: volumeAccountings,
+    },
+    { key: "mud losses", candidates: ["mud_losses"], rows: mudLosses },
   ];
 
   try {

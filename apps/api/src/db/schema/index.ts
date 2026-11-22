@@ -18,4 +18,5 @@ export * from "./section.schema";
 export * from "./solid-control.schema";
 export * from "./solids-analysis.schema";
 export * from "./user.schema";
+export * from "./volumes.schema";
 export * from "./well.schema";
