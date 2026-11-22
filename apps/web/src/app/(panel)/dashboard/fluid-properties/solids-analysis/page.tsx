@@ -1,5 +1,11 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { Suspense } from "react";
+import { SolidsAnalysisView } from "@/features/solids-analysis/components/solids-analysis-view";
 
 export default function Page() {
-  return <PagePlaceholder title="Solids analysis" />;
+  // The view reads `?report=` from the URL, which needs a Suspense boundary.
+  return (
+    <Suspense>
+      <SolidsAnalysisView />
+    </Suspense>
+  );
 }
